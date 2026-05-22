@@ -11,4 +11,23 @@
             <label lang="de-DE">Beispiel Konfiguration</label>
         </input-field>
     </card>
+
+    <card>
+        <title>Payment Restrictions for Guest Checkouts</title>
+        <title lang="de-DE">Zahlungseinschraenkungen fuer Gastbestellungen</title>
+
+        <component name="sw-entity-multi-id-select">
+            <name>blockedPrivateGuestPayments</name>
+            <entity>payment_method</entity>
+            <label>Blocked payment methods for Private Guest Checkouts</label>
+            <label lang="de-DE">Gesperrte Bezahlmethoden fuer private Gastbestellungen</label>
+        </component>
+
+        <component name="sw-entity-multi-id-select">
+            <name>blockedBusinessGuestPayments</name>
+            <entity>payment_method</entity>
+            <label>Blocked payment methods for Business Guest Checkouts</label>
+            <label lang="de-DE">Gesperrte Bezahlmethoden fuer gewerbliche Gastbestellungen</label>
+        </component>
+    </card>
 </config>

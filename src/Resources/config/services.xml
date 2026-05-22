@@ -13,10 +13,35 @@
             </call>
         </service>
 
+        <service id="Topdata\TopdataBetterCheckoutSW6\Resources\snippet\de_DE\SnippetFile_de_DE">
+            <tag name="shopware.snippet.file"/>
+        </service>
+
+        <service id="Topdata\TopdataBetterCheckoutSW6\Resources\snippet\en_GB\SnippetFile_en_GB">
+            <tag name="shopware.snippet.file"/>
+        </service>
+
         <service id="Topdata\TopdataBetterCheckoutSW6\Controller\AdminApiExampleController" public="true">
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
+        </service>
+
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\SalesChannel\RegisterRouteDecorator"
+                 decorates="Shopware\Core\Checkout\Customer\SalesChannel\RegisterRoute"
+                 public="true">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="customer.repository"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
+            <argument type="service" id="translator"/>
+        </service>
+
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Payment\SalesChannel\PaymentMethodRouteDecorator"
+                 decorates="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute"
+                 public="true">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
     </services>
 </container>

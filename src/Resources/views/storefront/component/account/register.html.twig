@@ -1,0 +1,11 @@
+{% sw_extends '@Storefront/storefront/component/account/register.html.twig' %}
+
+{% block component_account_register_form_action %}
+    {{ parent() }}
+    {% set checkoutType = app.request.query.get('checkoutType')
+        ?: app.request.request.get('checkoutType')
+        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+    {% if checkoutType %}
+        <input type="hidden" name="checkoutType" value="{{ checkoutType }}">
+    {% endif %}
+{% endblock %}

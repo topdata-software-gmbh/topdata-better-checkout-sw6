@@ -1,0 +1,42 @@
+{% sw_extends '@Storefront/storefront/page/checkout/address/register.html.twig' %}
+
+{% block page_checkout_register_personal_guest %}
+    {% set checkoutType = app.request.query.get('checkoutType')
+        ?: app.request.request.get('checkoutType')
+        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+    
+    {% if checkoutType == 'guest' %}
+        {# Enforce Guest and hide the checkbox to avoid confusion while allowing JS toggles to execute #}
+        <div class="d-none">
+            <input type="checkbox"
+                   name="createCustomerAccount"
+                   value="1"
+                   id="personalGuest"
+                   data-form-field-toggle="true"
+                   data-form-field-toggle-target=".js-form-field-toggle-guest-mode"
+                   data-form-field-toggle-value="false">
+            <input type="hidden" name="guest" value="1">
+        </div>
+        {# Fail-safe style to prevent layout shifts/flicker of password fields on load #}
+        <style>
+            .js-form-field-toggle-guest-mode {
+                display: none !important;
+            }
+        </style>
+    {% elseif checkoutType == 'register' %}
+        {# Enforce normal registration and hide the checkbox #}
+        <div class="d-none">
+            <input type="checkbox"
+                   name="createCustomerAccount"
+                   value="1"
+                   id="personalGuest"
+                   checked="checked"
+                   data-form-field-toggle="true"
+                   data-form-field-toggle-target=".js-form-field-toggle-guest-mode"
+                   data-form-field-toggle-value="false">
+            <input type="hidden" name="guest" value="">
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 {
-    "name":        "topdata/better-checkout-sw6",
+    "name":        "topdata/topdata-better-checkout-sw6",
     "description": "Topdata Better Checkout SW6",
     "version":     "v1.0.0",
     "type":        "shopware-platform-plugin",

@@ -1,0 +1,16 @@
+{
+    "better-checkout": {
+        "box": {
+            "registerTitle": "Ich möchte mich als neuer Kunde registrieren",
+            "registerText": "Melden Sie sich einmal an und profitieren Sie für lange Zeit.",
+            "registerBtn": "Ein Konto erstellen",
+            "loginTitle": "Ich habe bereits ein Konto",
+            "guestTitle": "Ich möchte nur als Gast bestellen",
+            "guestText": "Der schnelle Weg zu Ihrer Bestellung ohne Kundenkonto",
+            "guestBtn": "Bestellung als Gast"
+        },
+        "register": {
+            "emailAlreadyRegistered": "Sie sind bereits als Kunde registriert - bitte loggen Sie sich ein."
+        }
+    }
+}
