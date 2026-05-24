@@ -3,7 +3,7 @@
 {% block page_checkout_main_content %}
     {% set checkoutType = app.request.query.get('checkoutType')
         ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
 
     {% set customerLoggedIn = context.customer is not null %}
     
@@ -53,7 +53,7 @@
 {% block page_checkout_address_login %}
     {% set checkoutType = app.request.query.get('checkoutType')
         ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
 
     {% set customerLoggedIn = context.customer is not null %}
 
@@ -67,7 +67,7 @@
 {% block page_checkout_address_register %}
     {% set checkoutType = app.request.query.get('checkoutType')
         ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
 
     {% set customerLoggedIn = context.customer is not null %}
 

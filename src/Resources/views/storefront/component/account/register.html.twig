@@ -4,7 +4,7 @@
     {{ parent() }}
     {% set checkoutType = app.request.query.get('checkoutType')
         ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
     {% if checkoutType %}
         <input type="hidden" name="checkoutType" value="{{ checkoutType }}">
     {% endif %}

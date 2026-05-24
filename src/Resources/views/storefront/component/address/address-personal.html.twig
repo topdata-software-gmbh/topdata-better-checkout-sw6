@@ -3,7 +3,7 @@
 {% block component_address_personal_account_type %}
     {% set checkoutType = app.request.query.get('checkoutType')
         ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null ? (data.get is defined ? data.get('checkoutType') : (data.checkoutType is defined ? data.checkoutType : null)) : null) %}
+        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
     
     {% if checkoutType == 'guest' %}
         {# Allow Private/Business selection during Guest Checkout #}
