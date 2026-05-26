@@ -1,15 +1,15 @@
 {% sw_extends '@Storefront/storefront/component/address/address-personal.html.twig' %}
 
 {% block component_address_personal_account_type %}
-    {% set checkoutType = app.request.query.get('checkoutType')
-        ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
-    
-    {% if checkoutType == 'guest' %}
-        {# Allow Private/Business selection during Guest Checkout #}
-        {{ parent() }}
-    {% else %}
-        {# Force Business Account Type on standard registration / non-guest checkout #}
-        <input type="hidden" name="{% if prefix %}{{ prefix }}[accountType]{% else %}accountType{% endif %}" value="{{ constant('Shopware\\Core\\Checkout\\Customer\\CustomerEntity::ACCOUNT_TYPE_BUSINESS') }}">
+    {% if prefix != 'shippingAddress' %}
+        {% set checkoutType = app.request.query.get('checkoutType')
+            ?: app.request.request.get('checkoutType')
+            ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
+
+        {% if checkoutType == 'guest' %}
+            {{ parent() }}
+        {% else %}
+            <input type="hidden" name="{% if prefix %}{{ prefix }}[accountType]{% else %}accountType{% endif %}" value="{{ constant('Shopware\\Core\\Checkout\\Customer\\CustomerEntity::ACCOUNT_TYPE_BUSINESS') }}">
+        {% endif %}
     {% endif %}
 {% endblock %}
