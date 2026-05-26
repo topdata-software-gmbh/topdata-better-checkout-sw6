@@ -8,13 +8,12 @@
     {% if checkoutType == 'guest' %}
         <div class="d-none">
             <input type="checkbox"
-                   name="guest"
-                   value="true"
+                   name="createCustomerAccount"
+                   value="1"
                    id="personalGuest"
-                   checked="checked"
                    data-form-field-toggle="true"
                    data-form-field-toggle-target=".js-form-field-toggle-guest-mode"
-                   data-form-field-toggle-value="false">
+                   data-form-field-toggle-value="true">
             <input type="hidden" name="guest" value="1">
         </div>
         <style>
@@ -25,12 +24,13 @@
     {% elseif checkoutType == 'register' %}
         <div class="d-none">
             <input type="checkbox"
-                   name="guest"
-                   value="true"
+                   name="createCustomerAccount"
+                   value="1"
                    id="personalGuest"
+                   checked="checked"
                    data-form-field-toggle="true"
                    data-form-field-toggle-target=".js-form-field-toggle-guest-mode"
-                   data-form-field-toggle-value="false">
+                   data-form-field-toggle-value="true">
         </div>
     {% else %}
         {{ parent() }}
