@@ -3,7 +3,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
     <card>
         <title>Account Type Settings</title>
-        <title lang="de-DE">Kundengruppen-Einstellungen</title>
+        <title lang="de-DE">Kontotyp-Einstellungen</title>
 
         <input-field type="single-select">
             <name>guestAccountType</name>
@@ -26,7 +26,7 @@
             </options>
             <defaultValue>user_choice</defaultValue>
             <label>Guest Checkout Account Type</label>
-            <label lang="de-DE">Gastbestellung - Kundengruppe</label>
+            <label lang="de-DE">Gastbestellung - Kontotyp</label>
         </input-field>
 
         <input-field type="single-select">
@@ -50,7 +50,7 @@
             </options>
             <defaultValue>always_business</defaultValue>
             <label>Registration Account Type</label>
-            <label lang="de-DE">Registrierung - Kundengruppe</label>
+            <label lang="de-DE">Registrierung - Kontotyp</label>
         </input-field>
     </card>
 

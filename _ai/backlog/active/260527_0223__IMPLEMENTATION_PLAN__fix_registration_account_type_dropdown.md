@@ -11,7 +11,7 @@ documentType: IMPLEMENTATION_PLAN
 ---
 
 # Problem Statement
-The custom Shopware 6 plugin has a setting `Registrierung - Kundengruppe` designed to force the customer account type (e.g., "Immer Gewerblich" / Always Business). While this configuration correctly forces the account type and hides the dropdown during the 3-box checkout intermediate step, it fails to apply on the default Shopware account registration page (`/account/login`). On this page, the "Kontotyp" (Account type) dropdown is incorrectly displayed, allowing users to override the plugin's configuration.
+The custom Shopware 6 plugin has a setting `Registrierung - Kontotyp` designed to force the customer account type (e.g., "Immer Gewerblich" / Always Business). While this configuration correctly forces the account type and hides the dropdown during the 3-box checkout intermediate step, it fails to apply on the default Shopware account registration page (`/account/login`). On this page, the "Kontotyp" (Account type) dropdown is incorrectly displayed, allowing users to override the plugin's configuration.
 
 # Executive Summary
 To resolve this inconsistency, we will extend the base Storefront registration component (`storefront/component/account/register.html.twig`). By targeting the `component_account_register_personal_account_type` Twig block, we can globally evaluate the plugin's configuration parameter. If the setting dictates a forced account type (like "Immer Gewerblich"), we will intercept the rendering to replace the visible dropdown with a hidden pre-selected element. This satisfies the Shopware native JavaScript (`FormFieldToggle`), ensuring company fields are correctly displayed upon page load, while strictly enforcing the configuration setting across all registration avenues.
@@ -27,7 +27,7 @@ To resolve this inconsistency, we will extend the base Storefront registration c
 # Implementation Plan
 
 ## Phase 1: Identify Configuration Keys
-Before applying the Twig patch, the AI coding agent must verify the exact plugin configuration domain and keys used for the "Registrierung - Kundengruppe" setting.
+Before applying the Twig patch, the AI coding agent must verify the exact plugin configuration domain and keys used for the "Registrierung - Kontotyp" setting.
 *   **Action:** Locate the `config.xml` in `src/Resources/config/` of the plugin.
 *   **Target Data:** Determine the `<name>` of the config element (e.g., `registrationCustomerGroup`) and the exact `<option>` `<value>` strings (e.g., `always_business`, `always_private`). 
 *   *Note: In the code blocks below, placeholders `YourPlugin.config.registrationCustomerGroup` and `always_business` are used and must be substituted with the actual plugin values.*
@@ -94,7 +94,7 @@ Since the plugin's scope of effectiveness is being widened to encompass standard
 ```markdown
 <!-- [MODIFY] README.md or CHANGELOG.md -->
 ### Fixed
-- Fixed an issue where the "Registrierung - Kundengruppe" (Registration Customer Group) configuration was bypassed and rendered a manual dropdown on the default `/account/login` route. The chosen setting is now globally enforced across all registration pages.
+- Fixed an issue where the "Registrierung - Kontotyp" (Registration Customer Group) configuration was bypassed and rendered a manual dropdown on the default `/account/login` route. The chosen setting is now globally enforced across all registration pages.
 ```
 
 ## Phase 4: Compile and Test
