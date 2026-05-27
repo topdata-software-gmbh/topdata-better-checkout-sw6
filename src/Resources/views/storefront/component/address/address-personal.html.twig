@@ -1,7 +1,7 @@
 {% sw_extends '@Storefront/storefront/component/address/address-personal.html.twig' %}
 
 {% block component_address_personal_account_type %}
-    {% set isRegistrationRoute = app.request.attributes.get('_route') in ['frontend.checkout.register.page', 'frontend.account.register.page'] %}
+    {% set isRegistrationRoute = app.request.attributes.get('_route') in ['frontend.checkout.register.page', 'frontend.account.register.page', 'frontend.account.login.page'] %}
 
     {% if not isRegistrationRoute %}
         {{ parent() }}
