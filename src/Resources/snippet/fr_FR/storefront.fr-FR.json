@@ -1,0 +1,16 @@
+{
+    "better-checkout": {
+        "box": {
+            "registerTitle": "Je souhaite m'inscrire comme nouveau client",
+            "registerText": "Inscrivez-vous une fois et profitez-en pendant longtemps.",
+            "registerBtn": "Créer un compte",
+            "loginTitle": "J'ai déjà un compte",
+            "guestTitle": "Je souhaite commander uniquement en tant qu'invité",
+            "guestText": "Le chemin rapide vers votre commande sans compte client",
+            "guestBtn": "Commande en tant qu'invité"
+        },
+        "register": {
+            "emailAlreadyRegistered": "Vous êtes déjà enregistré comme client - veuillez vous connecter."
+        }
+    }
+}
