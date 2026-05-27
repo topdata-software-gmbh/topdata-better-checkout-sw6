@@ -2,13 +2,55 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
     <card>
-        <title>Basic Configuration</title>
-        <title lang="de-DE">Grundeinstellungen</title>
-        
-        <input-field>
-            <name>example</name>
-            <label>Example Configuration</label>
-            <label lang="de-DE">Beispiel Konfiguration</label>
+        <title>Account Type Settings</title>
+        <title lang="de-DE">Kundengruppen-Einstellungen</title>
+
+        <input-field type="single-select">
+            <name>guestAccountType</name>
+            <options>
+                <option>
+                    <id>user_choice</id>
+                    <name>Let user choose</name>
+                    <name lang="de-DE">Benutzer wählen lassen</name>
+                </option>
+                <option>
+                    <id>always_private</id>
+                    <name>Always Private</name>
+                    <name lang="de-DE">Immer Privat</name>
+                </option>
+                <option>
+                    <id>always_business</id>
+                    <name>Always Business</name>
+                    <name lang="de-DE">Immer Gewerblich</name>
+                </option>
+            </options>
+            <defaultValue>user_choice</defaultValue>
+            <label>Guest Checkout Account Type</label>
+            <label lang="de-DE">Gastbestellung - Kundengruppe</label>
+        </input-field>
+
+        <input-field type="single-select">
+            <name>registrationAccountType</name>
+            <options>
+                <option>
+                    <id>user_choice</id>
+                    <name>Let user choose</name>
+                    <name lang="de-DE">Benutzer wählen lassen</name>
+                </option>
+                <option>
+                    <id>always_private</id>
+                    <name>Always Private</name>
+                    <name lang="de-DE">Immer Privat</name>
+                </option>
+                <option>
+                    <id>always_business</id>
+                    <name>Always Business</name>
+                    <name lang="de-DE">Immer Gewerblich</name>
+                </option>
+            </options>
+            <defaultValue>always_business</defaultValue>
+            <label>Registration Account Type</label>
+            <label lang="de-DE">Registrierung - Kundengruppe</label>
         </input-field>
     </card>
 

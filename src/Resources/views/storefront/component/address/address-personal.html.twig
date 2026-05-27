@@ -1,13 +1,30 @@
 {% sw_extends '@Storefront/storefront/component/address/address-personal.html.twig' %}
 
 {% block component_address_personal_account_type %}
-    {% set checkoutType = app.request.query.get('checkoutType')
-        ?: app.request.request.get('checkoutType')
-        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
+    {% set isRegistrationRoute = app.request.attributes.get('_route') in ['frontend.checkout.register.page', 'frontend.account.register.page'] %}
 
-    {% if checkoutType == 'guest' %}
+    {% if not isRegistrationRoute %}
         {{ parent() }}
-    {% elseif prefix != 'shippingAddress' %}
-        <input type="hidden" name="{% if prefix %}{{ prefix }}[accountType]{% else %}accountType{% endif %}" value="{{ constant('Shopware\\Core\\Checkout\\Customer\\CustomerEntity::ACCOUNT_TYPE_BUSINESS') }}">
+    {% else %}
+        {% set checkoutType = app.request.query.get('checkoutType')
+            ?: app.request.request.get('checkoutType')
+            ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
+
+        {% set guestSetting = config('TopdataBetterCheckoutSW6.config.guestAccountType') ?: 'user_choice' %}
+        {% set registerSetting = config('TopdataBetterCheckoutSW6.config.registrationAccountType') ?: 'always_business' %}
+
+        {% set accountTypeSetting = checkoutType == 'guest' ? guestSetting : registerSetting %}
+
+        {% if accountTypeSetting == 'user_choice' %}
+            {{ parent() }}
+        {% elseif accountTypeSetting == 'always_business' %}
+            {% if prefix != 'shippingAddress' %}
+                <input type="hidden" name="{% if prefix %}{{ prefix }}[accountType]{% else %}accountType{% endif %}" value="{{ constant('Shopware\\Core\\Checkout\\Customer\\CustomerEntity::ACCOUNT_TYPE_BUSINESS') }}">
+            {% endif %}
+        {% elseif accountTypeSetting == 'always_private' %}
+            {% if prefix != 'shippingAddress' %}
+                <input type="hidden" name="{% if prefix %}{{ prefix }}[accountType]{% else %}accountType{% endif %}" value="{{ constant('Shopware\\Core\\Checkout\\Customer\\CustomerEntity::ACCOUNT_TYPE_PRIVATE') }}">
+            {% endif %}
+        {% endif %}
     {% endif %}
 {% endblock %}

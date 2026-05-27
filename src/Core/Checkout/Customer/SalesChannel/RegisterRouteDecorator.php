@@ -46,7 +46,42 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
             $this->assertGuestEmailNotRegistered($data, $context);
         }
 
+        $this->enforceAccountType($data, $context, $isGuest);
+
         return $this->decorated->register($data, $context, $validateStorefrontUrl, $additionalValidationDefinitions);
+    }
+
+    private function enforceAccountType(RequestDataBag $data, SalesChannelContext $context, bool $isGuest): void
+    {
+        $configKey = $isGuest ? 'guestAccountType' : 'registrationAccountType';
+        $defaultSetting = $isGuest ? 'user_choice' : 'always_business';
+
+        $setting = $this->systemConfigService->getString(
+            'TopdataBetterCheckoutSW6.config.' . $configKey,
+            $context->getSalesChannelId()
+        );
+
+        if ($setting === '') {
+            $setting = $defaultSetting;
+        }
+
+        if ($setting === 'always_private') {
+            $data->set('accountType', CustomerEntity::ACCOUNT_TYPE_PRIVATE);
+        } elseif ($setting === 'always_business') {
+            $data->set('accountType', CustomerEntity::ACCOUNT_TYPE_BUSINESS);
+        }
+
+        if ($setting === 'always_private') {
+            $data->remove('company');
+            $data->remove('vatIds');
+            if ($data->has('billingAddress')) {
+                $billingAddress = $data->get('billingAddress');
+                if ($billingAddress instanceof RequestDataBag) {
+                    $billingAddress->remove('company');
+                    $billingAddress->remove('vatId');
+                }
+            }
+        }
     }
 
     private function assertGuestEmailNotRegistered(RequestDataBag $data, SalesChannelContext $context): void
