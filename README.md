@@ -21,6 +21,9 @@ Features
 - Backend enforcement of account type via `RegisterRoute` decoration ensures the correct value is persisted regardless of template quirks.
 - Blocks registered guest checkout with an email already used by a full customer account.
 - Payment method restrictions for guest customers based on account type (private vs business).
+- **Isolated Billing & Shipping Addresses**: Automatically forces the creation of separate database entities for billing and shipping addresses during registration, even if the customer selects "same as billing".
+- **ERP Integration Flags**: Automatically sets a custom field (`is_faktura`: `true`) on the billing address to easily identify the correct address object for ERP systems.
+- **Billing Address Lock**: Prevents customers from switching their default billing address to a different address book entry (via Storefront UI removal and API blocking). Customers can edit their existing billing address without accidentally breaking the shipping address.
 - Adds storefront snippets for English (en-GB) and German (de-DE) to make the boxes translatable.
 
 Configuration

@@ -37,6 +37,12 @@
             <argument type="service" id="translator"/>
         </service>
 
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\SalesChannel\SetDefaultBillingAddressRouteDecorator"
+                 decorates="Shopware\Core\Checkout\Customer\SalesChannel\SetDefaultBillingAddressRoute"
+                 public="true">
+            <argument type="service" id=".inner"/>
+        </service>
+
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Payment\SalesChannel\PaymentMethodRouteDecorator"
                  decorates="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute"
                  public="true">
