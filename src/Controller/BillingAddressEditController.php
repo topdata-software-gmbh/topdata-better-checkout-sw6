@@ -87,7 +87,7 @@ class BillingAddressEditController extends StorefrontController
                 $customer,
             );
 
-            return new Response('', 204);
+            return $this->redirectToRoute('frontend.checkout.confirm.page');
         } catch (ConstraintViolationException $formViolations) {
             $address = $this->getCustomerAddress($addressId, $context, $customer);
 
