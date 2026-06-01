@@ -3,12 +3,17 @@
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
 
 use Shopware\Core\Checkout\Customer\CustomerEntity;
+use Shopware\Core\Framework\Api\Context\SalesChannelApiSource;
 use Shopware\Core\Framework\Validation\BuildValidationEvent;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Shopware\Core\Framework\Validation\DataValidationDefinition;
 
+/**
+ * AddressValidationSubscriber handles validation rules for customer and address data.
+ * It modifies validation constraints based on configuration settings and account types.
+ */
 class AddressValidationSubscriber implements EventSubscriberInterface
 {
     public function __construct(
@@ -16,6 +21,11 @@ class AddressValidationSubscriber implements EventSubscriberInterface
     ) {
     }
 
+    /**
+     * Returns an array of event names this subscriber wants to listen to.
+     *
+     * @return array<string, string>
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -26,20 +36,30 @@ class AddressValidationSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * Handles validation for customer creation and update events.
+     * Applies validation rules based on account type and configuration settings.
+     *
+     * @param BuildValidationEvent $event The validation event
+     */
     public function onCustomerValidation(BuildValidationEvent $event): void
     {
         $definition = $event->getDefinition();
         $data = $event->getData();
-        $salesChannelId = $event->getContext()->getSalesChannelId();
+        $context = $event->getContext();
+        $source = $context->getSource();
+        $salesChannelId = $source instanceof SalesChannelApiSource ? $source->getSalesChannelId() : null;
 
         $accountType = $data->get('accountType');
         $isBusiness = $accountType === CustomerEntity::ACCOUNT_TYPE_BUSINESS;
 
         $subDefinitions = $definition->getSubDefinitions();
 
+        // ---- Apply validation rules to billing address if it exists
         if (isset($subDefinitions['billingAddress'])) {
             $this->applyValidationRules($subDefinitions['billingAddress'], 'billing', $salesChannelId, $isBusiness);
 
+            // ---- Handle company field validation based on configuration
             $billingSetting = $this->systemConfigService->getString('TopdataBetterCheckoutSW6.config.companyValidationBilling', $salesChannelId);
             if ($billingSetting === 'optional') {
                 $this->removeConstraint($definition, 'company', NotBlank::class);
@@ -48,27 +68,30 @@ class AddressValidationSubscriber implements EventSubscriberInterface
             }
         }
 
+        // ---- Apply validation rules to shipping address if it exists
         if (isset($subDefinitions['shippingAddress'])) {
             $this->applyValidationRules($subDefinitions['shippingAddress'], 'shipping', $salesChannelId, $isBusiness);
         }
     }
 
+    /**
+     * Handles validation for address creation and update events.
+     * Determines if the address is for billing or shipping and applies appropriate validation rules.
+     *
+     * @param BuildValidationEvent $event The validation event
+     */
     public function onAddressValidation(BuildValidationEvent $event): void
     {
         $definition = $event->getDefinition();
         $data = $event->getData();
         $context = $event->getContext();
-        $salesChannelId = $context->getSalesChannelId();
+        $source = $context->getSource();
+        $salesChannelId = $source instanceof SalesChannelApiSource ? $source->getSalesChannelId() : null;
 
-        $customer = $context->getCustomer();
-        $isBusiness = false;
+        // ---- Determine if this is a business account
+        $isBusiness = $data->has('accountType') && $data->get('accountType') === CustomerEntity::ACCOUNT_TYPE_BUSINESS;
 
-        if ($data->has('accountType') && $data->get('accountType') === CustomerEntity::ACCOUNT_TYPE_BUSINESS) {
-            $isBusiness = true;
-        } elseif ($customer !== null && $customer->getAccountType() === CustomerEntity::ACCOUNT_TYPE_BUSINESS) {
-            $isBusiness = true;
-        }
-
+        // ---- Determine if this is a shipping or billing address
         $type = 'billing';
         $customFields = $data->get('customFields');
 
@@ -83,23 +106,31 @@ class AddressValidationSubscriber implements EventSubscriberInterface
                     $type = 'shipping';
                 }
             }
-        } else {
-            if ($customer !== null && $data->has('id') && $data->get('id') === $customer->getDefaultShippingAddressId()) {
-                $type = 'shipping';
-            }
         }
 
+        // ---- Apply validation rules based on address type and business status
         $this->applyValidationRules($definition, $type, $salesChannelId, $isBusiness);
     }
 
+    /**
+     * Applies validation rules to a data definition based on configuration settings.
+     * Modifies company field validation based on whether it's optional or required.
+     *
+     * @param DataValidationDefinition $definition The validation definition to modify
+     * @param string $type The address type ('billing' or 'shipping')
+     * @param string|null $salesChannelId The sales channel ID
+     * @param bool $isBusiness Whether the customer is a business account
+     */
     private function applyValidationRules(DataValidationDefinition $definition, string $type, ?string $salesChannelId, bool $isBusiness): void
     {
+        // ---- Get the appropriate configuration key based on address type
         $configKey = $type === 'shipping'
             ? 'TopdataBetterCheckoutSW6.config.companyValidationShipping'
             : 'TopdataBetterCheckoutSW6.config.companyValidationBilling';
 
         $setting = $this->systemConfigService->getString($configKey, $salesChannelId);
 
+        // ---- Apply validation rules based on configuration setting
         if ($setting === 'optional') {
             $this->removeConstraint($definition, 'company', NotBlank::class);
         } elseif ($setting === 'required' && $isBusiness) {
@@ -107,6 +138,13 @@ class AddressValidationSubscriber implements EventSubscriberInterface
         }
     }
 
+    /**
+     * Removes a specific constraint from a field in the validation definition.
+     *
+     * @param DataValidationDefinition $definition The validation definition
+     * @param string $fieldName The field name to modify
+     * @param string $constraintClass The constraint class to remove
+     */
     private function removeConstraint(DataValidationDefinition $definition, string $fieldName, string $constraintClass): void
     {
         $properties = $definition->getProperties();
@@ -114,19 +152,29 @@ class AddressValidationSubscriber implements EventSubscriberInterface
             return;
         }
 
+        // ---- Filter out the specified constraint class
         $constraints = $properties[$fieldName];
         $newConstraints = array_filter($constraints, fn($c) => !($c instanceof $constraintClass));
 
+        // ---- Update the definition if constraints were removed
         if (count($newConstraints) !== count($constraints)) {
             $definition->set($fieldName, ...$newConstraints);
         }
     }
 
+    /**
+     * Adds a constraint to a field if it doesn't already exist.
+     *
+     * @param DataValidationDefinition $definition The validation definition
+     * @param string $fieldName The field name to modify
+     * @param \Symfony\Component\Validator\Constraint $newConstraint The constraint to add
+     */
     private function addConstraintIfNotExists(DataValidationDefinition $definition, string $fieldName, \Symfony\Component\Validator\Constraint $newConstraint): void
     {
         $properties = $definition->getProperties();
         $constraints = $properties[$fieldName] ?? [];
 
+        // ---- Check if constraint already exists
         $constraintClass = \get_class($newConstraint);
         foreach ($constraints as $constraint) {
             if ($constraint instanceof $constraintClass) {
@@ -134,6 +182,7 @@ class AddressValidationSubscriber implements EventSubscriberInterface
             }
         }
 
+        // ---- Add the new constraint
         $definition->add($fieldName, $newConstraint);
     }
 }
