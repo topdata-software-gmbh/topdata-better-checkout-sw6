@@ -14,6 +14,7 @@ use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\Framework\Validation\Exception\ConstraintViolationException;
 use Shopware\Core\System\Country\SalesChannel\AbstractCountryRoute;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\System\Salutation\SalesChannel\AbstractSalutationRoute;
 use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +27,7 @@ class BillingAddressEditController extends StorefrontController
         private readonly AbstractListAddressRoute $listAddressRoute,
         private readonly AbstractUpsertAddressRoute $upsertAddressRoute,
         private readonly AbstractCountryRoute $countryRoute,
+        private readonly AbstractSalutationRoute $salutationRoute,
     ) {
     }
 
@@ -115,8 +117,13 @@ class BillingAddressEditController extends StorefrontController
             ->addSorting(new FieldSorting('name', FieldSorting::ASCENDING));
 
         $countries = $this->countryRoute->load(new Request(), $criteria, $context)->getCountries();
+        $salutations = $this->salutationRoute->load(new Request(), $context, new Criteria())->getSalutations();
+        $salutations->sort(fn ($a, $b) => $b->getSalutationKey() <=> $a->getSalutationKey());
 
-        return ['countries' => $countries];
+        return [
+            'countries' => $countries,
+            'salutations' => $salutations,
+        ];
     }
 
     private function getCustomerAddress(
