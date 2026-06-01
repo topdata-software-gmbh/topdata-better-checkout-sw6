@@ -3,25 +3,29 @@
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\SalesChannel;
 
 use Shopware\Core\Checkout\Customer\CustomerEntity;
-use Shopware\Core\Checkout\Customer\SalesChannel\AbstractSetDefaultBillingAddressRoute;
+use Shopware\Core\Checkout\Customer\SalesChannel\AbstractSwitchDefaultAddressRoute;
+use Shopware\Core\System\SalesChannel\NoContentResponse;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
-use Shopware\Core\System\SalesChannel\SuccessResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class SetDefaultBillingAddressRouteDecorator extends AbstractSetDefaultBillingAddressRoute
+class SetDefaultBillingAddressRouteDecorator extends AbstractSwitchDefaultAddressRoute
 {
     public function __construct(
-        private readonly AbstractSetDefaultBillingAddressRoute $decorated
+        private readonly AbstractSwitchDefaultAddressRoute $decorated
     ) {
     }
 
-    public function getDecorated(): AbstractSetDefaultBillingAddressRoute
+    public function getDecorated(): AbstractSwitchDefaultAddressRoute
     {
         return $this->decorated;
     }
 
-    public function setDefaultBillingAddress(string $addressId, SalesChannelContext $context, CustomerEntity $customer): SuccessResponse
+    public function swap(string $addressId, string $type, SalesChannelContext $context, CustomerEntity $customer): NoContentResponse
     {
-        throw new AccessDeniedHttpException('Changing the default billing address is not allowed. Please edit the existing billing address instead.');
+        if ($type === AbstractSwitchDefaultAddressRoute::TYPE_BILLING) {
+            throw new AccessDeniedHttpException('Changing the default billing address is not allowed. Please edit the existing billing address instead.');
+        }
+
+        return $this->decorated->swap($addressId, $type, $context, $customer);
     }
 }

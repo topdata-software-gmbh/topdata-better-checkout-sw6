@@ -38,7 +38,7 @@
         </service>
 
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\SalesChannel\SetDefaultBillingAddressRouteDecorator"
-                 decorates="Shopware\Core\Checkout\Customer\SalesChannel\SetDefaultBillingAddressRoute"
+                 decorates="Shopware\Core\Checkout\Customer\SalesChannel\SwitchDefaultAddressRoute"
                  public="true">
             <argument type="service" id=".inner"/>
         </service>
