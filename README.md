@@ -24,6 +24,7 @@ Features
 - **Isolated Billing & Shipping Addresses**: Automatically forces the creation of separate database entities for billing and shipping addresses during registration, even if the customer selects "same as billing".
 - **ERP Integration Flags**: Automatically sets a custom field (`is_faktura`: `true`) on the billing address to easily identify the correct address object for ERP systems.
 - **Billing Address Lock**: Prevents customers from switching their default billing address to a different address book entry (via Storefront UI removal and API blocking). Customers can edit their existing billing address without accidentally breaking the shipping address.
+- **Granular Company Name Validation**: Allows granular control to make the company name input mandatory or optional independently for billing and shipping addresses.
 - Adds storefront snippets for English (en-GB) and German (de-DE) to make the boxes translatable.
 
 Configuration
@@ -33,6 +34,8 @@ In the Shopware Administration under the plugin settings:
 - **Registration Account Type** — controls the `accountType` for new customer registrations (`user_choice` / `always_private` / `always_business`, default: always business).
 - **Blocked payment methods for Private Guest Checkouts** — payment methods hidden for guests with a private account type.
 - **Blocked payment methods for Business Guest Checkouts** — payment methods hidden for guests with a business account type.
+- **Billing Address Company Name** — controls if the company name is mandatory for business customers on the billing address (Shopware Default / Mandatory / Optional).
+- **Shipping Address Company Name** — controls if the company name is mandatory for business customers on the shipping address (Shopware Default / Mandatory / Optional, default: Optional).
 
 How it works (technical summary)
 
@@ -42,6 +45,7 @@ How it works (technical summary)
 - The account type field on registration pages reads the plugin config: for `always_business` or `always_private` a hidden input is rendered; for `user_choice` the native Shopware selector is displayed.
 - `RegisterRouteDecorator` enforces the configured account type on the `RequestDataBag` before passing it to the core `RegisterRoute`, ensuring the correct value is always persisted to the database regardless of what the template or upstream controller sends.
 - `PaymentMethodRouteDecorator` filters out blocked payment methods for guest customers based on their account type.
+- `AddressValidationSubscriber` listens to `framework.validation.customer.*` and `framework.validation.address.*` events to dynamically rewrite the backend validation definition fields (adding or removing `NotBlank` constraints based on config).
 - Template overrides are scoped to registration routes only (`frontend.checkout.register.page`, `frontend.account.register.page`) to avoid interfering with standard address editing.
 
 Usage / Examples

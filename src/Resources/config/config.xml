@@ -72,4 +72,57 @@
             <label lang="de-DE">Gesperrte Bezahlmethoden fuer gewerbliche Gastbestellungen</label>
         </component>
     </card>
+
+    <card>
+        <title>Company Name Validation</title>
+        <title lang="de-DE">Firmenname Validierung</title>
+
+        <input-field type="single-select">
+            <name>companyValidationBilling</name>
+            <options>
+                <option>
+                    <id>core</id>
+                    <name>Shopware Default</name>
+                    <name lang="de-DE">Shopware Standard</name>
+                </option>
+                <option>
+                    <id>required</id>
+                    <name>Mandatory (Business)</name>
+                    <name lang="de-DE">Pflichtfeld (Gewerblich)</name>
+                </option>
+                <option>
+                    <id>optional</id>
+                    <name>Optional</name>
+                    <name lang="de-DE">Optional</name>
+                </option>
+            </options>
+            <defaultValue>core</defaultValue>
+            <label>Billing Address Company Name</label>
+            <label lang="de-DE">Rechnungsadresse Firmenname</label>
+        </input-field>
+
+        <input-field type="single-select">
+            <name>companyValidationShipping</name>
+            <options>
+                <option>
+                    <id>core</id>
+                    <name>Shopware Default</name>
+                    <name lang="de-DE">Shopware Standard</name>
+                </option>
+                <option>
+                    <id>required</id>
+                    <name>Mandatory (Business)</name>
+                    <name lang="de-DE">Pflichtfeld (Gewerblich)</name>
+                </option>
+                <option>
+                    <id>optional</id>
+                    <name>Optional</name>
+                    <name lang="de-DE">Optional</name>
+                </option>
+            </options>
+            <defaultValue>optional</defaultValue>
+            <label>Shipping Address Company Name</label>
+            <label lang="de-DE">Lieferadresse Firmenname</label>
+        </input-field>
+    </card>
 </config>

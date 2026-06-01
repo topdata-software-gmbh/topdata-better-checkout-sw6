@@ -32,6 +32,20 @@
                                 {% endif %}
 
                                 {% block component_address_form_company_name_input %}
+                                    {% set isShipping = (prefix == 'shippingAddress') %}
+                                    {% set companyValidationSetting = isShipping ? config('TopdataBetterCheckoutSW6.config.companyValidationShipping') : config('TopdataBetterCheckoutSW6.config.companyValidationBilling') %}
+
+                                    {% if not companyValidationSetting %}
+                                        {% set companyValidationSetting = isShipping ? 'optional' : 'core' %}
+                                    {% endif %}
+
+                                    {% set validationRules = 'required' %}
+                                    {% if companyValidationSetting == 'optional' %}
+                                        {% set validationRules = '' %}
+                                    {% elseif companyValidationSetting == 'required' %}
+                                        {% set validationRules = 'required' %}
+                                    {% endif %}
+
                                     {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
                                         label: 'address.companyNameLabel'|trans|sw_sanitize,
                                         id: idPrefix ~ prefix ~ 'company',
@@ -39,7 +53,7 @@
                                         value: address.get('company'),
                                         autocomplete: 'section-personal organization',
                                         violationPath: violationPath,
-                                        validationRules: 'required',
+                                        validationRules: validationRules,
                                         additionalClass: 'col-12',
                                     } %}
                                 {% endblock %}
