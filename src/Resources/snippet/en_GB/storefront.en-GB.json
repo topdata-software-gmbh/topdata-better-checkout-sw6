@@ -11,6 +11,11 @@
         },
         "register": {
             "emailAlreadyRegistered": "You are already registered as a customer - please log in."
+        },
+        "billingAddressEdit": {
+            "title": "Edit billing address",
+            "cancel": "Cancel",
+            "save": "Save"
         }
     },
     "checkout": {

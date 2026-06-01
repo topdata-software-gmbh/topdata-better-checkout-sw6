@@ -4,10 +4,14 @@
     <div class="card-actions">
         {% set billingAddress = context.customer.activeBillingAddress %}
 
-        <a href="{{ path('frontend.account.address.edit.page', {addressId: billingAddress.id}) }}"
-           class="btn btn-light btn-sm"
-           title="{{ 'checkout.confirmChangeBillingAddress'|trans|striptags }}">
+        <button
+            type="button"
+            class="btn btn-light btn-sm"
+            data-ajax-modal="true"
+            data-url="{{ path('frontend.checkout.billing-address.edit.get', { addressId: billingAddress.id }) }}"
+            title="{{ 'checkout.confirmChangeBillingAddress'|trans|striptags }}"
+        >
             {{ "checkout.confirmChangeBillingAddress"|trans|sw_sanitize }}
-        </a>
+        </button>
     </div>
 {% endblock %}

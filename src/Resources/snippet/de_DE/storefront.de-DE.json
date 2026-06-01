@@ -11,6 +11,11 @@
         },
         "register": {
             "emailAlreadyRegistered": "Sie sind bereits als Kunde registriert - bitte loggen Sie sich ein."
+        },
+        "billingAddressEdit": {
+            "title": "Rechnungsadresse bearbeiten",
+            "cancel": "Abbrechen",
+            "save": "Speichern"
         }
     },
     "checkout": {

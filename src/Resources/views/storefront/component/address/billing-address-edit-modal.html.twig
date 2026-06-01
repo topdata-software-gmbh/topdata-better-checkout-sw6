@@ -1,0 +1,70 @@
+<div class="js-pseudo-modal-template-root-element billing-address-edit-modal">
+    <div class="modal-header pb-0 align-items-start">
+        {% block billing_address_edit_modal_title %}
+            <h1 class="fs-2">
+                {{ 'better-checkout.billingAddressEdit.title'|trans|sw_sanitize }}
+            </h1>
+        {% endblock %}
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="{{ 'global.default.close'|trans|striptags }}"
+        ></button>
+    </div>
+
+    <div class="modal-body">
+        {% block billing_address_edit_modal_form %}
+            <form
+                method="post"
+                action="{{ path('frontend.checkout.billing-address.edit.save', { addressId: address.id }) }}"
+                id="billing-address-edit-form"
+                data-form-handler="true"
+            >
+                {% block billing_address_edit_modal_personal %}
+                    {% sw_include '@Storefront/storefront/component/address/address-personal.html.twig' with {
+                        data: postedData ?? address,
+                        prefix: 'address',
+                        showFormCompany: true,
+                    } %}
+                {% endblock %}
+
+                {% block billing_address_edit_modal_address %}
+                    {% sw_include '@Storefront/storefront/component/address/address-form.html.twig' with {
+                        data: postedData ?? address,
+                        prefix: 'address',
+                        showFormCompany: true,
+                    } %}
+                {% endblock %}
+
+                {% block billing_address_edit_modal_required %}
+                    <p class="address-required-info required-fields">
+                        {{ 'general.requiredFields'|trans|sw_sanitize }}
+                    </p>
+                {% endblock %}
+            </form>
+        {% endblock %}
+    </div>
+
+    <div class="modal-footer justify-content-end">
+        {% block billing_address_edit_modal_actions %}
+            <button
+                type="button"
+                class="btn btn-outline-dark"
+                data-bs-dismiss="modal"
+            >
+                {{ 'better-checkout.billingAddressEdit.cancel'|trans|sw_sanitize }}
+            </button>
+
+            <button
+                type="submit"
+                form="billing-address-edit-form"
+                class="btn btn-primary"
+                title="{{ 'better-checkout.billingAddressEdit.save'|trans|striptags }}"
+            >
+                {{ 'better-checkout.billingAddressEdit.save'|trans|sw_sanitize }}
+            </button>
+        {% endblock %}
+    </div>
+</div>

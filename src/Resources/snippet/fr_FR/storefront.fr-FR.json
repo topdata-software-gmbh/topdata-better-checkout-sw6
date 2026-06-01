@@ -11,6 +11,11 @@
         },
         "register": {
             "emailAlreadyRegistered": "Vous êtes déjà enregistré comme client - veuillez vous connecter."
+        },
+        "billingAddressEdit": {
+            "title": "Modifier l'adresse de facturation",
+            "cancel": "Annuler",
+            "save": "Enregistrer"
         }
     }
 }

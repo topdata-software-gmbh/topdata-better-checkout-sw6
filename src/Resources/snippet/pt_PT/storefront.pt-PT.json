@@ -11,6 +11,11 @@
         },
         "register": {
             "emailAlreadyRegistered": "Já está registado como cliente - por favor, inicie sessão."
+        },
+        "billingAddressEdit": {
+            "title": "Editar endereço de faturação",
+            "cancel": "Cancelar",
+            "save": "Guardar"
         }
     }
 }

@@ -45,7 +45,11 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 - Removes "Set as default billing address" button from the storefront address book
 
 ### 2.7 "Edit Billing Address" on Confirm Page
-- Replaces "Change billing address" (modal selection) with direct link to edit the current billing address
+- Replaces "Change billing address" (modal selection) with a direct-edit modal
+- Clicking "Rechnungsadresse bearbeiten" opens an AJAX modal with the address form
+- Saving the form updates the existing `CustomerAddress` entity via `AbstractUpsertAddressRoute`
+- The `defaultBillingAddress` is NEVER changed by this operation
+- After save, the modal closes and the page reloads to show the updated address
 
 ### 2.8 Payment Method Restrictions for Guest Checkouts
 | Setting | Type | Description |
