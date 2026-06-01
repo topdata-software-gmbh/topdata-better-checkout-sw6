@@ -2,19 +2,19 @@
 
 ## 1. Grundkonfiguration (Admin → Einstellungen → Erweiterungen)
 
-- [ ] **Plugin ist installiert und aktiv** – Keine Fehler in der Plugin-Übersicht
-- [ ] **Konfigurationsseite aufrufbar** – Alle drei Karten (Account-Typ, Zahlungsrestriktionen, Firmenvalidierung) werden angezeigt
-- [ ] **Standardwerte prüfen** – `guestAccountType=user_choice`, `registrationAccountType=always_business`, `companyValidationBilling=core`, `companyValidationShipping=optional`
-- [ ] **Werte speicherbar** – Alle Select-Felder und Multi-ID-Selects lassen sich speichern und bleiben nach Neuladen erhalten
+- [X] **Plugin ist installiert und aktiv** – Keine Fehler in der Plugin-Übersicht
+- [X] **Konfigurationsseite aufrufbar** – Alle drei Karten (Account-Typ, Zahlungsrestriktionen, Firmenvalidierung) werden angezeigt
+- [X] **Standardwerte prüfen** – `guestAccountType=user_choice`, `registrationAccountType=always_business`, `companyValidationBilling=core`, `companyValidationShipping=optional`
+- [X] **Werte speicherbar** – Alle Select-Felder und Multi-ID-Selects lassen sich speichern und bleiben nach Neuladen erhalten
 
 ---
 
 ## 2. 3-Box-Auswahl (Startseite Checkout)
 
-- [ ] **3 Boxen werden angezeigt** – Registrieren / Anmelden / Gast
-- [ ] **Box "Registrieren"** führt zu `?checkoutType=register`
-- [ ] **Box "Gast"** führt zu `?checkoutType=guest`
-- [ ] **Box "Anmelden"** zeigt das Login-Formular direkt an
+- [X] **3 Boxen werden angezeigt** – Registrieren / Anmelden / Gast
+- [X] **Box "Registrieren"** führt zu `?checkoutType=register`
+- [X] **Box "Gast"** führt zu `?checkoutType=guest`
+- [X] **Box "Anmelden"** zeigt das Login-Formular direkt an
 - [ ] **Nicht eingeloggt** → 3 Boxen sichtbar
 - [ ] **Bereits eingeloggt** → Standard-Checkout (keine Boxen)
 - [ ] **Mobile Ansicht** – Boxen sind responsive (Stack untereinander)
