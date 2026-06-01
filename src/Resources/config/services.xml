@@ -9,6 +9,7 @@
         <service id="Topdata\TopdataBetterCheckoutSW6\Controller\BillingAddressEditController" public="true">
             <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\ListAddressRoute"/>
             <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\UpsertAddressRoute"/>
+            <argument type="service" id="Shopware\Core\System\Country\SalesChannel\CountryRoute"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

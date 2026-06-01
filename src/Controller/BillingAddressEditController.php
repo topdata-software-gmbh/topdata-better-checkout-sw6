@@ -9,10 +9,13 @@ use Shopware\Core\Checkout\Customer\SalesChannel\AbstractListAddressRoute;
 use Shopware\Core\Checkout\Customer\SalesChannel\AbstractUpsertAddressRoute;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\Framework\Validation\Exception\ConstraintViolationException;
+use Shopware\Core\System\Country\SalesChannel\AbstractCountryRoute;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Controller\StorefrontController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -22,6 +25,7 @@ class BillingAddressEditController extends StorefrontController
     public function __construct(
         private readonly AbstractListAddressRoute $listAddressRoute,
         private readonly AbstractUpsertAddressRoute $upsertAddressRoute,
+        private readonly AbstractCountryRoute $countryRoute,
     ) {
     }
 
@@ -39,10 +43,13 @@ class BillingAddressEditController extends StorefrontController
     ): Response {
         $address = $this->getCustomerAddress($addressId, $context, $customer);
 
+        $page = $this->getPageWithCountries($context);
+
         $response = $this->renderStorefront(
             '@TopdataBetterCheckoutSW6/storefront/component/address/billing-address-edit-modal.html.twig',
             [
                 'address' => $address,
+                'page' => $page,
             ],
         );
 
@@ -82,10 +89,13 @@ class BillingAddressEditController extends StorefrontController
         } catch (ConstraintViolationException $formViolations) {
             $address = $this->getCustomerAddress($addressId, $context, $customer);
 
+            $page = $this->getPageWithCountries($context);
+
             $response = $this->renderStorefront(
                 '@TopdataBetterCheckoutSW6/storefront/component/address/billing-address-edit-modal.html.twig',
                 [
                     'address' => $address,
+                    'page' => $page,
                     'formViolations' => $formViolations,
                     'postedData' => $addressData,
                 ],
@@ -96,6 +106,17 @@ class BillingAddressEditController extends StorefrontController
 
             return $response;
         }
+    }
+
+    private function getPageWithCountries(SalesChannelContext $context): array
+    {
+        $criteria = (new Criteria())
+            ->addSorting(new FieldSorting('position', FieldSorting::ASCENDING))
+            ->addSorting(new FieldSorting('name', FieldSorting::ASCENDING));
+
+        $countries = $this->countryRoute->load(new Request(), $criteria, $context)->getCountries();
+
+        return ['countries' => $countries];
     }
 
     private function getCustomerAddress(
