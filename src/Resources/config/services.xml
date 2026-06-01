@@ -43,6 +43,12 @@
             <argument type="service" id=".inner"/>
         </service>
 
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\SalesChannel\ContextSwitchRouteDecorator"
+                 decorates="Shopware\Core\System\SalesChannel\SalesChannel\ContextSwitchRoute"
+                 public="true">
+            <argument type="service" id=".inner"/>
+        </service>
+
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Payment\SalesChannel\PaymentMethodRouteDecorator"
                  decorates="Shopware\Core\Checkout\Payment\SalesChannel\PaymentMethodRoute"
                  public="true">
@@ -52,6 +58,7 @@
 
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AddressValidationSubscriber">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
             <tag name="kernel.event_subscriber"/>
         </service>
     </services>

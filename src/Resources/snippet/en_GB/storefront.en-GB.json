@@ -12,5 +12,8 @@
         "register": {
             "emailAlreadyRegistered": "You are already registered as a customer - please log in."
         }
+    },
+    "checkout": {
+        "confirmChangeBillingAddress": "Edit billing address"
     }
 }

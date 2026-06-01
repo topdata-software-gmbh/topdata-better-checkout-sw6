@@ -58,20 +58,8 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
         $billingAddress = $data->get('billingAddress');
 
         if ($billingAddress instanceof RequestDataBag) {
-            $customFields = $billingAddress->get('customFields');
-            if (!$customFields instanceof RequestDataBag) {
-                $customFields = new RequestDataBag();
-            }
-            $customFields->set('is_faktura', true);
-            $billingAddress->set('customFields', $customFields);
-
             if (!$data->has('shippingAddress')) {
                 $shippingAddress = clone $billingAddress;
-
-                $shippingCustomFields = clone $customFields;
-                $shippingCustomFields->set('is_faktura', false);
-                $shippingAddress->set('customFields', $shippingCustomFields);
-
                 $data->set('shippingAddress', $shippingAddress);
             }
         }

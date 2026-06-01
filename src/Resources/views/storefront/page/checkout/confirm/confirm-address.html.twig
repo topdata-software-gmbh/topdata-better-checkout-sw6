@@ -1,0 +1,17 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/confirm-address.html.twig' %}
+
+{% block page_checkout_confirm_address_billing_actions %}
+    <div class="card-actions">
+        {% set billingAddress = context.customer.activeBillingAddress %}
+
+        <button class="btn btn-light btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#address-editor-modal"
+                data-address-editor-modal-options="{{ {
+                    changeBilling: true,
+                    addressId: billingAddress.id
+                }|json_encode }}">
+            {{ "checkout.confirmChangeBillingAddress"|trans|sw_sanitize }}
+        </button>
+    </div>
+{% endblock %}
