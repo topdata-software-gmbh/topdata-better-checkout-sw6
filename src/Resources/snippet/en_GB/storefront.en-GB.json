@@ -22,6 +22,9 @@
             "save": "Save"
         }
     },
+    "account": {
+        "addressesTitleDefaultBillingAddress": "Billing address"
+    },
     "checkout": {
         "confirmChangeBillingAddress": "Edit billing address"
     }

@@ -1,7 +1,24 @@
 {% sw_extends '@Storefront/storefront/page/account/addressbook/address-manager.html.twig' %}
 
+{% block address_base_default_address_item %}
+    {% sw_include '@Storefront/storefront/page/account/addressbook/address-item.html.twig' with {
+        address: defaultBillingAddress,
+        defaultBilling: true
+    }  %}
+{% endblock %}
+
 {% block address_base_list_title %}
     <h2 class="mt-4">
         {{ "better-checkout.account.addressesAvailable"|trans|sw_sanitize }}
     </h2>
+{% endblock %}
+
+{% block address_base_list_address_item %}
+    {% if address.id != defaultBillingAddress.id %}
+        {% sw_include '@Storefront/storefront/page/account/addressbook/address-item.html.twig' with {
+            address: address,
+            defaultShipping: defaultShippingAddress.id == address.id,
+            defaultBilling: false
+        }  %}
+    {% endif %}
 {% endblock %}

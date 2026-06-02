@@ -22,6 +22,9 @@
             "save": "Speichern"
         }
     },
+    "account": {
+        "addressesTitleDefaultBillingAddress": "Rechnungsadresse"
+    },
     "checkout": {
         "confirmChangeBillingAddress": "Rechnungsadresse bearbeiten"
     }

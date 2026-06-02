@@ -21,5 +21,11 @@
             "cancel": "Annuler",
             "save": "Enregistrer"
         }
+    },
+    "account": {
+        "addressesTitleDefaultBillingAddress": "Adresse de facturation"
+    },
+    "checkout": {
+        "confirmChangeBillingAddress": "Modifier l'adresse de facturation"
     }
 }
