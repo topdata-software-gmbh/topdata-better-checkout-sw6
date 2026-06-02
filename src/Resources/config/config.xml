@@ -74,6 +74,20 @@
     </card>
 
     <card>
+        <title>Address Book Settings</title>
+        <title lang="de-DE">Adressbuch Einstellungen</title>
+
+        <input-field type="text">
+            <name>addressDropdownIcon</name>
+            <defaultValue>paper-pencil</defaultValue>
+            <label>Address Dropdown Icon</label>
+            <label lang="de-DE">Adress-Dropdown Icon</label>
+            <helpText>Icon name for the address options dropdown button (e.g. more-vertical, paper-pencil).</helpText>
+            <helpText lang="de-DE">Icon-Name für den Adress-Optionen Dropdown-Button (z.B. more-vertical, paper-pencil).</helpText>
+        </input-field>
+    </card>
+
+    <card>
         <title>Company Name Validation</title>
         <title lang="de-DE">Firmenname Validierung</title>
 
