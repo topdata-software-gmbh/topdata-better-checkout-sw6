@@ -1,0 +1,52 @@
+{% sw_extends '@Storefront/storefront/page/account/addressbook/address-item.html.twig' %}
+
+{% block address_item_dropdown_items %}
+    <li>
+        <a
+            class="dropdown-item address-manager-modal-address-form"
+            href="{{ path('frontend.account.address.edit.page', {addressId: address.id}) }}"
+        >
+            {{ 'global.default.edit'|trans|sw_sanitize }}
+        </a>
+    </li>
+    {% if not defaultShipping %}
+        <li>
+            <form
+                action="{{ path('frontend.account.address.set-default-address', {type: 'shipping', addressId: address.id}) }}"
+                method="post"
+            >
+                <button
+                    type="submit"
+                    title="{{ 'account.addressesSetAsDefaultShippingAction'|trans|striptags }}"
+                    class="dropdown-item"{% if not address.country.shippingAvailable %}disabled="disabled"{% endif %}
+                >
+                    {{ 'account.addressesSetAsDefaultShippingAction'|trans|sw_sanitize }}
+                </button>
+            </form>
+        </li>
+    {% endif %}
+    {% if not (defaultShipping or defaultBilling) %}
+        <li>
+            <form
+                action="{{ path('frontend.account.address.delete', {addressId: address.id}) }}"
+                method="post"
+            >
+                <button type="submit" class="dropdown-item text-danger">
+                    {{ 'account.addressesContentItemActionDelete'|trans|sw_sanitize }}
+                </button>
+            </form>
+        </li>
+    {% endif %}
+{% endblock %}
+
+{% block address_item_badge %}
+    {% if isBillingAddress is defined and isBillingAddress %}
+        <div class="mt-auto d-flex justify-content-end">
+            <span class="address-item-default-badge fs-6 fw-semibold px-4 py-1 rounded-pill text-bg-info">
+                {{ 'account.addressesTitleDefaultBillingAddress'|trans|sw_sanitize }}
+            </span>
+        </div>
+    {% elseif defaultShipping %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

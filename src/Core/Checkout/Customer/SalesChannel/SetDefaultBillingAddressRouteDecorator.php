@@ -26,6 +26,13 @@ class SetDefaultBillingAddressRouteDecorator extends AbstractSwitchDefaultAddres
             throw new AccessDeniedHttpException('Changing the default billing address is not allowed. Please edit the existing billing address instead.');
         }
 
+        if ($type === AbstractSwitchDefaultAddressRoute::TYPE_SHIPPING) {
+            $billingAddress = $customer->getDefaultBillingAddress();
+            if ($billingAddress !== null && $billingAddress->getId() === $addressId) {
+                throw new AccessDeniedHttpException('The billing address cannot be set as the default shipping address.');
+            }
+        }
+
         return $this->decorated->swap($addressId, $type, $context, $customer);
     }
 }
