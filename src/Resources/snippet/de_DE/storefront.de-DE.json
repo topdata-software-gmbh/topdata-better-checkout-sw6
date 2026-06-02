@@ -12,6 +12,10 @@
         "register": {
             "emailAlreadyRegistered": "Sie sind bereits als Kunde registriert - bitte loggen Sie sich ein."
         },
+        "account": {
+            "addressesTitle": "Rechnungsadresse",
+            "addressesAvailable": "Verfügbare Lieferadressen"
+        },
         "billingAddressEdit": {
             "title": "Rechnungsadresse bearbeiten",
             "cancel": "Abbrechen",

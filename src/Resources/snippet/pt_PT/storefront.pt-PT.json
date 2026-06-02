@@ -12,6 +12,10 @@
         "register": {
             "emailAlreadyRegistered": "Já está registado como cliente - por favor, inicie sessão."
         },
+        "account": {
+            "addressesTitle": "Endereço de faturação",
+            "addressesAvailable": "Endereços de entrega disponíveis"
+        },
         "billingAddressEdit": {
             "title": "Editar endereço de faturação",
             "cancel": "Cancelar",

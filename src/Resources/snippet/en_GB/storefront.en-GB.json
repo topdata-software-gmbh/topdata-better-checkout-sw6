@@ -12,6 +12,10 @@
         "register": {
             "emailAlreadyRegistered": "You are already registered as a customer - please log in."
         },
+        "account": {
+            "addressesTitle": "Billing address",
+            "addressesAvailable": "Available shipping addresses"
+        },
         "billingAddressEdit": {
             "title": "Edit billing address",
             "cancel": "Cancel",

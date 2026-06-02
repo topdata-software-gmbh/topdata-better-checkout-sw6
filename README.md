@@ -28,6 +28,7 @@ The plugin is intentionally small and implemented as Storefront template overrid
   - Overrides the checkout page behavior: converts "Rechnungsadresse ändern" to "Rechnungsadresse bearbeiten", directly opening the active billing address edit dialog rather than a search/selection list.
 - **Granular Company Name Validation**: Allows granular control to make the company name input mandatory or optional independently for billing and shipping addresses.
 - Adds storefront snippets for English (en-GB) and German (de-DE) to make the boxes translatable.
+- **Address Book Optimization**: Renames the generic headings in the customer account (`/account/address`) to distinctly display "Billing address" and "Available shipping addresses" for improved clarity.
 
 ## Configuration
 
