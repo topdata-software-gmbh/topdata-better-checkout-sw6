@@ -4,7 +4,7 @@
     {% sw_include '@Storefront/storefront/page/account/addressbook/address-item.html.twig' with {
         address: defaultBillingAddress,
         defaultBilling: true,
-        defaultShipping: true,
+        defaultShipping: defaultShippingAddress.id == defaultBillingAddress.id,
         isBillingAddress: true
     }  %}
 {% endblock %}
@@ -20,7 +20,7 @@
         {% sw_include '@Storefront/storefront/page/account/addressbook/address-item.html.twig' with {
             address: address,
             defaultShipping: defaultShippingAddress.id == address.id,
-            defaultBilling: true
+            defaultBilling: false
         }  %}
     {% endif %}
 {% endblock %}
