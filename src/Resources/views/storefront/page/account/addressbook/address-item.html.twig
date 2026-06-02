@@ -9,7 +9,7 @@
             {{ 'global.default.edit'|trans|sw_sanitize }}
         </a>
     </li>
-    {% if not defaultShipping %}
+    {% if not defaultShipping and not defaultBilling %}
         <li>
             <form
                 action="{{ path('frontend.account.address.set-default-address', {type: 'shipping', addressId: address.id}) }}"
