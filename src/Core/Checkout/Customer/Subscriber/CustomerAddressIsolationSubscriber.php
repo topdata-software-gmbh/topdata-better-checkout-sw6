@@ -3,7 +3,6 @@
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
 
 use Doctrine\DBAL\Connection;
-use Shopware\Core\Checkout\Customer\CustomerDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Command\UpdateCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Validation\PreWriteValidationEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -26,7 +25,7 @@ class CustomerAddressIsolationSubscriber implements EventSubscriberInterface
     public function onPreWriteValidate(PreWriteValidationEvent $event): void
     {
         foreach ($event->getCommands() as $command) {
-            if (!$command instanceof UpdateCommand || $command->getDefinition()->getClass() !== CustomerDefinition::class) {
+            if (!$command instanceof UpdateCommand || $command->getEntityName() !== 'customer') {
                 continue;
             }
 

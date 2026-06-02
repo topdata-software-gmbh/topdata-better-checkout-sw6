@@ -1,0 +1,28 @@
+{% sw_extends '@Storefront/storefront/component/address/address-manager-item.html.twig' %}
+
+{% block address_manager_modal_item_dropdown_items %}
+    <li>
+        <a
+            class="dropdown-item address-manager-modal-address-form"
+            href="#"
+            data-address-id="{{ address.id }}"
+            data-address-type="{{ type }}"
+        >
+            {{ 'global.default.edit'|trans|sw_sanitize }}
+        </a>
+    </li>
+    {% if type is same as('shipping') and defaultAddressId is not same as(address.id) and address.country.shippingAvailable %}
+        {% if address.id is not same as(context.customer.defaultBillingAddressId) %}
+            <li>
+                <a
+                    class="dropdown-item address-manager-modal-set-default-address"
+                    href="#"
+                    data-address-id="{{ address.id }}"
+                    data-address-type="{{ type }}"
+                >
+                    {{ 'account.addressesSetAsDefaultShippingAction'|trans|sw_sanitize }}
+                </a>
+            </li>
+        {% endif %}
+    {% endif %}
+{% endblock %}
