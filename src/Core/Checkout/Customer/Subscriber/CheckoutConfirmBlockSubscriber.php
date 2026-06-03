@@ -1,0 +1,44 @@
+<?php declare(strict_types=1);
+
+namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
+
+use Shopware\Core\Checkout\Customer\CustomerEntity;
+use Shopware\Storefront\Page\Checkout\Confirm\CheckoutConfirmPageLoadedEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangePendingExtension;
+use Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService;
+
+class CheckoutConfirmBlockSubscriber implements EventSubscriberInterface
+{
+    public function __construct(
+        private readonly CompanyNameChangeRequestService $companyNameChangeRequestService,
+    ) {
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            CheckoutConfirmPageLoadedEvent::class => 'onConfirmPageLoaded',
+        ];
+    }
+
+    public function onConfirmPageLoaded(CheckoutConfirmPageLoadedEvent $event): void
+    {
+        $customer = $event->getSalesChannelContext()->getCustomer();
+        if (!$customer instanceof CustomerEntity) {
+            return;
+        }
+
+        $pendingRequest = $this->companyNameChangeRequestService->findPendingChangeRequestForCustomer(
+            $customer->getId(),
+            $event->getContext()
+        );
+
+        if ($pendingRequest !== null) {
+            $event->getPage()->addExtension(
+                'topdataCompanyNameChangePending',
+                new CompanyNameChangePendingExtension($pendingRequest)
+            );
+        }
+    }
+}

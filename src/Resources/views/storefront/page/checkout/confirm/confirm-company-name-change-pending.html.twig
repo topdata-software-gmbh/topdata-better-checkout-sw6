@@ -1,0 +1,26 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/index.html.twig' %}
+
+{% block page_checkout_confirm %}
+    {% set pendingChange = page.getExtension('topdataCompanyNameChangePending') %}
+
+    {% if pendingChange %}
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <div class="me-3">
+                {% sw_icon 'warning' style { size: 'lg' } %}
+            </div>
+            <div>
+                <strong>{{ 'better-checkout.companyChange.blockedTitle'|trans|sw_sanitize }}</strong>
+                <p class="mb-0 mt-1">
+                    {{ 'better-checkout.companyChange.blockedMessage'|trans({
+                        '%oldCompany%': pendingChange.changeRequest.oldCompanyName,
+                        '%newCompany%': pendingChange.changeRequest.newCompanyName
+                    })|sw_sanitize }}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if not pendingChange %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

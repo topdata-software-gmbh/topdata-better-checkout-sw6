@@ -20,6 +20,12 @@
             "title": "Edit billing address",
             "cancel": "Cancel",
             "save": "Save"
+        },
+        "companyChange": {
+            "blockedTitle": "Order not possible at this time",
+            "blockedMessage": "Your request to change the company name from \"%oldCompany%\" to \"%newCompany%\" is currently under review. You cannot place an order until the change is confirmed.",
+            "pendingTitle": "Company name change under review",
+            "pendingMessage": "Your request to change the company name is currently under review. Orders are not possible until the change is confirmed."
         }
     },
     "account": {

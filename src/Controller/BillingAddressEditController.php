@@ -19,6 +19,7 @@ use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService;
 
 #[Route(defaults: ['_routeScope' => ['storefront']])]
 class BillingAddressEditController extends StorefrontController
@@ -28,6 +29,7 @@ class BillingAddressEditController extends StorefrontController
         private readonly AbstractUpsertAddressRoute $upsertAddressRoute,
         private readonly AbstractCountryRoute $countryRoute,
         private readonly AbstractSalutationRoute $salutationRoute,
+        private readonly CompanyNameChangeRequestService $companyNameChangeRequestService,
     ) {
     }
 
@@ -44,19 +46,23 @@ class BillingAddressEditController extends StorefrontController
         CustomerEntity $customer,
     ): Response {
         $address = $this->getCustomerAddress($addressId, $context, $customer);
-
         $page = $this->getPageWithCountries($context);
+
+        $hasPendingRequest = $this->companyNameChangeRequestService->hasPendingChangeRequest(
+            $customer->getId(),
+            $addressId,
+            $context->getContext()
+        );
 
         $response = $this->renderStorefront(
             '@TopdataBetterCheckoutSW6/storefront/component/address/billing-address-edit-modal.html.twig',
             [
                 'address' => $address,
                 'page' => $page,
+                'hasPendingCompanyNameChange' => $hasPendingRequest,
             ],
         );
-
         $response->headers->set('x-robots-tag', 'noindex');
-
         return $response;
     }
 
@@ -73,11 +79,30 @@ class BillingAddressEditController extends StorefrontController
         SalesChannelContext $context,
         CustomerEntity $customer,
     ): Response {
-        $this->getCustomerAddress($addressId, $context, $customer);
+        $address = $this->getCustomerAddress($addressId, $context, $customer);
 
         /** @var RequestDataBag $addressData */
         $addressData = $data->get('address');
         $addressData->set('id', $addressId);
+
+        $newCompanyName = $addressData->get('company', $address->getCompany() ?? '');
+        $oldCompanyName = $address->getCompany() ?? '';
+
+        if ($newCompanyName !== $oldCompanyName && trim($newCompanyName) !== '') {
+            $this->companyNameChangeRequestService->createChangeRequest(
+                $customer->getId(),
+                $addressId,
+                $oldCompanyName,
+                $newCompanyName,
+                $context->getContext()
+            );
+
+            $addressData->remove('company');
+
+            if ($addressData->count() === 1 && $addressData->has('id')) {
+                return $this->redirectToRoute('frontend.checkout.confirm.page');
+            }
+        }
 
         try {
             $this->upsertAddressRoute->upsert(
@@ -90,9 +115,7 @@ class BillingAddressEditController extends StorefrontController
             return $this->redirectToRoute('frontend.checkout.confirm.page');
         } catch (ConstraintViolationException $formViolations) {
             $address = $this->getCustomerAddress($addressId, $context, $customer);
-
             $page = $this->getPageWithCountries($context);
-
             $response = $this->renderStorefront(
                 '@TopdataBetterCheckoutSW6/storefront/component/address/billing-address-edit-modal.html.twig',
                 [
@@ -102,10 +125,8 @@ class BillingAddressEditController extends StorefrontController
                     'postedData' => $addressData,
                 ],
             );
-
             $response->setStatusCode(422);
             $response->headers->set('x-robots-tag', 'noindex');
-
             return $response;
         }
     }

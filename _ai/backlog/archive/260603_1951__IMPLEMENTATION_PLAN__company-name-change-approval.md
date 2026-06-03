@@ -3,7 +3,8 @@ filename: "_ai/backlog/active/260603_1951__IMPLEMENTATION_PLAN__company-name-cha
 title: "Company Name Change Approval Workflow"
 createdAt: 2026-06-03 19:51
 updatedAt: 2026-06-03 19:51
-status: draft
+status: completed
+completedAt: 2026-06-03 19:51
 priority: high
 tags: [checkout, billing-address, admin, email, approval-workflow, sw6.7]
 estimatedComplexity: complex

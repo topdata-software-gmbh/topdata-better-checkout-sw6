@@ -1,0 +1,46 @@
+<sw-page class="topdata-company-name-change-list">
+    <template #smart-bar-header>
+        <h2>{{ $tc('topdata-better-checkout-company-name-change.list.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <sw-button variant="primary" @click="getList">
+            {{ $tc('global.default.refresh') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-entity-listing
+            v-if="items"
+            :items="items"
+            :repository="repository"
+            :columns="columns"
+            :isLoading="isLoading"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            detail-route="topdata.better.checkout.company.name.change.detail"
+            identifier="id"
+            @page-change="onPageChange"
+        >
+            <template #column-status="{ item }">
+                <sw-badge :variant="getStatusVariant(item.status)">
+                    {{ getStatusLabel(item.status) }}
+                </sw-badge>
+            </template>
+
+            <template #column-createdAt="{ item }">
+                {{ date(item.createdAt) }}
+            </template>
+        </sw-entity-listing>
+    </template>
+
+    <template #sidebar>
+        <sw-sidebar>
+            <sw-sidebar-filter-panel
+                entity="topdata_better_checkout_company_name_change_request"
+                :filters="listFilters"
+                @filters-changed="onFiltersChanged"
+            />
+        </sw-sidebar>
+    </template>
+</sw-page>

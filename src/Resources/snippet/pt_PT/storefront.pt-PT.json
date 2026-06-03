@@ -20,6 +20,12 @@
             "title": "Editar endereço de faturação",
             "cancel": "Cancelar",
             "save": "Guardar"
+        },
+        "companyChange": {
+            "blockedTitle": "Encomenda não possível neste momento",
+            "blockedMessage": "O seu pedido de alteração do nome da empresa de \"%oldCompany%\" para \"%newCompany%\" está em revisão. Não pode fazer encomendas até a alteração ser confirmada.",
+            "pendingTitle": "Alteração do nome da empresa em revisão",
+            "pendingMessage": "O seu pedido de alteração do nome da empresa está em revisão. Encomendas não são possíveis até a alteração ser confirmada."
         }
     },
     "account": {

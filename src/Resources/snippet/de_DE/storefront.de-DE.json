@@ -20,6 +20,12 @@
             "title": "Rechnungsadresse bearbeiten",
             "cancel": "Abbrechen",
             "save": "Speichern"
+        },
+        "companyChange": {
+            "blockedTitle": "Bestellung derzeit nicht möglich",
+            "blockedMessage": "Ihr Antrag auf Änderung des Firmennamens von \"%oldCompany%\" zu \"%newCompany%\" wird gerade geprüft. Bis zur Bestätigung können Sie keine Bestellung aufgeben.",
+            "pendingTitle": "Firmenname-Änderung wird geprüft",
+            "pendingMessage": "Ihr Antrag auf Änderung des Firmennamens wird aktuell geprüft. Bis zur Bestätigung sind Bestellungen nicht möglich."
         }
     },
     "account": {

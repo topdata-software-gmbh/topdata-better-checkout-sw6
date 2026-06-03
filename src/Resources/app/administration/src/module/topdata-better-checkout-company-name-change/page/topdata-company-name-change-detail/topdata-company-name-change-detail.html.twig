@@ -1,0 +1,90 @@
+<sw-page class="topdata-company-name-change-detail">
+    <template #smart-bar-header>
+        <h2>{{ $tc('topdata-better-checkout-company-name-change.detail.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <sw-button
+            v-if="isPending"
+            variant="danger"
+            :isLoading="isSaving"
+            @click="onReject"
+        >
+            {{ $tc('topdata-better-checkout-company-name-change.detail.reject') }}
+        </sw-button>
+
+        <sw-button
+            v-if="isPending"
+            variant="primary"
+            :isLoading="isSaving"
+            @click="onApprove"
+        >
+            {{ $tc('topdata-better-checkout-company-name-change.detail.approve') }}
+        </sw-button>
+    </template>
+
+    <template #content>
+        <sw-card-group v-if="item">
+            <sw-card :title="$tc('topdata-better-checkout-company-name-change.detail.card.requestInfo')">
+                <sw-description-list>
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.oldCompanyName') }}</dt>
+                    <dd>{{ item.oldCompanyName }}</dd>
+
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.newCompanyName') }}</dt>
+                    <dd class="new-company-name">{{ item.newCompanyName }}</dd>
+
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.status') }}</dt>
+                    <dd>
+                        <sw-badge :variant="getStatusVariant(item.status)">
+                            {{ $tc(`topdata-better-checkout-company-name-change.status.${item.status}`) }}
+                        </sw-badge>
+                    </dd>
+
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.createdAt') }}</dt>
+                    <dd>{{ date(item.createdAt) }}</dd>
+
+                    <template v-if="item.reviewedAt">
+                        <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.reviewedAt') }}</dt>
+                        <dd>{{ date(item.reviewedAt) }}</dd>
+                    </template>
+
+                    <template v-if="item.reviewComment">
+                        <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.reviewComment') }}</dt>
+                        <dd>{{ item.reviewComment }}</dd>
+                    </template>
+                </sw-description-list>
+            </sw-card>
+
+            <sw-card
+                v-if="item.customer"
+                :title="$tc('topdata-better-checkout-company-name-change.detail.card.customerInfo')"
+            >
+                <sw-description-list>
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.customerName') }}</dt>
+                    <dd>{{ item.customer.firstName }} {{ item.customer.lastName }}</dd>
+
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.customerEmail') }}</dt>
+                    <dd>{{ item.customer.email }}</dd>
+                </sw-description-list>
+            </sw-card>
+
+            <sw-card
+                v-if="isPending"
+                :title="$tc('topdata-better-checkout-company-name-change.detail.card.review')"
+            >
+                <sw-textarea-field
+                    v-model:value="reviewComment"
+                    :label="$tc('topdata-better-checkout-company-name-change.detail.label.reviewComment')"
+                    :placeholder="$tc('topdata-better-checkout-company-name-change.detail.placeholder.reviewComment')"
+                />
+            </sw-card>
+        </sw-card-group>
+
+        <sw-loader v-else-if="isLoading" />
+
+        <sw-empty-state
+            v-else
+            :title="$tc('topdata-better-checkout-company-name-change.detail.notFound')"
+        />
+    </template>
+</sw-page>

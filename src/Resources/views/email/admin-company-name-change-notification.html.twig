@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Neuer Antrag auf Firmennameänderung</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <h2>Neuer Antrag auf Firmennameänderung</h2>
+    <p>New Company Name Change Request / Neuer Antrag auf Firmennameänderung</p>
+
+    <table style="border-collapse: collapse; width: 100%; max-width: 500px;">
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">Customer ID</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ changeRequest.customerId }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">Address ID</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ changeRequest.addressId }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">Alter Firmenname / Old Company</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ changeRequest.oldCompanyName }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">Neuer Firmenname / New Company</td>
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; color: #c0392b;">{{ changeRequest.newCompanyName }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-weight: bold;">Datum / Date</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">{{ changeRequest.createdAt|date('d.m.Y H:i') }}</td>
+        </tr>
+    </table>
+
+    <p style="margin-top: 20px;">
+        Bitte prüfen Sie diesen Antrag im Admin-Bereich.<br>
+        Please review this request in the admin area.
+    </p>
+</body>
+</html>

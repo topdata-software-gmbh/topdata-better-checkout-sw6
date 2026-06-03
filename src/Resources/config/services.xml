@@ -5,12 +5,27 @@
 
     <services>
 
+        <!-- Company Name Change Request Email Service -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestEmailService">
+            <argument type="service" id="Symfony\Component\Mailer\MailerInterface"/>
+            <argument type="service" id="twig"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <!-- Company Name Change Request Service -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService">
+            <argument type="service" id="topdata_better_checkout_company_name_change_request.repository"/>
+            <argument type="service" id="customer_address.repository"/>
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestEmailService"/>
+        </service>
+
         <!-- CONTROLLERS -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Controller\BillingAddressEditController" public="true">
             <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\ListAddressRoute"/>
             <argument type="service" id="Shopware\Core\Checkout\Customer\SalesChannel\UpsertAddressRoute"/>
             <argument type="service" id="Shopware\Core\System\Country\SalesChannel\CountryRoute"/>
             <argument type="service" id="Shopware\Core\System\Salutation\SalesChannel\SalutationRoute"/>
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
@@ -67,6 +82,23 @@
 
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\CustomerAddressIsolationSubscriber">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Admin API Controller -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Controller\AdminApi\CompanyNameChangeRequestController" public="true">
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
+        </service>
+
+        <!-- Checkout Block Subscriber -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\CheckoutConfirmBlockSubscriber">
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Account Address Page Subscriber -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AccountAddressPageSubscriber">
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
             <tag name="kernel.event_subscriber"/>
         </service>
     </services>

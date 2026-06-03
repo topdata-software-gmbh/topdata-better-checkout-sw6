@@ -20,6 +20,12 @@
             "title": "Modifier l'adresse de facturation",
             "cancel": "Annuler",
             "save": "Enregistrer"
+        },
+        "companyChange": {
+            "blockedTitle": "Commande impossible pour le moment",
+            "blockedMessage": "Votre demande de changement de nom d'entreprise de \"%oldCompany%\" à \"%newCompany%\" est en cours de vérification. Vous ne pouvez pas passer de commande tant que le changement n'est pas confirmé.",
+            "pendingTitle": "Changement de nom d'entreprise en cours de vérification",
+            "pendingMessage": "Votre demande de changement de nom d'entreprise est en cours de vérification. Les commandes ne sont pas possibles tant que le changement n'est pas confirmé."
         }
     },
     "account": {
