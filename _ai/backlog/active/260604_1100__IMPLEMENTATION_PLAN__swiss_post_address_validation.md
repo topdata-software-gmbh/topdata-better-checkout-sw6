@@ -2,7 +2,7 @@
 filename: "_ai/backlog/active/260604_1100__IMPLEMENTATION_PLAN__swiss_post_address_validation.md"
 title: "Implementation Plan: Swiss Post Address Validation"
 createdAt: 2026-06-04 11:00
-updatedAt: 2026-06-04 11:00
+updatedAt: 2026-06-04 11:45
 status: draft
 priority: high
 tags: [swiss-post, address-validation, storefront, admin]
@@ -902,7 +902,7 @@ export default class TopdataAddressValidator extends Plugin {
 ```
 
 ### [NEW FILE] `src/Resources/app/storefront/src/plugin/swiss-post-autocomplete.plugin.js`
-The ZIP/city autocomplete plugin. Debounces zip input and renders a dropdown with matching results.
+The ZIP/city autocomplete plugin. Debounces zip input and renders a dropdown with matching results. Supports keyboard navigation: ArrowUp/Down to highlight, Enter to select, Escape to close.
 
 ```javascript
 import Plugin from 'src/plugin-system/plugin.class';
@@ -953,11 +953,63 @@ export default class TopdataZipAutocomplete extends Plugin {
             debouncedAutocomplete(e.target.value);
         });
 
+        this.zipInput.addEventListener('keydown', this._onKeydown.bind(this));
+
         document.addEventListener('click', (e) => {
             if (!this.zipInput.contains(e.target)) {
                 this._closeDropdown();
             }
         });
+    }
+
+    _onKeydown(e) {
+        const dropdown = this.el.querySelector('.swiss-post-autocomplete-dropdown');
+        if (!dropdown) return;
+
+        const items = dropdown.querySelectorAll('.list-group-item');
+        if (items.length === 0) return;
+
+        const currentIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this._highlightItem(items, Math.min(currentIndex + 1, items.length - 1));
+                this._scrollToItem(items[Math.min(currentIndex + 1, items.length - 1)]);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                this._highlightItem(items, Math.max(currentIndex - 1, 0));
+                this._scrollToItem(items[Math.max(currentIndex - 1, 0)]);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (currentIndex >= 0) {
+                    items[currentIndex].click();
+                }
+                break;
+            case 'Escape':
+                e.preventDefault();
+                this._closeDropdown();
+                break;
+        }
+    }
+
+    _highlightItem(items, index) {
+        items.forEach(item => item.classList.remove('active'));
+        items[index].classList.add('active');
+    }
+
+    _scrollToItem(item) {
+        const dropdown = item.closest('.swiss-post-autocomplete-dropdown');
+        if (!dropdown) return;
+        const itemRect = item.getBoundingClientRect();
+        const containerRect = dropdown.getBoundingClientRect();
+        if (itemRect.bottom > containerRect.bottom) {
+            item.scrollIntoView({ block: 'nearest' });
+        } else if (itemRect.top < containerRect.top) {
+            item.scrollIntoView({ block: 'nearest' });
+        }
     }
 
     _isCountrySupported() {
@@ -1000,17 +1052,26 @@ export default class TopdataZipAutocomplete extends Plugin {
             btn.className = 'list-group-item list-group-item-action py-2 text-start';
             btn.innerHTML = `<strong>${item.zip}</strong> ${item.city}`;
             btn.addEventListener('click', () => {
-                this.zipInput.value = item.zip;
-                this.cityInput.value = item.city;
-                this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
-                this.cityInput.dispatchEvent(new Event('input', { bubbles: true }));
-                this._closeDropdown();
+                this._selectItem(item, btn);
+            });
+            btn.addEventListener('mouseenter', () => {
+                const allItems = dropdown.querySelectorAll('.list-group-item');
+                allItems.forEach(i => i.classList.remove('active'));
+                btn.classList.add('active');
             });
             dropdown.appendChild(btn);
         });
 
         this.zipInput.parentNode.style.position = 'relative';
         this.zipInput.parentNode.appendChild(dropdown);
+    }
+
+    _selectItem(item, btn) {
+        this.zipInput.value = item.zip;
+        this.cityInput.value = item.city;
+        this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
+        this.cityInput.dispatchEvent(new Event('input', { bubbles: true }));
+        this._closeDropdown();
     }
 
     _closeDropdown() {
