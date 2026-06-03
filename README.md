@@ -58,6 +58,12 @@ In the Shopware Administration under the plugin settings:
 3. Review and adjust the plugin configuration under the plugin settings.
 4. Clear cache / rebuild storefront if necessary.
 
+## Swiss Post Address Validation
+
+When the optional Swiss Post address validation feature is enabled, addresses are validated in real-time against the [Swiss Post Digital Commerce API (DCAPI)](https://developer.post.ch/en/digital-commerce-api) during checkout, registration, and account address editing. The feature uses the [OAuth2 Client Credentials flow](https://developer.post.ch/en/digital-commerce-api#3-4-client-credential-flow) for server-to-server authentication with the `DCAPI_ADDRESS_VALIDATE` and `DCAPI_ADDRESS_AUTOCOMPLETE` scopes. ZIP/city autocomplete is also available via the [`/address/v1/zips`](https://developer.post.ch/en/digital-commerce-api#5-2-zip-auto-completion) endpoint.
+
+To use this feature, you need a Swiss Post developer account and API credentials (Client ID + Client Secret) from the [Swiss Post Developer Portal](https://developer.post.ch).
+
 ## Requirements
 
 - Shopware 6.7.x
