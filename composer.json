@@ -1,7 +1,7 @@
 {
     "name":        "topdata/topdata-better-checkout-sw6",
     "description": "Topdata Better Checkout SW6",
-    "version":     "v1.1.0",
+    "version":     "v1.2.0",
     "type":        "shopware-platform-plugin",
     "license":     "MIT",
     "authors":     [
