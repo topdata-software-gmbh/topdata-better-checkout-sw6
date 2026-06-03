@@ -91,7 +91,7 @@
         <title>Address Cloning</title>
         <title lang="de-DE">Adressen Klonen</title>
 
-        <component name="switch" type="bool">
+        <component name="switch">
             <name>cloneBillingAsShipping</name>
             <label>Clone billing as shipping address</label>
             <label lang="de-DE">Rechnungsadresse als Lieferadresse klonen</label>
