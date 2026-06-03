@@ -9,7 +9,7 @@ Full feature spec at `_ai/SPEC.md` — read first for architecture, feature list
 - **Pure PHP 8.1+** (`declare(strict_types=1)`) + Twig + JSON snippets. No JS, no CSS, no npm/webpack, no build step.
 - **No plugin lifecycle overrides** — `TopdataBetterCheckoutSW6.php` is empty. All wiring is in `src/Resources/config/services.xml`.
 - **DI decorator pattern** (not inheritance) — 4 decorators registered with `<service decorates="...">` in services.xml:
-  - `RegisterRouteDecorator` → account type enforcement, guest email blocking, address splitting
+  - `RegisterRouteDecorator` → account type enforcement, guest email blocking, address splitting (config-gated cloning)
   - `PaymentMethodRouteDecorator` → guest payment filtering
   - `SetDefaultBillingAddressRouteDecorator` → billing address lock (403)
   - `ContextSwitchRouteDecorator` → billing address context protection
@@ -34,12 +34,15 @@ Full feature spec at `_ai/SPEC.md` — read first for architecture, feature list
 | `blockedBusinessGuestPayments` | — | entity-multi-id-select |
 | `companyValidationBilling` | `core` | `core` / `required` / `optional` |
 | `companyValidationShipping` | `optional` | `core` / `required` / `optional` |
+| `cloneBillingAsShipping` | `true` | `true` / `false` |
 
 Config keys always prefixed with `TopdataBetterCheckoutSW6.config.` in code.
 
 ## Snippets
 
 5 languages: en-GB, de-DE, fr-FR, fr-CH, pt-PT. Implemented via `SnippetFileInterface` in `src/Resources/snippet/`. Keys: `better-checkout.*`, `checkout.confirmChangeBillingAddress`.
+
+- **RegisterRouteDecorator execution order**: `assertGuestEmailNotRegistered()` → `enforceAccountType()` → `cloneBillingAsShippingIfEnabled()` → delegate to decorated route. The order matters because `enforceAccountType()` may strip company/vatId before cloning.
 
 ## Code conventions
 

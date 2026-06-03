@@ -36,8 +36,15 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 - Respects `isCustomerBoundToSalesChannel` config
 
 ### 2.5 Isolated Billing & Shipping Addresses (Address Splitting)
-- When no separate shipping address is provided, billing address is **cloned** into a distinct `shippingAddress` entry
-- Creates two separate database rows instead of sharing one address entity
+
+- **When no separate shipping address is provided** (customer leaves the "shipping = billing" checkbox checked), the billing address is **cloned** into a distinct `shippingAddress` entry in the `RequestDataBag`
+- Creates two separate `customer_address` database rows instead of sharing one address entity
+- Cloning is gated by the `cloneBillingAsShipping` configuration key (default: `true`)
+- When disabled, Shopware's default behavior applies (single shared address for billing + shipping)
+- The cloned address is a **deep copy** — no shared references between billing and shipping `RequestDataBag` instances
+- The `id` field is explicitly removed from the clone to prevent ID collisions
+- Operates **before** `RegisterRoute::register()` processes the data, so Shopware's core creates two independent `customer_address` entities with unique UUIDs
+- **Order of operations**: `enforceAccountType()` runs first (may strip `company`/`vatId`), then `cloneBillingAsShippingIfEnabled()` runs on the already-modified data. This ensures private accounts don't leak company info into the cloned shipping address.
 
 ### 2.6 Billing Address Lock
 - Blocks `PATCH /store-api/account/customer/{id}/default-billing-address/{addressId}` (403 via `SetDefaultBillingAddressRouteDecorator`)
@@ -113,6 +120,7 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 |---|---|
 | Account Type Settings | `guestAccountType`, `registrationAccountType` |
 | Payment Restrictions (Guest) | `blockedPrivateGuestPayments`, `blockedBusinessGuestPayments` |
+| Address Cloning | `cloneBillingAsShipping` |
 | Company Name Validation | `companyValidationBilling`, `companyValidationShipping` |
 
 ---

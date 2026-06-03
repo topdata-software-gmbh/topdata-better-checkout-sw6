@@ -33,5 +33,9 @@
     },
     "checkout": {
         "confirmChangeBillingAddress": "Modifier l'adresse de facturation"
+    },
+    "TopdataBetterCheckoutSW6": {
+        "cloneBillingAsShipping": "Cloner l'adresse de facturation en adresse de livraison",
+        "cloneBillingAsShippingHelp": "Lorsqu'activé, crée deux entités d'adresse séparées même si les adresses de facturation et de livraison sont identiques. Requis pour l'isolation de l'adresse de facturation."
     }
 }

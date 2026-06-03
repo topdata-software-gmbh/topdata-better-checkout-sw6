@@ -33,5 +33,9 @@
     },
     "checkout": {
         "confirmChangeBillingAddress": "Editar endereço de faturação"
+    },
+    "TopdataBetterCheckoutSW6": {
+        "cloneBillingAsShipping": "Clonar endereço de faturação como endereço de entrega",
+        "cloneBillingAsShippingHelp": "Quando ativado, cria duas entidades de endereço separadas mesmo quando a faturação e a entrega são idênticas. Necessário para o isolamento do endereço de faturação."
     }
 }

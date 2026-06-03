@@ -20,6 +20,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegisterRouteDecorator extends AbstractRegisterRoute
 {
+    private const CONFIG_PREFIX = 'TopdataBetterCheckoutSW6.config.';
+
     public function __construct(
         private readonly AbstractRegisterRoute $decorated,
         private readonly EntityRepository $customerRepository,
@@ -47,22 +49,35 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
         }
 
         $this->enforceAccountType($data, $context, $isGuest);
-
-        $this->splitAddressesAndFlagBilling($data);
+        $this->cloneBillingAsShippingIfEnabled($data, $context);
 
         return $this->decorated->register($data, $context, $validateStorefrontUrl, $additionalValidationDefinitions);
     }
 
-    private function splitAddressesAndFlagBilling(RequestDataBag $data): void
+    private function cloneBillingAsShippingIfEnabled(RequestDataBag $data, SalesChannelContext $context): void
     {
-        $billingAddress = $data->get('billingAddress');
+        $isEnabled = $this->systemConfigService->getBool(
+            self::CONFIG_PREFIX . 'cloneBillingAsShipping',
+            $context->getSalesChannelId()
+        );
 
-        if ($billingAddress instanceof RequestDataBag) {
-            if (!$data->has('shippingAddress')) {
-                $shippingAddress = clone $billingAddress;
-                $data->set('shippingAddress', $shippingAddress);
-            }
+        if (!$isEnabled) {
+            return;
         }
+
+        $billingAddress = $data->get('billingAddress');
+        if (!$billingAddress instanceof RequestDataBag) {
+            return;
+        }
+
+        if ($data->has('shippingAddress')) {
+            return;
+        }
+
+        $shippingData = $billingAddress->all();
+        unset($shippingData['id']);
+
+        $data->set('shippingAddress', new RequestDataBag($shippingData));
     }
 
     private function enforceAccountType(RequestDataBag $data, SalesChannelContext $context, bool $isGuest): void
@@ -71,7 +86,7 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
         $defaultSetting = $isGuest ? 'user_choice' : 'always_business';
 
         $setting = $this->systemConfigService->getString(
-            'TopdataBetterCheckoutSW6.config.' . $configKey,
+            self::CONFIG_PREFIX . $configKey,
             $context->getSalesChannelId()
         );
 

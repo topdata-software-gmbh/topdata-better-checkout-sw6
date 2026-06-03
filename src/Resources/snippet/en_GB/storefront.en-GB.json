@@ -33,5 +33,9 @@
     },
     "checkout": {
         "confirmChangeBillingAddress": "Edit billing address"
+    },
+    "TopdataBetterCheckoutSW6": {
+        "cloneBillingAsShipping": "Clone billing as shipping address",
+        "cloneBillingAsShippingHelp": "When enabled, creates two separate address entities even when billing and shipping are identical. Required for billing address isolation."
     }
 }
