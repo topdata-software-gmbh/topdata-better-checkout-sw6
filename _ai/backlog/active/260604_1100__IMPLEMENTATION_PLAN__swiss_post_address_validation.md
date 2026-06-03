@@ -177,14 +177,13 @@ Create the core client handling authentication, address validation, and ZIP sear
 
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost;
 
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
-use Topdata\TopdataBetterCheckoutSW6\Service\SwissPost\SwissPostAddressValidationRequest;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Topdata\TopdataBetterCheckoutSW6\Service\SwissPost\Dto\SwissPostAddressValidationRequestDto;
 
 class SwissPostApiService
 {
@@ -194,13 +193,14 @@ class SwissPostApiService
     private const CACHE_KEY_PREFIX_ZIP = 'topdata_swiss_post_zip_';
 
     public function __construct(
-        private readonly ClientInterface $httpClient,
+        private readonly HttpClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory,
         private readonly CacheItemPoolInterface $cache,
         private readonly SystemConfigService $systemConfigService,
         private readonly LoggerInterface $logger
     ) {
+        $this->httpClient = $httpClient->withOptions(['timeout' => 5]);
     }
 
     public function isEnabled(?string $salesChannelId = null): bool
@@ -279,13 +279,14 @@ class SwissPostApiService
         try {
             $split = $this->splitStreet($address['street'] ?? '');
 
-            $dto = new SwissPostAddressValidationRequest(
+            $dto = new SwissPostAddressValidationRequestDto(
                 firstName: $address['firstName'] ?? '',
                 lastName: $address['lastName'] ?? '',
                 street: $split['streetName'],
                 houseNumber: $split['houseNumber'],
                 zip: $address['zipcode'] ?? '',
                 city: $address['city'] ?? '',
+                country: $address['countryCode'] ?? 'CH',
             );
 
             $payload = json_encode($dto);
@@ -551,16 +552,16 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
 
 ---
 
-### [NEW FILE] `src/Service/SwissPost/SwissPostAddressValidationRequest.php`
+### [NEW FILE] `src/Service/SwissPost/Dto/SwissPostAddressValidationRequestDto.php`
 
 Add a typed DTO for the DCAPI address validation request payload. Implements `JsonSerializable` for direct use with `json_encode()`.
 
 ```php
 <?php declare(strict_types=1);
 
-namespace Topdata\TopdataBetterCheckoutSW6\Service\SwissPost;
+namespace Topdata\TopdataBetterCheckoutSW6\Service\SwissPost\Dto;
 
-class SwissPostAddressValidationRequest implements \JsonSerializable
+class SwissPostAddressValidationRequestDto implements \JsonSerializable
 {
     public function __construct(
         private readonly string $firstName,
@@ -569,6 +570,7 @@ class SwissPostAddressValidationRequest implements \JsonSerializable
         private readonly string $houseNumber,
         private readonly string $zip,
         private readonly string $city,
+        private readonly string $country,
     ) {
     }
 
@@ -589,6 +591,7 @@ class SwissPostAddressValidationRequest implements \JsonSerializable
                     'city' => $this->city,
                 ],
             ],
+            'country' => $this->country,
             'fullValidation' => true,
         ];
     }
@@ -804,6 +807,7 @@ import Debouncer from 'src/helper/debouncer.helper';
 export default class TopdataZipAutocomplete extends Plugin {
     static options = {
         autocompleteUrl: '/bettercheckoutsw6/swiss-post/autocomplete',
+        countrySelectSelector: '.country-select',
         zipInputSelector: 'input[name$="[zipcode]"], input[name="zipcode"]',
         cityInputSelector: 'input[name$="[city]"], input[name="city"]'
     };
@@ -815,6 +819,7 @@ export default class TopdataZipAutocomplete extends Plugin {
     }
 
     _initElements() {
+        this.countrySelect = this.el.querySelector(this.options.countrySelectSelector);
         this.zipInput = this.el.querySelector(this.options.zipInputSelector);
         this.cityInput = this.el.querySelector(this.options.cityInputSelector);
     }
@@ -834,8 +839,14 @@ export default class TopdataZipAutocomplete extends Plugin {
         });
     }
 
+    _isCountrySupported() {
+        if (!this.countrySelect) return false;
+        const selectedOption = this.countrySelect.options[this.countrySelect.selectedIndex];
+        return selectedOption && ['CH', 'LI'].includes(selectedOption.getAttribute('data-country-iso'));
+    }
+
     _onAutocomplete(query) {
-        if (query.length < 2) {
+        if (query.length < 2 || !this._isCountrySupported()) {
             this._closeDropdown();
             return;
         }
@@ -932,15 +943,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route(defaults: ['_routeScope' => ['api']])]
 class SwissPostAdminController extends AbstractController
 {
     public function __construct(
-        private readonly ClientInterface $httpClient,
+        private readonly HttpClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly StreamFactoryInterface $streamFactory
     ) {
@@ -1004,9 +1015,9 @@ Register subscriber listeners and the API controller services.
 ```xml
         <!-- ... Existing Services ... -->
 
-        <!-- Swiss Post API Client -->
+        <!-- Swiss Post API Client — 5 s timeout for upstream API calls -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService" autowire="true">
-            <argument type="service" id="psr18.client"/>
+            <argument type="service" id="http_client"/>
             <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
             <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
             <argument type="service" id="cache.object"/>
@@ -1022,7 +1033,7 @@ Register subscriber listeners and the API controller services.
         </service>
 
         <service id="Topdata\TopdataBetterCheckoutSW6\Controller\AdminApi\SwissPostAdminController" public="true" autowire="true">
-            <argument type="service" id="psr18.client"/>
+            <argument type="service" id="http_client"/>
             <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
             <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
             <call method="setContainer">
@@ -1074,7 +1085,7 @@ We successfully implemented the Swiss Post Address Validation feature for the `T
 - `src/Controller/SwissPostStorefrontController.php` (Storefront AJAX endpoint router)
 - `src/Controller/AdminApi/SwissPostAdminController.php` (Admin testing API)
 - `src/Core/Checkout/Customer/Subscriber/AddressCertificationSubscriber.php` (Save event certifier hook)
-- `src/Service/SwissPost/SwissPostAddressValidationRequest.php` (Typed DTO with JsonSerializable)
+- `src/Service/SwissPost/Dto/SwissPostAddressValidationRequestDto.php` (Typed DTO with JsonSerializable)
 - `src/Resources/views/storefront/component/address/swiss-post-widget.html.twig` (UI status container)
 - `src/Resources/app/storefront/src/plugin/swiss-post-validator.plugin.js` (Debounced validation JS plugin)
 - `src/Resources/app/storefront/src/plugin/swiss-post-autocomplete.plugin.js` (ZIP/city autocomplete JS plugin)
@@ -1092,7 +1103,7 @@ We successfully implemented the Swiss Post Address Validation feature for the `T
 - Leveraged PSR-18 standard interfaces, eliminating hard-coded dependencies.
 - Added client-side autocomplete matching.
 - Built-in integration targeting the `customFields` layer on address tables.
-- Typed DTO (`SwissPostAddressValidationRequest`) replaces inline array payloads.
+- Typed DTO (`SwissPostAddressValidationRequestDto`) replaces inline array payloads.
 - `splitStreet()` extracts house numbers for improved API match rates.
 
 ## 4. Technical Decisions
