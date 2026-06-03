@@ -230,6 +230,48 @@ class SwissPostApiService
             return null;
         }
 
+        $data = $this->requestAccessToken($clientId, $clientSecret);
+        if ($data === null) {
+            return null;
+        }
+
+        $token = $data['access_token'] ?? null;
+        $expiresIn = (int)($data['expires_in'] ?? 3500);
+
+        if ($token) {
+            $cacheItem->set($token);
+            $cacheItem->expiresAfter($expiresIn - 60);
+            $this->cache->save($cacheItem);
+            return $token;
+        }
+
+        return null;
+    }
+
+    /**
+     * Tests whether the given credentials are valid against the Swiss Post API.
+     * Used by the admin test endpoint — does not cache the token.
+     */
+    public function testCredentials(string $clientId, string $clientSecret): array
+    {
+        if (empty($clientId) || empty($clientSecret)) {
+            return ['success' => false, 'message' => 'Credentials must not be empty.'];
+        }
+
+        $data = $this->requestAccessToken($clientId, $clientSecret);
+
+        if ($data !== null && !empty($data['access_token'])) {
+            return ['success' => true];
+        }
+
+        return ['success' => false, 'message' => 'Authentication with Swiss Post API failed. Please check your credentials.'];
+    }
+
+    /**
+     * Performs the OAuth2 token request. Shared by getAccessToken() and testCredentials().
+     */
+    private function requestAccessToken(string $clientId, string $clientSecret): ?array
+    {
         try {
             $body = http_build_query([
                 'grant_type' => 'client_credentials',
@@ -245,25 +287,15 @@ class SwissPostApiService
             $response = $this->httpClient->sendRequest($request);
 
             if ($response->getStatusCode() !== 200) {
-                $this->logger->error('Swiss Post Auth Failure', ['status' => $response->getStatusCode(), 'body' => $response->getBody()->getContents()]);
+                $this->logger->error('Swiss Post Auth Failure', ['status' => $response->getStatusCode()]);
                 return null;
             }
 
-            $data = json_decode($response->getBody()->getContents(), true);
-            $token = $data['access_token'] ?? null;
-            $expiresIn = (int)($data['expires_in'] ?? 3500);
-
-            if ($token) {
-                $cacheItem->set($token);
-                $cacheItem->expiresAfter($expiresIn - 60); // Safety buffer
-                $this->cache->save($cacheItem);
-                return $token;
-            }
+            return json_decode($response->getBody()->getContents(), true);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post Auth Exception', ['exception' => $e->getMessage()]);
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -290,13 +322,27 @@ class SwissPostApiService
             );
 
             $payload = json_encode($dto);
+            $uri = self::BASE_API_URL . '/addresses/validation';
 
-            $request = $this->requestFactory->createRequest('POST', self::BASE_API_URL . '/addresses/validation')
+            $request = $this->requestFactory->createRequest('POST', $uri)
                 ->withHeader('Authorization', 'Bearer ' . $token)
                 ->withHeader('Content-Type', 'application/json')
                 ->withBody($this->streamFactory->createStream($payload));
 
             $response = $this->httpClient->sendRequest($request);
+
+            // Token auto-refresh on 401 — retry once
+            if ($response->getStatusCode() === 401) {
+                $this->invalidateTokenCache($salesChannelId);
+                $token = $this->getAccessToken($salesChannelId);
+                if ($token) {
+                    $request = $request->withHeader('Authorization', 'Bearer ' . $token);
+                    $response = $this->httpClient->sendRequest($request);
+                } else {
+                    return ['success' => false, 'error' => 'Could not re-authenticate with Swiss Post API'];
+                }
+            }
+
             $contents = $response->getBody()->getContents();
 
             if ($response->getStatusCode() === 200) {
@@ -337,6 +383,16 @@ class SwissPostApiService
     }
 
     /**
+     * Invalidates the cached access token for a given sales channel.
+     * Called on 401 to force a fresh token on the next request.
+     */
+    private function invalidateTokenCache(?string $salesChannelId = null): void
+    {
+        $cacheKey = self::CACHE_KEY_TOKEN . '_' . ($salesChannelId ?? 'global');
+        $this->cache->deleteItem($cacheKey);
+    }
+
+    /**
      * Search ZIP codes and autocomplete matching city names.
      */
     public function autocompleteZip(string $query, ?string $salesChannelId = null): array
@@ -361,17 +417,28 @@ class SwissPostApiService
 
             $response = $this->httpClient->sendRequest($request);
 
+            // Token auto-refresh on 401 — retry once
+            if ($response->getStatusCode() === 401) {
+                $this->invalidateTokenCache($salesChannelId);
+                $token = $this->getAccessToken($salesChannelId);
+                if ($token) {
+                    $request = $request->withHeader('Authorization', 'Bearer ' . $token);
+                    $response = $this->httpClient->sendRequest($request);
+                } else {
+                    return [];
+                }
+            }
+
             if ($response->getStatusCode() === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
-                
-                // Map to structured simplified format
+
                 $results = array_map(static fn($item) => [
                     'zip' => $item['zip'] ?? '',
                     'city' => $item['city18'] ?? $item['city27'] ?? ''
                 ], $data);
 
                 $cacheItem->set($results);
-                $cacheItem->expiresAfter(86400); // 24 hours
+                $cacheItem->expiresAfter(86400);
                 $this->cache->save($cacheItem);
 
                 return $results;
@@ -399,6 +466,7 @@ Expose endpoints for real-time validation checks and autocomplete requests.
 
 namespace Topdata\TopdataBetterCheckoutSW6\Controller;
 
+use Doctrine\DBAL\Connection;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -410,7 +478,8 @@ use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService;
 class SwissPostStorefrontController extends StorefrontController
 {
     public function __construct(
-        private readonly SwissPostApiService $apiService
+        private readonly SwissPostApiService $apiService,
+        private readonly Connection $connection
     ) {
     }
 
@@ -451,6 +520,21 @@ class SwissPostStorefrontController extends StorefrontController
 
         $results = $this->apiService->autocompleteZip($query, $context->getSalesChannelId());
         return new JsonResponse($results);
+    }
+
+    #[Route(
+        path: '/bettercheckoutsw6/swiss-post/country-ids',
+        name: 'frontend.bettercheckoutsw6.swiss-post.country-ids',
+        options: ['seo' => false],
+        methods: ['GET']
+    )]
+    public function getCountryIds(): JsonResponse
+    {
+        $ids = $this->connection->fetchFirstColumn(
+            "SELECT LOWER(HEX(id)) FROM country WHERE iso = 'CH' OR iso = 'LI'"
+        );
+
+        return new JsonResponse($ids);
     }
 }
 ```
@@ -693,6 +777,7 @@ import Debouncer from 'src/helper/debouncer.helper';
 export default class TopdataAddressValidator extends Plugin {
     static options = {
         validateUrl: '/bettercheckoutsw6/swiss-post/validate',
+        countryIdsUrl: null,
         countrySelectSelector: '.country-select',
         zipInputSelector: 'input[name$="[zipcode]"], input[name="zipcode"]',
         cityInputSelector: 'input[name$="[city]"], input[name="city"]',
@@ -704,6 +789,7 @@ export default class TopdataAddressValidator extends Plugin {
     init() {
         this._client = new HttpClient();
         this._initElements();
+        this._fetchCountryIds();
         this._registerEvents();
     }
 
@@ -715,6 +801,28 @@ export default class TopdataAddressValidator extends Plugin {
         this.firstNameInput = this.el.querySelector(this.options.firstNameInputSelector);
         this.lastNameInput = this.el.querySelector(this.options.lastNameInputSelector);
         this.widget = this.el.querySelector('[data-swiss-post-validation]');
+    }
+
+    _fetchCountryIds() {
+        this._supportedCountryIds = null;
+        const url = this.options.countryIdsUrl;
+        if (!url) return;
+
+        this._client.get(url, (response) => {
+            try {
+                this._supportedCountryIds = JSON.parse(response);
+            } catch (e) {
+                this._supportedCountryIds = null;
+            }
+        });
+    }
+
+    _isCountrySupported() {
+        if (!this.countrySelect) return false;
+        if (!this._supportedCountryIds) return true;
+
+        const selectedOption = this.countrySelect.options[this.countrySelect.selectedIndex];
+        return selectedOption && this._supportedCountryIds.includes(selectedOption.value);
     }
 
     _registerEvents() {
@@ -732,10 +840,7 @@ export default class TopdataAddressValidator extends Plugin {
     }
 
     _onCountryChange() {
-        const selectedOption = this.countrySelect.options[this.countrySelect.selectedIndex];
-        const isCHorLI = ['CH', 'LI'].includes(selectedOption.getAttribute('data-country-iso'));
-
-        if (isCHorLI) {
+        if (this._isCountrySupported()) {
             this.widget.classList.remove('d-none');
             this._onValidate();
         } else {
@@ -807,6 +912,7 @@ import Debouncer from 'src/helper/debouncer.helper';
 export default class TopdataZipAutocomplete extends Plugin {
     static options = {
         autocompleteUrl: '/bettercheckoutsw6/swiss-post/autocomplete',
+        countryIdsUrl: null,
         countrySelectSelector: '.country-select',
         zipInputSelector: 'input[name$="[zipcode]"], input[name="zipcode"]',
         cityInputSelector: 'input[name$="[city]"], input[name="city"]'
@@ -815,6 +921,7 @@ export default class TopdataZipAutocomplete extends Plugin {
     init() {
         this._client = new HttpClient();
         this._initElements();
+        this._fetchCountryIds();
         this._registerEvents();
     }
 
@@ -822,6 +929,20 @@ export default class TopdataZipAutocomplete extends Plugin {
         this.countrySelect = this.el.querySelector(this.options.countrySelectSelector);
         this.zipInput = this.el.querySelector(this.options.zipInputSelector);
         this.cityInput = this.el.querySelector(this.options.cityInputSelector);
+    }
+
+    _fetchCountryIds() {
+        this._supportedCountryIds = null;
+        const url = this.options.countryIdsUrl;
+        if (!url) return;
+
+        this._client.get(url, (response) => {
+            try {
+                this._supportedCountryIds = JSON.parse(response);
+            } catch (e) {
+                this._supportedCountryIds = null;
+            }
+        });
     }
 
     _registerEvents() {
@@ -841,8 +962,10 @@ export default class TopdataZipAutocomplete extends Plugin {
 
     _isCountrySupported() {
         if (!this.countrySelect) return false;
+        if (!this._supportedCountryIds) return true;
+
         const selectedOption = this.countrySelect.options[this.countrySelect.selectedIndex];
-        return selectedOption && ['CH', 'LI'].includes(selectedOption.getAttribute('data-country-iso'));
+        return selectedOption && this._supportedCountryIds.includes(selectedOption.value);
     }
 
     _onAutocomplete(query) {
@@ -917,8 +1040,11 @@ Wrap form fields with target markup attributes for both plugins.
 ```twig
 {% sw_extends '@Storefront/storefront/component/address/address-personal.html.twig' %}
 
+{% set swissPostCountryIdsUrl = path('frontend.bettercheckoutsw6.swiss-post.country-ids') %}
+
 {% block component_address_personal_fields %}
-    <div data-topdata-address-validator="true" data-topdata-zip-autocomplete="true">
+    <div data-topdata-address-validator='{"countryIdsUrl": "{{ swissPostCountryIdsUrl }}"}'
+         data-topdata-zip-autocomplete='{"countryIdsUrl": "{{ swissPostCountryIdsUrl }}"}'>
         {{ parent() }}
     </div>
 {% endblock %}
@@ -932,6 +1058,7 @@ We will implement a credential testing system allowing fast API troubleshooting.
 
 ### [NEW FILE] `src/Controller/AdminApi/SwissPostAdminController.php`
 Create a controller to handle quick testing requests from the administration panel.
+Delegates authentication to `SwissPostApiService::testCredentials()` to avoid duplicating the OAuth2 token request logic.
 
 ```php
 <?php declare(strict_types=1);
@@ -942,18 +1069,13 @@ use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
-use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService;
 
 #[Route(defaults: ['_routeScope' => ['api']])]
 class SwissPostAdminController extends AbstractController
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly StreamFactoryInterface $streamFactory
+        private readonly SwissPostApiService $apiService
     ) {
     }
 
@@ -967,33 +1089,9 @@ class SwissPostAdminController extends AbstractController
         $clientId = $data->get('clientId');
         $clientSecret = $data->get('clientSecret');
 
-        if (!$clientId || !$clientSecret) {
-            return new JsonResponse(['success' => false, 'message' => 'Credentials must not be empty.'], 400);
-        }
+        $result = $this->apiService->testCredentials($clientId, $clientSecret);
 
-        try {
-            $body = http_build_query([
-                'grant_type' => 'client_credentials',
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'scope' => 'DCAPI_ADDRESS_VALIDATE DCAPI_ADDRESS_AUTOCOMPLETE'
-            ]);
-
-            $request = $this->requestFactory->createRequest('POST', 'https://api.post.ch/OAuth/token')
-                ->withHeader('Content-Type', 'application/x-www-form-urlencoded')
-                ->withBody($this->streamFactory->createStream($body));
-
-            $response = $this->httpClient->sendRequest($request);
-
-            if ($response->getStatusCode() === 200) {
-                return new JsonResponse(['success' => true]);
-            }
-
-            $errorMsg = 'Auth failed: Status ' . $response->getStatusCode();
-            return new JsonResponse(['success' => false, 'message' => $errorMsg]);
-        } catch (\Throwable $e) {
-            return new JsonResponse(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return new JsonResponse($result, $result['success'] ? 200 : 400);
     }
 }
 ```
@@ -1033,9 +1131,6 @@ Register subscriber listeners and the API controller services.
         </service>
 
         <service id="Topdata\TopdataBetterCheckoutSW6\Controller\AdminApi\SwissPostAdminController" public="true" autowire="true">
-            <argument type="service" id="http_client"/>
-            <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
-            <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
