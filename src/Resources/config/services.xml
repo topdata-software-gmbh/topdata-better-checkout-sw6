@@ -5,6 +5,11 @@
 
     <services>
 
+        <!-- Company Name Change Request Definition -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestDefinition">
+            <tag name="shopware.entity.definition"/>
+        </service>
+
         <!-- Company Name Change Request Email Service -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestEmailService">
             <argument type="service" id="Symfony\Component\Mailer\MailerInterface"/>

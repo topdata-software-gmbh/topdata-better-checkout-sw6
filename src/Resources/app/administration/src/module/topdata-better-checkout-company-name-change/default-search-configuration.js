@@ -1,19 +1,15 @@
-import { searchBehavior } from 'src/app/default-search-configuration';
+import { searchRankingPoint } from 'src/app/service/search-ranking.service';
 
-const defaults = {
-    ...searchBehavior,
-    searchConfig: {
-        searches: [
-            {
-                field: 'oldCompanyName',
-                rank: 500,
-            },
-            {
-                field: 'newCompanyName',
-                rank: 500,
-            },
-        ],
+const defaultSearchConfiguration = {
+    _searchable: true,
+    oldCompanyName: {
+        _searchable: true,
+        _score: searchRankingPoint.HIGH_SEARCH_RANKING,
+    },
+    newCompanyName: {
+        _searchable: true,
+        _score: searchRankingPoint.HIGH_SEARCH_RANKING,
     },
 };
 
-export default defaults;
+export default defaultSearchConfiguration;
