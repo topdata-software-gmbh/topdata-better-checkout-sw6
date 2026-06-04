@@ -13,6 +13,7 @@ use Shopware\Core\Framework\Validation\DataValidationDefinition;
 use Shopware\Core\Framework\Validation\Exception\ConstraintViolationException;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -22,12 +23,15 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
 {
     private const CONFIG_PREFIX = 'TopdataBetterCheckoutSW6.config.';
 
+    private const CONTACT_EMAIL_UNIQUENESS_SERVICE_ID = 'Topdata\\TopdataContactLoginSW6\\Service\\ContactEmailUniquenessService';
+
     public function __construct(
         private readonly AbstractRegisterRoute $decorated,
         private readonly EntityRepository $customerRepository,
         private readonly SystemConfigService $systemConfigService,
         private readonly RequestStack $requestStack,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly ContainerInterface $container,
     ) {
     }
 
@@ -40,7 +44,7 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
         RequestDataBag $data,
         SalesChannelContext $context,
         bool $validateStorefrontUrl = true,
-        ?DataValidationDefinition $additionalValidationDefinitions = null
+        ?DataValidationDefinition $additionalValidationDefinitions = null,
     ): CustomerResponse {
         $isGuest = $data->getBoolean('guest') || !$data->has('password') || empty($data->get('password'));
 
@@ -54,66 +58,69 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
         return $this->decorated->register($data, $context, $validateStorefrontUrl, $additionalValidationDefinitions);
     }
 
-    private function cloneBillingAsShippingIfEnabled(RequestDataBag $data, SalesChannelContext $context): void
-    {
-        $isEnabled = $this->systemConfigService->getBool(
-            self::CONFIG_PREFIX . 'cloneBillingAsShipping',
-            $context->getSalesChannelId()
-        );
-
-        if (!$isEnabled) {
-            return;
-        }
-
-        $billingAddress = $data->get('billingAddress');
-        if (!$billingAddress instanceof RequestDataBag) {
-            return;
-        }
-
-        if ($data->has('shippingAddress')) {
-            return;
-        }
-
-        $shippingData = $billingAddress->all();
-        unset($shippingData['id']);
-
-        $data->set('shippingAddress', new RequestDataBag($shippingData));
-    }
-
-    private function enforceAccountType(RequestDataBag $data, SalesChannelContext $context, bool $isGuest): void
-    {
-        $configKey = $isGuest ? 'guestAccountType' : 'registrationAccountType';
-        $defaultSetting = $isGuest ? 'user_choice' : 'always_business';
-
-        $setting = $this->systemConfigService->getString(
-            self::CONFIG_PREFIX . $configKey,
-            $context->getSalesChannelId()
-        );
-
-        if ($setting === '') {
-            $setting = $defaultSetting;
-        }
-
-        if ($setting === 'always_private') {
-            $data->set('accountType', CustomerEntity::ACCOUNT_TYPE_PRIVATE);
-        } elseif ($setting === 'always_business') {
-            $data->set('accountType', CustomerEntity::ACCOUNT_TYPE_BUSINESS);
-        }
-
-        if ($setting === 'always_private') {
-            $data->remove('company');
-            $data->remove('vatIds');
-            if ($data->has('billingAddress')) {
-                $billingAddress = $data->get('billingAddress');
-                if ($billingAddress instanceof RequestDataBag) {
-                    $billingAddress->remove('company');
-                    $billingAddress->remove('vatId');
-                }
-            }
-        }
-    }
-
     private function assertGuestEmailNotRegistered(RequestDataBag $data, SalesChannelContext $context): void
+    {
+        $email = $data->get('email');
+        if (!\is_string($email) || $email === '') {
+            return;
+        }
+
+        $request = $this->requestStack->getCurrentRequest();
+        $ipAddress = $request?->getClientIp();
+        $userAgent = $request?->headers->get('User-Agent');
+
+        $emailUniquenessService = $this->getOptionalEmailUniquenessService();
+
+        if ($emailUniquenessService !== null) {
+            $result = $emailUniquenessService->checkEmailUniqueness(
+                email: $email,
+                context: $context->getContext(),
+                attemptType: 'guest_checkout',
+                salesChannelId: $context->getSalesChannelId(),
+                customerId: null,
+                ipAddress: $ipAddress,
+                userAgent: $userAgent,
+            );
+
+            if (!$result['isUnique']) {
+                $message = $this->translator->trans('better-checkout.register.emailAlreadyRegistered');
+
+                if ($request !== null && $request->hasSession()) {
+                    $session = $request->getSession();
+                    if (method_exists($session, 'getFlashBag')) {
+                        $session->getFlashBag()->add('danger', $message);
+                    }
+                }
+
+                $violations = new ConstraintViolationList();
+                $violations->add(new ConstraintViolation(
+                    $message,
+                    null,
+                    [],
+                    null,
+                    'email',
+                    $email,
+                ));
+
+                throw new ConstraintViolationException($violations, $data->all());
+            }
+
+            return;
+        }
+
+        $this->assertGuestEmailNotRegisteredFallback($data, $context);
+    }
+
+    private function getOptionalEmailUniquenessService(): ?object
+    {
+        if (!$this->container->has(self::CONTACT_EMAIL_UNIQUENESS_SERVICE_ID)) {
+            return null;
+        }
+
+        return $this->container->get(self::CONTACT_EMAIL_UNIQUENESS_SERVICE_ID);
+    }
+
+    private function assertGuestEmailNotRegisteredFallback(RequestDataBag $data, SalesChannelContext $context): void
     {
         $email = $data->get('email');
         if (!\is_string($email) || $email === '') {
@@ -122,7 +129,7 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
 
         $isBoundToSalesChannel = (bool) $this->systemConfigService->get(
             'core.loginRegistration.isCustomerBoundToSalesChannel',
-            $context->getSalesChannelId()
+            $context->getSalesChannelId(),
         );
 
         $criteria = (new Criteria())
@@ -156,9 +163,68 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
             [],
             null,
             'email',
-            $email
+            $email,
         ));
 
         throw new ConstraintViolationException($violations, $data->all());
+    }
+
+    private function cloneBillingAsShippingIfEnabled(RequestDataBag $data, SalesChannelContext $context): void
+    {
+        $isEnabled = $this->systemConfigService->getBool(
+            self::CONFIG_PREFIX . 'cloneBillingAsShipping',
+            $context->getSalesChannelId(),
+        );
+
+        if (!$isEnabled) {
+            return;
+        }
+
+        $billingAddress = $data->get('billingAddress');
+        if (!$billingAddress instanceof RequestDataBag) {
+            return;
+        }
+
+        if ($data->has('shippingAddress')) {
+            return;
+        }
+
+        $shippingData = $billingAddress->all();
+        unset($shippingData['id']);
+
+        $data->set('shippingAddress', new RequestDataBag($shippingData));
+    }
+
+    private function enforceAccountType(RequestDataBag $data, SalesChannelContext $context, bool $isGuest): void
+    {
+        $configKey = $isGuest ? 'guestAccountType' : 'registrationAccountType';
+        $defaultSetting = $isGuest ? 'user_choice' : 'always_business';
+
+        $setting = $this->systemConfigService->getString(
+            self::CONFIG_PREFIX . $configKey,
+            $context->getSalesChannelId(),
+        );
+
+        if ($setting === '') {
+            $setting = $defaultSetting;
+        }
+
+        if ($setting === 'always_private') {
+            $data->set('accountType', CustomerEntity::ACCOUNT_TYPE_PRIVATE);
+        } elseif ($setting === 'always_business') {
+            $data->set('accountType', CustomerEntity::ACCOUNT_TYPE_BUSINESS);
+        }
+
+        if ($setting === 'always_private') {
+            $data->remove('company');
+            $data->remove('vatIds');
+            if ($data->has('billingAddress')) {
+                $billingAddress = $data->get('billingAddress');
+                if ($billingAddress instanceof RequestDataBag) {
+                    $billingAddress->remove('company');
+                    $billingAddress->remove('vatId');
+                }
+            }
+        }
     }
 }

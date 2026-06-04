@@ -31,7 +31,7 @@ Module.register('topdata-better-checkout-company-name-change', {
         color: '#ff5722',
         icon: 'regular:window',
         path: 'topdata.better.checkout.company.name.change.list',
-        parent: 'customer',
+        parent: 'sw-customer',
         position: 100,
     }],
 

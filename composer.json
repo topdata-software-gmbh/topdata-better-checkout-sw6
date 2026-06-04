@@ -14,6 +14,9 @@
     "require":     {
         "shopware/core": "6.7.*"
     },
+    "suggest": {
+        "topdata/contact-login-sw6": "Enables cross-table email uniqueness checking (contacts + customers) and registration attempt logging"
+    },
     "extra":       {
         "shopware-plugin-class": "Topdata\\TopdataBetterCheckoutSW6\\TopdataBetterCheckoutSW6",
         "plugin-icon": "src/Resources/config/plugin.png",
