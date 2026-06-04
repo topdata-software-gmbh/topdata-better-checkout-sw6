@@ -8,6 +8,8 @@ use Shopware\Core\Framework\DataAbstractionLayer\Attribute\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\Attribute\Field;
 use Shopware\Core\Framework\DataAbstractionLayer\Attribute\FieldType;
 use Shopware\Core\Framework\DataAbstractionLayer\Attribute\ForeignKey;
+use Shopware\Core\Framework\DataAbstractionLayer\Attribute\ManyToOne;
+use Shopware\Core\Framework\DataAbstractionLayer\Attribute\OnDelete;
 use Shopware\Core\Framework\DataAbstractionLayer\Attribute\PrimaryKey;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity as DalEntity;
 
@@ -44,7 +46,10 @@ class CompanyNameChangeRequestEntity extends DalEntity
     #[Field(type: FieldType::UUID, nullable: true)]
     protected ?string $reviewedByUserId = null;
 
+    #[ManyToOne(entity: CustomerEntity::class, onDelete: OnDelete::CASCADE, api: ['admin-api' => true])]
     protected ?CustomerEntity $customer = null;
+
+    #[ManyToOne(entity: CustomerAddressEntity::class, onDelete: OnDelete::CASCADE, api: ['admin-api' => true])]
     protected ?CustomerAddressEntity $address = null;
 
     public function getId(): string { return $this->id; }
