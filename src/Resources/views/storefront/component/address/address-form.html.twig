@@ -1,0 +1,9 @@
+{% sw_extends '@Storefront/storefront/component/address/address-form.html.twig' %}
+
+{% block component_address_form_address_fields %}
+    {{ parent() }}
+
+    {% if config('TopdataBetterCheckoutSW6.config.swissPostEnabled') %}
+        {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
+    {% endif %}
+{% endblock %}

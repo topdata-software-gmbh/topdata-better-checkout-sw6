@@ -36,6 +36,13 @@
     },
     "TopdataBetterCheckoutSW6": {
         "cloneBillingAsShipping": "Clone billing as shipping address",
-        "cloneBillingAsShippingHelp": "When enabled, creates two separate address entities even when billing and shipping are identical. Required for billing address isolation."
+        "cloneBillingAsShippingHelp": "When enabled, creates two separate address entities even when billing and shipping are identical. Required for billing address isolation.",
+        "swissPost": {
+            "validationTitle": "Address check (Swiss Post)",
+            "defaultText": "The check will be executed as soon as all fields are filled in.",
+            "certifiedText": "The address is certified by Swiss Post.",
+            "notCertifiedText": "The system could not detect an acceptable address.",
+            "errorText": "Address check failure:"
+        }
     }
 }

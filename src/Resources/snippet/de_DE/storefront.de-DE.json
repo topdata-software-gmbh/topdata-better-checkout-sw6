@@ -36,6 +36,13 @@
     },
     "TopdataBetterCheckoutSW6": {
         "cloneBillingAsShipping": "Rechnungsadresse als Lieferadresse klonen",
-        "cloneBillingAsShippingHelp": "Wenn aktiviert, werden zwei separate Adressentitäten erstellt, auch wenn Rechnungs- und Lieferadresse identisch sind. Erforderlich für die Rechnungsadressenisolierung."
+        "cloneBillingAsShippingHelp": "Wenn aktiviert, werden zwei separate Adressentitäten erstellt, auch wenn Rechnungs- und Lieferadresse identisch sind. Erforderlich für die Rechnungsadressenisolierung.",
+        "swissPost": {
+            "validationTitle": "Adressprüfung (Swiss Post)",
+            "defaultText": "Die Prüfung wird ausgeführt, sobald alle Felder ausgefüllt sind.",
+            "certifiedText": "Die Adresse ist von der Swiss Post zertifiziert.",
+            "notCertifiedText": "Das System konnte keine akzeptable Adresse erkennen.",
+            "errorText": "Fehler bei der Adressprüfung:"
+        }
     }
 }

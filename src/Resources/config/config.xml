@@ -153,4 +153,32 @@
             <label lang="de-DE">Lieferadresse Firmenname</label>
         </input-field>
     </card>
+
+    <card>
+        <title>Swiss Post Address Validation</title>
+        <title lang="de-DE">Swiss Post Adressprüfung</title>
+
+        <input-field type="bool">
+            <name>swissPostEnabled</name>
+            <label>Enable Swiss Post Address Validation</label>
+            <label lang="de-DE">Swiss Post Adressprüfung aktivieren</label>
+            <defaultValue>false</defaultValue>
+        </input-field>
+
+        <input-field type="text">
+            <name>swissPostClientId</name>
+            <label>Client ID</label>
+            <label lang="de-DE">Client-ID</label>
+            <helpText>Your Swiss Post DCAPI client ID</helpText>
+            <helpText lang="de-DE">Ihre Swiss Post DCAPI Client-ID</helpText>
+        </input-field>
+
+        <input-field type="password">
+            <name>swissPostClientSecret</name>
+            <label>Client Secret</label>
+            <label lang="de-DE">Client-Secret</label>
+            <helpText>Your Swiss Post DCAPI client secret</helpText>
+            <helpText lang="de-DE">Ihre Swiss Post DCAPI Client-Secret</helpText>
+        </input-field>
+    </card>
 </config>

@@ -1,5 +1,14 @@
 {% sw_extends '@Storefront/storefront/component/address/address-personal.html.twig' %}
 
+{% set swissPostCountryIdsUrl = path('frontend.bettercheckoutsw6.swiss-post.country-ids') %}
+
+{% block component_address_personal_fields %}
+    <div data-topdata-address-validator='{"countryIdsUrl": "{{ swissPostCountryIdsUrl }}"}'
+         data-topdata-zip-autocomplete='{"countryIdsUrl": "{{ swissPostCountryIdsUrl }}"}'>
+        {{ parent() }}
+    </div>
+{% endblock %}
+
 {% block component_address_personal_account_type %}
     {% set isRegistrationRoute = app.request.attributes.get('_route') in ['frontend.checkout.register.page', 'frontend.account.register.page', 'frontend.account.login.page'] %}
 

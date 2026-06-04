@@ -106,5 +106,36 @@
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
             <tag name="kernel.event_subscriber"/>
         </service>
+
+        <!-- Swiss Post API Client -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService" autowire="true">
+            <argument type="service" id="psr18.http_client"/>
+            <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
+            <argument type="service" id="Nyholm\Psr7\Factory\Psr17Factory"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Swiss Post Storefront Controller -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Controller\SwissPostStorefrontController" public="true" autowire="true">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <!-- Swiss Post Admin Controller -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Controller\AdminApi\SwissPostAdminController" public="true" autowire="true">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <!-- Address Certification Subscriber -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AddressCertificationSubscriber">
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
+            <argument type="service" id="customer_address.repository"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
 </container>
