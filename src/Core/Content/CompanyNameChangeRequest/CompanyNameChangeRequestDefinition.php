@@ -17,6 +17,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToOneAssociationField
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\UpdatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
+use Shopware\Core\System\User\UserDefinition;
 
 #[Entity('topdata_better_checkout_company_name_change_request')]
 class CompanyNameChangeRequestDefinition extends EntityDefinition
@@ -47,7 +48,7 @@ class CompanyNameChangeRequestDefinition extends EntityDefinition
             (new StringField('status', 'status'))->addFlags(new Required()),
             (new DateTimeField('reviewed_at', 'reviewedAt')),
             (new LongTextField('review_comment', 'reviewComment')),
-            (new FkField('reviewed_by_user_id', 'reviewedByUserId')),
+            (new FkField('reviewed_by_user_id', 'reviewedByUserId', UserDefinition::class)),
             new ManyToOneAssociationField('customer', 'customer_id', CustomerDefinition::class, 'id'),
             new ManyToOneAssociationField('address', 'address_id', CustomerAddressDefinition::class, 'id'),
             new CreatedAtField(),
