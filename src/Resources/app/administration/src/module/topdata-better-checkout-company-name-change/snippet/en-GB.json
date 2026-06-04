@@ -7,6 +7,7 @@
         },
         "list": {
             "title": "Company Name Change Requests",
+            "refresh": "Refresh",
             "filter": {
                 "status": "Status"
             },
