@@ -5,30 +5,13 @@
         <title>Logout Settings</title>
         <title lang="de-DE">Logout-Einstellungen</title>
 
-        <input-field type="single-select">
+        <input-field type="text">
             <name>logoutRedirectRoute</name>
-            <options>
-                <option>
-                    <id>frontend.home.page</id>
-                    <name>Homepage</name>
-                    <name lang="de-DE">Startseite</name>
-                </option>
-                <option>
-                    <id>frontend.account.login.page</id>
-                    <name>Login page (default)</name>
-                    <name lang="de-DE">Login-Seite (Standard)</name>
-                </option>
-                <option>
-                    <id>frontend.checkout.cart.page</id>
-                    <name>Shopping cart</name>
-                    <name lang="de-DE">Warenkorb</name>
-                </option>
-            </options>
             <defaultValue>frontend.home.page</defaultValue>
-            <label>Logout redirect route</label>
-            <label lang="de-DE">Logout-Weiterleitungsroute</label>
-            <helpText>Where to redirect the customer after logout.</helpText>
-            <helpText lang="de-DE">Wohin der Kunde nach dem Logout weitergeleitet werden soll.</helpText>
+            <label>Logout redirect target</label>
+            <label lang="de-DE">Logout-Weiterleitungsziel</label>
+            <helpText>Route name (e.g. frontend.home.page) or URL path (e.g. /my-thank-you-page).</helpText>
+            <helpText lang="de-DE">Routenname (z.B. frontend.home.page) oder URL-Pfad (z.B. /meine-danke-seite).</helpText>
         </input-field>
     </card>
 
