@@ -50,6 +50,19 @@
     {% endif %}
 {% endblock %}
 
+{% block page_checkout_address_login_toggle %}
+    {% set checkoutType = app.request.query.get('checkoutType')
+        ?: app.request.request.get('checkoutType')
+        ?: (data is defined and data is not null and data.all is defined ? data.get('checkoutType') : null) %}
+
+    {% set customerLoggedIn = context.customer is not null %}
+
+    {% if checkoutType or customerLoggedIn %}
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
 {% block page_checkout_address_login %}
     {% set checkoutType = app.request.query.get('checkoutType')
         ?: app.request.request.get('checkoutType')
@@ -72,7 +85,7 @@
     {% set customerLoggedIn = context.customer is not null %}
 
     {% if checkoutType or customerLoggedIn %}
-        <div class="col-12 col-lg-8 offset-lg-2">
+        <div class="col-12 col-lg-12">
             {{ parent() }}
         </div>
     {% else %}
