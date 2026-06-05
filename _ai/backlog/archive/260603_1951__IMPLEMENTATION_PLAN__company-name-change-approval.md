@@ -37,7 +37,7 @@ This plan introduces a **Company Name Change Request** approval workflow:
 |---|---|
 | `CompanyNameChangeRequestEntity` + DAL Definition | New custom entity to persist change requests (old company, new company, status, timestamps, customer/address references) |
 | `CompanyNameChangeRequestRepository` | DAL repository for the new entity |
-| Database Migration | Creates the `topdata_better_checkout_company_name_change_request` table |
+| Database Migration | Creates the `tdbc_company_name_change_request` table |
 | `BillingAddressEditController` (modified) | Intercept company name changes; create a change request instead of directly updating the address |
 | `CheckoutBlockSubscriber` | New event subscriber that blocks order placement when a pending change request exists |
 | `CheckoutConfirmPageController` decorator | Blocks checkout confirmation page, shows error message |
@@ -81,12 +81,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Attribute\ForeignKey;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Required;
 
-#[Entity('topdata_better_checkout_company_name_change_request')]
+#[Entity('tdbc_company_name_change_request')]
 class CompanyNameChangeRequestDefinition extends EntityDefinition
 {
     public function getEntityName(): string
     {
-        return 'topdata_better_checkout_company_name_change_request';
+        return 'tdbc_company_name_change_request';
     }
 
     public function getEntityClass(): string
@@ -226,7 +226,7 @@ class Migration1748979000CreateCompanyNameChangeRequestTable extends MigrationSt
     public function update(Connection $connection): void
     {
         $sql = <<<'SQL'
-            CREATE TABLE IF NOT EXISTS `topdata_better_checkout_company_name_change_request` (
+            CREATE TABLE IF NOT EXISTS `tdbc_company_name_change_request` (
                 `id` BINARY(16) NOT NULL,
                 `customer_id` BINARY(16) NOT NULL,
                 `address_id` BINARY(16) NOT NULL,
@@ -1050,7 +1050,7 @@ Module.register('topdata-better-checkout-company-name-change', {
     description: 'topdata-better-checkout-company-name-change.module.description',
     color: '#ff5722',
     icon: 'regular:window',
-    entity: 'topdata_better_checkout_company_name_change_request',
+    entity: 'tdbc_company_name_change_request',
 
     routes: {
         list: {
@@ -1135,7 +1135,7 @@ Shopware.Component.register('topdata-company-name-change-list', {
 
     computed: {
         repository() {
-            return this.repositoryFactory.create('topdata_better_checkout_company_name_change_request');
+            return this.repositoryFactory.create('tdbc_company_name_change_request');
         },
 
         listFilters() {
@@ -1262,7 +1262,7 @@ Shopware.Component.register('topdata-company-name-change-list', {
     <template #sidebar>
         <sw-sidebar>
             <sw-sidebar-filter-panel
-                entity="topdata_better_checkout_company_name_change_request"
+                entity="tdbc_company_name_change_request"
                 :filters="listFilters"
                 @filters-changed="onFiltersChanged"
             />
@@ -1301,7 +1301,7 @@ Shopware.Component.register('topdata-company-name-change-detail', {
 
     computed: {
         repository() {
-            return this.repositoryFactory.create('topdata_better_checkout_company_name_change_request');
+            return this.repositoryFactory.create('tdbc_company_name_change_request');
         },
 
         changeRequestId() {
@@ -1611,7 +1611,7 @@ class CompanyNameChangeRequestController extends AbstractController
         </service>
 
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService">
-            <argument type="service" id="topdata_better_checkout_company_name_change_request.repository"/>
+            <argument type="service" id="tdbc_company_name_change_request.repository"/>
             <argument type="service" id="customer_address.repository"/>
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestEmailService"/>
         </service>

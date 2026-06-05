@@ -27,7 +27,7 @@ Shopware.Component.register('topdata-company-name-change-list', {
 
     computed: {
         repository() {
-            return this.repositoryFactory.create('topdata_better_checkout_company_name_change_request');
+            return this.repositoryFactory.create('tdbc_company_name_change_request');
         },
 
         listFilters() {

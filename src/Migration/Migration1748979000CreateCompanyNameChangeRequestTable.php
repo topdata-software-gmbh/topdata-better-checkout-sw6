@@ -15,7 +15,7 @@ class Migration1748979000CreateCompanyNameChangeRequestTable extends MigrationSt
     public function update(Connection $connection): void
     {
         $sql = <<<'SQL'
-            CREATE TABLE IF NOT EXISTS `topdata_better_checkout_company_name_change_request` (
+            CREATE TABLE IF NOT EXISTS `tdbc_company_name_change_request` (
                 `id` BINARY(16) NOT NULL,
                 `customer_id` BINARY(16) NOT NULL,
                 `address_id` BINARY(16) NOT NULL,
@@ -31,8 +31,8 @@ class Migration1748979000CreateCompanyNameChangeRequestTable extends MigrationSt
                 KEY `idx.crreq.customer_id` (`customer_id`),
                 KEY `idx.crreq.address_id` (`address_id`),
                 KEY `idx.crreq.status` (`status`),
-                CONSTRAINT `fk.crreq.customer_id` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE,
-                CONSTRAINT `fk.crreq.address_id` FOREIGN KEY (`address_id`) REFERENCES `customer_address` (`id`) ON DELETE CASCADE
+                CONSTRAINT `fk.tdbc_cr.customer_id` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE,
+                CONSTRAINT `fk.tdbc_cr.address_id` FOREIGN KEY (`address_id`) REFERENCES `customer_address` (`id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         SQL;
 

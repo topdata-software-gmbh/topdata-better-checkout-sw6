@@ -19,7 +19,7 @@
 
         <!-- Company Name Change Request Service -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService">
-            <argument type="service" id="topdata_better_checkout_company_name_change_request.repository"/>
+            <argument type="service" id="tdbc_company_name_change_request.repository"/>
             <argument type="service" id="customer_address.repository"/>
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestEmailService"/>
         </service>

@@ -19,12 +19,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\UpdatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 use Shopware\Core\System\User\UserDefinition;
 
-#[Entity('topdata_better_checkout_company_name_change_request')]
+#[Entity('tdbc_company_name_change_request')]
 class CompanyNameChangeRequestDefinition extends EntityDefinition
 {
     public function getEntityName(): string
     {
-        return 'topdata_better_checkout_company_name_change_request';
+        return 'tdbc_company_name_change_request';
     }
 
     public function getEntityClass(): string

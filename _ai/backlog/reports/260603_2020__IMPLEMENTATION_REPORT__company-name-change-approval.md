@@ -109,14 +109,14 @@ Manual QA checklist:
 
 **Approve via CLI** (alternative to admin UI):
 ```bash
-bin/console dbal:run "UPDATE topdata_better_checkout_company_name_change_request SET status='approved', reviewed_at=NOW() WHERE id=UNHEX('...')"
+bin/console dbal:run "UPDATE tdbc_company_name_change_request SET status='approved', reviewed_at=NOW() WHERE id=UNHEX('...')"
 ```
 
 ## 8. Documentation Updates
 
 - New snippet keys added under `better-checkout.companyChange.*` for all 5 languages
 - New admin snippet keys: `topdata-better-checkout-company-name-change.*` (de-DE, en-GB)
-- New custom entity: `topdata_better_checkout_company_name_change_request` (DAL repository auto-registered)
+- New custom entity: `tdbc_company_name_change_request` (DAL repository auto-registered)
 - Admin API endpoints: `POST /api/topdata-better-checkout/company-name-change-request/{id}/approve` and `.../reject`
 
 ## 9. Next Steps

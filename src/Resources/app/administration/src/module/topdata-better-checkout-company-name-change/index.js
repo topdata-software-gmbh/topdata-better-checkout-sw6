@@ -12,7 +12,7 @@ Module.register('topdata-better-checkout-company-name-change', {
     description: 'topdata-better-checkout-company-name-change.module.description',
     color: '#ff5722',
     icon: 'regular:window',
-    entity: 'topdata_better_checkout_company_name_change_request',
+    entity: 'tdbc_company_name_change_request',
 
     routes: {
         list: {
