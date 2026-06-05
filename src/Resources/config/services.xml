@@ -83,6 +83,7 @@
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\LogoutRedirectSubscriber">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="router"/>
+            <argument type="service" id="language.repository"/>
             <tag name="kernel.event_subscriber"/>
         </service>
 

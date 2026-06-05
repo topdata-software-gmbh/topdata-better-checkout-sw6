@@ -36,7 +36,7 @@
     },
     "TopdataBetterCheckoutSW6": {
         "logoutRedirectRoute": "Logout-Weiterleitungsroute",
-        "logoutRedirectRouteHelp": "Der Routenname, zu dem nach dem Logout weitergeleitet werden soll (z.B. frontend.home.page).",
+        "logoutRedirectRouteHelp": "Routenname oder URL-Pfad. Für sprachspezifisch: pro Zeile locale=Ziel (de-DE=/newsletter, fr-FR=/fr/newsletter). _default als Fallback.",
         "cloneBillingAsShipping": "Rechnungsadresse als Lieferadresse klonen",
         "cloneBillingAsShippingHelp": "Wenn aktiviert, werden zwei separate Adressentitäten erstellt, auch wenn Rechnungs- und Lieferadresse identisch sind. Erforderlich für die Rechnungsadressenisolierung.",
         "swissPost": {

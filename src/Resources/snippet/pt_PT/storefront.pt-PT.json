@@ -36,7 +36,7 @@
     },
     "TopdataBetterCheckoutSW6": {
         "logoutRedirectRoute": "Rota de redirecionamento após logout",
-        "logoutRedirectRouteHelp": "O nome da rota para redirecionar após o logout (ex. frontend.home.page).",
+        "logoutRedirectRouteHelp": "Nome da rota ou caminho URL. Por idioma: uma linha local=destino (de-DE=/newsletter, fr-FR=/fr/newsletter). _default como fallback.",
         "cloneBillingAsShipping": "Clonar endereço de faturação como endereço de entrega",
         "cloneBillingAsShippingHelp": "Quando ativado, cria duas entidades de endereço separadas mesmo quando a faturação e a entrega são idênticas. Necessário para o isolamento do endereço de faturação."
     }

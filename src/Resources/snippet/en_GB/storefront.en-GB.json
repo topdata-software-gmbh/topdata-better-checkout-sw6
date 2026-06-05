@@ -36,7 +36,7 @@
     },
     "TopdataBetterCheckoutSW6": {
         "logoutRedirectRoute": "Logout redirect route",
-        "logoutRedirectRouteHelp": "The route name to redirect to after logout (e.g. frontend.home.page).",
+        "logoutRedirectRouteHelp": "Route name (e.g. frontend.home.page) or URL path. For per-language: use one locale=target per line (de-DE=/newsletter, fr-FR=/fr/newsletter). _default as fallback.",
         "cloneBillingAsShipping": "Clone billing as shipping address",
         "cloneBillingAsShippingHelp": "When enabled, creates two separate address entities even when billing and shipping are identical. Required for billing address isolation.",
         "swissPost": {

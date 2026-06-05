@@ -5,13 +5,13 @@
         <title>Logout Settings</title>
         <title lang="de-DE">Logout-Einstellungen</title>
 
-        <input-field type="text">
+        <input-field type="textarea">
             <name>logoutRedirectRoute</name>
             <defaultValue>frontend.home.page</defaultValue>
             <label>Logout redirect target</label>
             <label lang="de-DE">Logout-Weiterleitungsziel</label>
-            <helpText>Route name (e.g. frontend.home.page) or URL path (e.g. /my-thank-you-page).</helpText>
-            <helpText lang="de-DE">Routenname (z.B. frontend.home.page) oder URL-Pfad (z.B. /meine-danke-seite).</helpText>
+            <helpText>Route name (e.g. frontend.home.page) or URL path (e.g. /my-thank-you-page). For per-language redirects, use one locale=target per line: de-DE=/Newsletter, fr-FR=/fr/Newsletter. Use _default as fallback.</helpText>
+            <helpText lang="de-DE">Routenname (z.B. frontend.home.page) oder URL-Pfad (z.B. /meine-danke-seite). Für sprachspezifische Weiterleitungen pro Zeile eine locale=Ziel angeben: de-DE=/Newsletter, fr-FR=/fr/Newsletter. _default als Fallback.</helpText>
         </input-field>
     </card>
 

@@ -35,7 +35,16 @@ Full feature spec at `_ai/SPEC.md` — read first for architecture, feature list
 | `companyValidationBilling` | `core` | `core` / `required` / `optional` |
 | `companyValidationShipping` | `optional` | `core` / `required` / `optional` |
 | `cloneBillingAsShipping` | `true` | `true` / `false` |
-| `logoutRedirectRoute` | `frontend.home.page` | any route name (text) |
+| `logoutRedirectRoute` | `frontend.home.page` | route name, URL path, or multi-line locale map (see below) |
+
+  > **Multi‑line locale map** – each line: `locale=target`. Lines starting with `#` are ignored.  
+  > Fallback: exact `de-DE` → `de` (2‑letter) → `_default`.  
+  > Example:  
+  > ```text
+  > de-DE=/Newsletter
+  > fr-FR=/fr/Newsletter
+  > _default=frontend.home.page
+  > ```
 
 Config keys always prefixed with `TopdataBetterCheckoutSW6.config.` in code.
 
