@@ -2,6 +2,37 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
     <card>
+        <title>Logout Settings</title>
+        <title lang="de-DE">Logout-Einstellungen</title>
+
+        <input-field type="single-select">
+            <name>logoutRedirectRoute</name>
+            <options>
+                <option>
+                    <id>frontend.home.page</id>
+                    <name>Homepage</name>
+                    <name lang="de-DE">Startseite</name>
+                </option>
+                <option>
+                    <id>frontend.account.login.page</id>
+                    <name>Login page (default)</name>
+                    <name lang="de-DE">Login-Seite (Standard)</name>
+                </option>
+                <option>
+                    <id>frontend.checkout.cart.page</id>
+                    <name>Shopping cart</name>
+                    <name lang="de-DE">Warenkorb</name>
+                </option>
+            </options>
+            <defaultValue>frontend.home.page</defaultValue>
+            <label>Logout redirect route</label>
+            <label lang="de-DE">Logout-Weiterleitungsroute</label>
+            <helpText>Where to redirect the customer after logout.</helpText>
+            <helpText lang="de-DE">Wohin der Kunde nach dem Logout weitergeleitet werden soll.</helpText>
+        </input-field>
+    </card>
+
+    <card>
         <title>Account Type Settings</title>
         <title lang="de-DE">Kontotyp-Einstellungen</title>
 

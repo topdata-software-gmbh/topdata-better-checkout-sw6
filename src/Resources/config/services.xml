@@ -80,6 +80,12 @@
 
 
         <!-- SUBSCRIBERS -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\LogoutRedirectSubscriber">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AddressValidationSubscriber">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>

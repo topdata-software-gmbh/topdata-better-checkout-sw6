@@ -35,6 +35,8 @@
         "confirmChangeBillingAddress": "Editar endereço de faturação"
     },
     "TopdataBetterCheckoutSW6": {
+        "logoutRedirectRoute": "Rota de redirecionamento após logout",
+        "logoutRedirectRouteHelp": "O nome da rota para redirecionar após o logout (ex. frontend.home.page).",
         "cloneBillingAsShipping": "Clonar endereço de faturação como endereço de entrega",
         "cloneBillingAsShippingHelp": "Quando ativado, cria duas entidades de endereço separadas mesmo quando a faturação e a entrega são idênticas. Necessário para o isolamento do endereço de faturação."
     }

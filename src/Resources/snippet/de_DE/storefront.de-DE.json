@@ -35,6 +35,8 @@
         "confirmChangeBillingAddress": "Rechnungsadresse bearbeiten"
     },
     "TopdataBetterCheckoutSW6": {
+        "logoutRedirectRoute": "Logout-Weiterleitungsroute",
+        "logoutRedirectRouteHelp": "Der Routenname, zu dem nach dem Logout weitergeleitet werden soll (z.B. frontend.home.page).",
         "cloneBillingAsShipping": "Rechnungsadresse als Lieferadresse klonen",
         "cloneBillingAsShippingHelp": "Wenn aktiviert, werden zwei separate Adressentitäten erstellt, auch wenn Rechnungs- und Lieferadresse identisch sind. Erforderlich für die Rechnungsadressenisolierung.",
         "swissPost": {

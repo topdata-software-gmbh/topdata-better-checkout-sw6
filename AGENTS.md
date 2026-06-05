@@ -35,6 +35,7 @@ Full feature spec at `_ai/SPEC.md` — read first for architecture, feature list
 | `companyValidationBilling` | `core` | `core` / `required` / `optional` |
 | `companyValidationShipping` | `optional` | `core` / `required` / `optional` |
 | `cloneBillingAsShipping` | `true` | `true` / `false` |
+| `logoutRedirectRoute` | `frontend.home.page` | any route name (text) |
 
 Config keys always prefixed with `TopdataBetterCheckoutSW6.config.` in code.
 
