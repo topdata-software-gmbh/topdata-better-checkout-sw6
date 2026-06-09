@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService;
 
+/**
+ * Controller for handling Swiss Post related storefront operations.
+ * Provides endpoints for address validation, autocomplete, and retrieving country IDs.
+ */
 #[Route(defaults: ['_routeScope' => ['storefront']])]
 class SwissPostStorefrontController extends StorefrontController
 {
@@ -19,6 +23,13 @@ class SwissPostStorefrontController extends StorefrontController
     ) {
     }
 
+    /**
+     * Validates an address using the Swiss Post API.
+     * 
+     * @param Request $request The incoming request containing address data
+     * @param SalesChannelContext $context The current sales channel context
+     * @return JsonResponse The validation result
+     */
     #[Route(
         path: '/bettercheckoutsw6/swiss-post/validate',
         name: 'frontend.bettercheckoutsw6.swiss-post.validate',
@@ -37,6 +48,13 @@ class SwissPostStorefrontController extends StorefrontController
         return new JsonResponse($result);
     }
 
+    /**
+     * Provides autocomplete suggestions for Swiss postal codes.
+     * 
+     * @param Request $request The incoming request containing the search query
+     * @param SalesChannelContext $context The current sales channel context
+     * @return JsonResponse The autocomplete results
+     */
     #[Route(
         path: '/bettercheckoutsw6/swiss-post/autocomplete',
         name: 'frontend.bettercheckoutsw6.swiss-post.autocomplete',
@@ -59,6 +77,11 @@ class SwissPostStorefrontController extends StorefrontController
         return new JsonResponse($results);
     }
 
+    /**
+     * Retrieves the IDs for Switzerland and Liechtenstein countries.
+     * 
+     * @return JsonResponse The country IDs
+     */
     #[Route(
         path: '/bettercheckoutsw6/swiss-post/country-ids',
         name: 'frontend.bettercheckoutsw6.swiss-post.country-ids',
