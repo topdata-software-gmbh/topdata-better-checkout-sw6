@@ -18,7 +18,9 @@ class SwissPostApiService
     private const CACHE_KEY_PREFIX_ZIP = 'topdata_swiss_post_zip_';
     private const CACHE_KEY_PREFIX_STREET = 'topdata_swiss_post_street_';
     private const CACHE_KEY_PREFIX_HOUSENR = 'topdata_swiss_post_housenr_';
-    private const LOG_FILE = '/var/log/swiss-post.jsonl';
+    private const LOG_FILE = '{LOGS_DIR}/swiss-post.jsonl';
+    private static $pathLogFile;
+
 
     public function __construct(
         private readonly ClientInterface $httpClient,
@@ -26,9 +28,12 @@ class SwissPostApiService
         private readonly StreamFactoryInterface $streamFactory,
         private readonly CacheItemPoolInterface $cache,
         private readonly SystemConfigService $systemConfigService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        string $logsDir,
     ) {
+        self::$pathLogFile = str_replace('{LOGS_DIR}', $logsDir, self::LOG_FILE);
     }
+
 
     public function isEnabled(?string $salesChannelId = null): bool
     {
@@ -230,10 +235,11 @@ class SwissPostApiService
 
             if ($statusCode === 200) {
                 $result = json_decode($contents, true);
+                $quality = $result['quality'] ?? 'UNKNOWN';
 
                 return [
-                    'success' => true,
-                    'quality' => $result['quality'] ?? 'UNKNOWN',
+                    'success' => $quality !== 'UNUSABLE',
+                    'quality' => $quality,
                     'originalResponse' => $result,
                 ];
             }
@@ -284,7 +290,7 @@ class SwissPostApiService
     private function logToJsonl(array $entry): void
     {
         try {
-            $dir = \dirname(self::LOG_FILE);
+            $dir = \dirname(self::$pathLogFile);
             if (!is_dir($dir)) {
                 mkdir($dir, 0775, true);
             }
@@ -294,7 +300,7 @@ class SwissPostApiService
                 $entry
             ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-            file_put_contents(self::LOG_FILE, $line . "\n", FILE_APPEND | LOCK_EX);
+            file_put_contents(self::$pathLogFile, $line . "\n", FILE_APPEND | LOCK_EX);
         } catch (\Throwable $e) {
             // Silently ignore logging failures
         }

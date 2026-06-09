@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(
-    name: 'bettercheckoutsw6:example',
+    name: 'topdata:better-checkout:example',
     description: 'Example command for BetterCheckoutSW6 plugin'
 )]
 class ExampleCommand extends Command

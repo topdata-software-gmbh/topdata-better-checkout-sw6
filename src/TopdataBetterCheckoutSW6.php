@@ -8,6 +8,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\Plugin;
 use Shopware\Core\Framework\Plugin\Context\InstallContext;
 use Shopware\Core\Framework\Plugin\Context\UninstallContext;
+use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\CustomField\CustomFieldTypes;
 
@@ -15,7 +16,12 @@ class TopdataBetterCheckoutSW6 extends Plugin
 {
     public function install(InstallContext $installContext): void
     {
-        $this->installCustomFields($installContext);
+        $this->installCustomFields($installContext->getContext());
+    }
+
+    public function postUpdate(UpdateContext $updateContext): void
+    {
+        $this->installCustomFields($updateContext->getContext());
     }
 
     public function uninstall(UninstallContext $uninstallContext): void
@@ -30,13 +36,13 @@ class TopdataBetterCheckoutSW6 extends Plugin
         parent::uninstall($uninstallContext);
     }
 
-    private function installCustomFields(InstallContext $installContext): void
+    private function installCustomFields(Context $context): void
     {
         $customFieldSetRepository = $this->container->get('custom_field_set.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsAnyFilter('name', ['topdata_swiss_post_address_validation']));
-        $existing = $customFieldSetRepository->searchIds($criteria, $installContext->getContext());
+        $existing = $customFieldSetRepository->searchIds($criteria, $context);
 
         if ($existing->getTotal() > 0) {
             return;
@@ -73,7 +79,7 @@ class TopdataBetterCheckoutSW6 extends Plugin
                     ],
                 ],
             ],
-        ], $installContext->getContext());
+        ], $context);
     }
 
     private function removeCustomFields(UninstallContext $uninstallContext): void

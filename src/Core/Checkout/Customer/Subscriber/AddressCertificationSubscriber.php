@@ -70,7 +70,7 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
                 'countryCode' => $iso,
             ], $salesChannelId);
 
-            $quality = $validation['success'] ? ($validation['quality'] ?? 'UNKNOWN') : 'INVALID';
+            $quality = $validation['quality'] ?? ($validation['success'] ? 'UNKNOWN' : 'INVALID');
 
             $customFields = $addressEntity->getCustomFields() ?? [];
             $customFields[self::METADATA_KEY] = $quality;

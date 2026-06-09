@@ -125,6 +125,7 @@
             <argument type="service" id="cache.object"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="logger"/>
+            <argument>%kernel.logs_dir%</argument>
         </service>
 
         <!-- Swiss Post Storefront Controller -->
@@ -146,6 +147,14 @@
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
             <argument type="service" id="customer_address.repository"/>
             <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- COMMANDS -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Command\BackfillAddressQualityCommand">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="country.repository"/>
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
+            <tag name="console.command"/>
         </service>
     </services>
 </container>
