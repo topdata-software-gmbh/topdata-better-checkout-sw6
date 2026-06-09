@@ -105,14 +105,14 @@
         <title>Address Cloning</title>
         <title lang="de-DE">Adressen Klonen</title>
 
-        <component name="switch">
+        <input-field type="bool">
             <name>cloneBillingAsShipping</name>
             <label>Clone billing as shipping address</label>
             <label lang="de-DE">Rechnungsadresse als Lieferadresse klonen</label>
             <helpText>When enabled, creates two separate address entities even when billing and shipping are identical. Required for billing address isolation.</helpText>
             <helpText lang="de-DE">Wenn aktiviert, werden zwei separate Adressentitäten erstellt, auch wenn Rechnungs- und Lieferadresse identisch sind. Erforderlich für die Rechnungsadressenisolierung.</helpText>
             <defaultValue>true</defaultValue>
-        </component>
+        </input-field>
     </card>
 
     <card>
