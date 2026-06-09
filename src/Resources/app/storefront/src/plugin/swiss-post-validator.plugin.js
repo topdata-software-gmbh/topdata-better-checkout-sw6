@@ -47,13 +47,17 @@ export default class TopdataAddressValidator extends Plugin {
             'widget:', !!this.widget);
     }
 
+    _findElement(selector) {
+        return this.el.querySelector(selector) || this.el.closest('form')?.querySelector(selector);
+    }
+
     _initElements() {
         this.countrySelect = this.el.querySelector(this.options.countrySelectSelector);
         this.zipInput = this.el.querySelector(this.options.zipInputSelector);
         this.cityInput = this.el.querySelector(this.options.cityInputSelector);
         this.streetInput = this.el.querySelector(this.options.streetInputSelector);
-        this.firstNameInput = this.el.querySelector(this.options.firstNameInputSelector);
-        this.lastNameInput = this.el.querySelector(this.options.lastNameInputSelector);
+        this.firstNameInput = this._findElement(this.options.firstNameInputSelector);
+        this.lastNameInput = this._findElement(this.options.lastNameInputSelector);
         this.widget = this.el.querySelector('[data-swiss-post-validation]');
 
         if (!this.widget) {
