@@ -173,7 +173,7 @@ export default class TopdataAddressValidator extends Plugin {
             street: this.streetInput ? this.streetInput.value.trim() : '',
             zipcode: this.zipInput ? this.zipInput.value.trim() : '',
             city: this.cityInput ? this.cityInput.value.trim() : '',
-            countryCode: selectedOption ? selectedOption.getAttribute('data-country-iso') : 'CH',
+            countryId: selectedOption ? selectedOption.value : '',
         };
     }
 

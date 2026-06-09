@@ -44,6 +44,26 @@ class SwissPostStorefrontController extends StorefrontController
         }
 
         $addressData = $request->request->all('address');
+
+        $countryId = $addressData['countryId'] ?? null;
+        if (empty($countryId)) {
+            return new JsonResponse(['success' => false, 'error' => 'Country ID is required for address validation.'], 400);
+        }
+
+        $iso = $this->connection->fetchOne(
+            'SELECT iso FROM country WHERE id = UNHEX(?)',
+            [$countryId]
+        );
+        if (!$iso) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid country ID: could not resolve country ISO.'], 400);
+        }
+
+        if (!in_array($iso, ['CH', 'LI'], true)) {
+            return new JsonResponse(['success' => false, 'error' => 'Address validation is only available for Switzerland and Liechtenstein.'], 400);
+        }
+
+        $addressData['countryCode'] = $iso;
+
         $result = $this->apiService->validateAddress($addressData, $context->getSalesChannelId());
 
         return new JsonResponse($result);
