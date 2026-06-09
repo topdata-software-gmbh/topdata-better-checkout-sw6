@@ -2,16 +2,18 @@
 
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\RouterInterface;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\PlatformRequest;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Routing\RouterInterface;
 
 class LogoutRedirectSubscriber implements EventSubscriberInterface
 {
@@ -67,11 +69,13 @@ class LogoutRedirectSubscriber implements EventSubscriberInterface
 
     private function getLocaleFromRequest(Request $request): string
     {
-        if ($request->attributes->has('sw-language-id')) {
-            $criteria = new Criteria([$request->attributes->get('sw-language-id')]);
+        $salesChannelContext = $request->attributes->get(PlatformRequest::ATTRIBUTE_SALES_CHANNEL_CONTEXT_OBJECT);
+        if ($salesChannelContext instanceof SalesChannelContext) {
+            $languageId = $salesChannelContext->getLanguageId();
+            $criteria = new Criteria([$languageId]);
             $criteria->addAssociation('locale');
             $language = $this->languageRepository->search($criteria, Context::createDefaultContext())->first();
-            if ($language) {
+            if ($language && $language->getLocale() !== null) {
                 return $language->getLocale()->getCode();
             }
         }
