@@ -96,9 +96,16 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 
 ### Event Subscribers
 
-| Subscriber | Events |
-|---|---|
-| `AddressValidationSubscriber` | `framework.validation.customer.create`, `framework.validation.customer.update`, `framework.validation.address.create`, `framework.validation.address.update` |
+| Subscriber | Events | Notes |
+|---|---|---|
+| `AddressValidationSubscriber` | `framework.validation.customer.create/update`, `framework.validation.address.create/update` | Company field validation only (Swiss Post validation removed) |
+| `AddressCertificationSubscriber` | `customer_address.written` | Dispatches `ValidateAddressMessage` for async processing |
+
+### Messages
+
+| Message | Handler | Purpose |
+|---|---|---|
+| `ValidateAddressMessage` | `ValidateAddressHandler` | Validates address via Swiss Post DCAPI and stores quality in `custom_fields` |
 
 ### Twig Template Overrides (8 files)
 
@@ -131,3 +138,17 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 - **No database migrations** — all state is in `system_config` via `config.xml`
 - **No third-party integrations** — only depends on `shopware/core: 6.7.*`
 - **No Storefront API or SPA support** beyond standard Storefront template overrides
+
+### 2.11 Asynchronous Swiss Post Address Validation
+- **Registration/address save NEVER blocks** on Swiss Post API calls
+- `AddressCertificationSubscriber` dispatches `ValidateAddressMessage` via Symfony Messenger
+- `ValidateAddressHandler` processes the message asynchronously:
+  - Calls Swiss Post DCAPI validation endpoint
+  - Stores the quality result (`CERTIFIED`, `DOMICILE_CERTIFIED`, `USABLE`, `UNUSABLE`, `FIXED`, `INVALID`) in `customer_address.custom_fields[topdata_swiss_post_certification_status]`
+- If the API is unreachable, the message is retried by Symfony Messenger's retry strategy
+- The storefront Ajax validation endpoint (`SwissPostStorefrontController::validate`) remains for **non-blocking real-time feedback** only
+
+#### Running the worker
+```bash
+bin/console messenger:consume async -vv
+```

@@ -7,7 +7,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService;
+use Topdata\TopdataBetterCheckoutSW6\Message\ValidateAddressMessage;
 
 class AddressCertificationSubscriber implements EventSubscriberInterface
 {
@@ -15,7 +17,8 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
 
     public function __construct(
         private readonly SwissPostApiService $apiService,
-        private readonly EntityRepository $customerAddressRepository
+        private readonly EntityRepository $customerAddressRepository,
+        private readonly MessageBusInterface $messageBus,
     ) {
     }
 
@@ -28,7 +31,6 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
 
     public function onAddressWritten(EntityWrittenEvent $event): void
     {
-        $context = $event->getContext();
         $salesChannelId = null;
 
         if (!$this->apiService->isValidationEnabled($salesChannelId)) {
@@ -43,14 +45,16 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
                 continue;
             }
 
+            // Skip if a status is already being set in this write
             if (array_key_exists('customFields', $payload) && isset($payload['customFields'][self::METADATA_KEY])) {
                 continue;
             }
 
+            // Fetch address to check country (CH/LI only)
             $criteria = new Criteria([$addressId]);
             $criteria->addAssociation('country');
             /** @var CustomerAddressEntity|null $addressEntity */
-            $addressEntity = $this->customerAddressRepository->search($criteria, $context)->first();
+            $addressEntity = $this->customerAddressRepository->search($criteria, $event->getContext())->first();
 
             if (!$addressEntity || !$addressEntity->getCountry()) {
                 continue;
@@ -61,26 +65,11 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            $validation = $this->apiService->validateAddress([
-                'firstName' => $addressEntity->getFirstName(),
-                'lastName' => $addressEntity->getLastName(),
-                'street' => $addressEntity->getStreet(),
-                'zipcode' => $addressEntity->getZipcode(),
-                'city' => $addressEntity->getCity(),
-                'countryCode' => $iso,
-            ], $salesChannelId);
-
-            $quality = $validation['quality'] ?? ($validation['success'] ? 'UNKNOWN' : 'INVALID');
-
-            $customFields = $addressEntity->getCustomFields() ?? [];
-            $customFields[self::METADATA_KEY] = $quality;
-
-            $this->customerAddressRepository->update([
-                [
-                    'id' => $addressId,
-                    'customFields' => $customFields,
-                ],
-            ], $context);
+            // Dispatch async message instead of calling API synchronously
+            $this->messageBus->dispatch(new ValidateAddressMessage(
+                addressId: $addressId,
+                salesChannelId: $salesChannelId,
+            ));
         }
     }
 }

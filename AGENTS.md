@@ -13,7 +13,8 @@ Full feature spec at `_ai/SPEC.md` — read first for architecture, feature list
   - `PaymentMethodRouteDecorator` → guest payment filtering
   - `SetDefaultBillingAddressRouteDecorator` → billing address lock (403)
   - `ContextSwitchRouteDecorator` → billing address context protection
-- **1 event subscriber**: `AddressValidationSubscriber` (company validation on create/update)
+- **2 event subscribers**: `AddressValidationSubscriber` (company validation), `AddressCertificationSubscriber` (dispatches `ValidateAddressMessage` for async Swiss Post validation)
+- **1 async message/handler**: `ValidateAddressMessage` / `ValidateAddressHandler` (processed by `bin/console messenger:consume async`)
 - **8 Twig overrides** — all use `{% sw_extends %}` to extend core blocks
 - **Controllers** use PHP 8 `#[Route]` attributes; auto-loaded via `routes.xml` with `type="attribute"`
 - **No DB migrations** — all state is `system_config` via `config.xml`

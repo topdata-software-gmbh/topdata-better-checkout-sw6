@@ -90,8 +90,6 @@
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AddressValidationSubscriber">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
-            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
-            <argument type="service" id="country.repository"/>
             <tag name="kernel.event_subscriber"/>
         </service>
 
@@ -142,11 +140,17 @@
             </call>
         </service>
 
-        <!-- Address Certification Subscriber -->
+        <!-- Address Certification Subscriber (dispatches async validation message) -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AddressCertificationSubscriber">
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
             <argument type="service" id="customer_address.repository"/>
+            <argument type="service" id="messenger.default_bus"/>
             <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- ASYNC MESSAGE HANDLER -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Message\ValidateAddressHandler" autowire="true">
+            <tag name="messenger.message_handler"/>
         </service>
 
         <!-- COMMANDS -->
