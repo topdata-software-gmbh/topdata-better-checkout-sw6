@@ -2,21 +2,29 @@
 
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
 
+use Doctrine\DBAL\Connection;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\Api\Context\SalesChannelApiSource;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\BuildValidationEvent;
+use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
+use Shopware\Core\Framework\Validation\DataValidationDefinition;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Shopware\Core\Framework\Validation\DataValidationDefinition;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AddressValidationSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private readonly SystemConfigService $systemConfigService,
         private readonly RequestStack $requestStack,
+        private readonly Connection $connection,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -46,6 +54,7 @@ class AddressValidationSubscriber implements EventSubscriberInterface
         // ---- Apply validation rules to billing address if it exists
         if (isset($subDefinitions['billingAddress'])) {
             $this->applyValidationRules($subDefinitions['billingAddress'], 'billing', $salesChannelId, $isBusiness);
+            $this->addZipcodeCountryCheck($subDefinitions['billingAddress']);
 
             // ---- Handle company field validation based on configuration
             $billingSetting = $this->systemConfigService->getString('TopdataBetterCheckoutSW6.config.companyValidationBilling', $salesChannelId);
@@ -59,6 +68,7 @@ class AddressValidationSubscriber implements EventSubscriberInterface
         // ---- Apply validation rules to shipping address if it exists
         if (isset($subDefinitions['shippingAddress'])) {
             $this->applyValidationRules($subDefinitions['shippingAddress'], 'shipping', $salesChannelId, $isBusiness);
+            $this->addZipcodeCountryCheck($subDefinitions['shippingAddress']);
         }
     }
 
@@ -88,6 +98,7 @@ class AddressValidationSubscriber implements EventSubscriberInterface
         }
 
         $this->applyValidationRules($definition, $type, $salesChannelId, $isBusiness);
+        $this->addZipcodeCountryCheck($definition);
     }
 
     private function applyValidationRules(DataValidationDefinition $definition, string $type, ?string $salesChannelId, bool $isBusiness): void
@@ -139,5 +150,72 @@ class AddressValidationSubscriber implements EventSubscriberInterface
 
         // ---- Add the new constraint
         $definition->add($fieldName, $newConstraint);
+    }
+
+    private function addZipcodeCountryCheck(DataValidationDefinition $definition): void
+    {
+        $definition->add('zipcode', new Callback([$this, 'validateZipcodeCountry']));
+    }
+
+    public function validateZipcodeCountry($zipcode, ExecutionContextInterface $context): void
+    {
+        if (empty($zipcode)) {
+            return;
+        }
+
+        $object = $context->getObject();
+        $countryId = null;
+
+        if ($object instanceof RequestDataBag) {
+            $countryId = $object->get('countryId');
+        } elseif (\is_array($object)) {
+            $countryId = $object['countryId'] ?? null;
+        } elseif (\is_object($object)) {
+            $countryId = $object->countryId ?? null;
+        }
+
+        if (empty($countryId) || !\is_string($countryId) || !Uuid::isValid($countryId)) {
+            return;
+        }
+
+        $countryIso = $this->getCountryIso($countryId);
+        if (empty($countryIso)) {
+            return;
+        }
+
+        if (!preg_match('/^\d{4}$/', (string)$zipcode)) {
+            return;
+        }
+
+        $zipInt = (int)$zipcode;
+        $isLiechtensteinZip = ($zipInt >= 9480 && $zipInt <= 9499);
+
+        if ($countryIso === 'LI' && !$isLiechtensteinZip) {
+            $message = $this->translator->trans('TopdataBetterCheckoutSW6.validation.invalidLiechtensteinZip');
+            $context->buildViolation($message)->addViolation();
+        }
+
+        if ($countryIso === 'CH' && $isLiechtensteinZip) {
+            $message = $this->translator->trans('TopdataBetterCheckoutSW6.validation.swissZipForLiechtenstein');
+            $context->buildViolation($message)->addViolation();
+        }
+    }
+
+    private function getCountryIso(?string $countryId): ?string
+    {
+        if (!$countryId) {
+            return null;
+        }
+
+        try {
+            $countryIdBytes = Uuid::fromHexToBytes($countryId);
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return $this->connection->fetchOne(
+            'SELECT iso FROM country WHERE id = :id',
+            ['id' => $countryIdBytes]
+        ) ?: null;
     }
 }

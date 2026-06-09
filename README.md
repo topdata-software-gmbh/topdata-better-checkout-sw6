@@ -27,6 +27,7 @@ The plugin is intentionally small and implemented as Storefront template overrid
   - Integrates a context protection layer (`ContextSwitchRouteDecorator`) that rejects programmatic context changes of the active billing address.
   - Overrides the checkout page behavior: converts "Rechnungsadresse ändern" to "Rechnungsadresse bearbeiten", directly opening the active billing address edit dialog rather than a search/selection list.
 - **Granular Company Name Validation**: Allows granular control to make the company name input mandatory or optional independently for billing and shipping addresses.
+- **Strict Country-ZIP Correlation Validation**: Custom validation constraints ensure that Swiss (`CH`) and Liechtenstein (`LI`) postal codes are mapped strictly to their correct political countries. Liechtenstein addresses must have postcodes in the `9480-9499` range, preventing Swiss Post validation mix-ups from persisting incorrect country labels in the database.
 - Adds storefront snippets for English (en-GB) and German (de-DE) to make the boxes translatable.
 - **Address Book Optimization**: Renames the generic headings in the customer account (`/account/address`) to distinctly display "Billing address" and "Available shipping addresses" for improved clarity.
 

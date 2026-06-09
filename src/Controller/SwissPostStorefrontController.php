@@ -8,6 +8,7 @@ use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService;
 
 /**
@@ -19,7 +20,8 @@ class SwissPostStorefrontController extends StorefrontController
 {
     public function __construct(
         private readonly SwissPostApiService $apiService,
-        private readonly Connection $connection
+        private readonly Connection $connection,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -60,6 +62,22 @@ class SwissPostStorefrontController extends StorefrontController
 
         if (!in_array($iso, ['CH', 'LI'], true)) {
             return new JsonResponse(['success' => false, 'error' => 'Address validation is only available for Switzerland and Liechtenstein.'], 400);
+        }
+
+        $zipcode = $addressData['zipcode'] ?? '';
+        if ($zipcode !== '' && preg_match('/^\d{4}$/', $zipcode)) {
+            $zipInt = (int)$zipcode;
+            $isLiZip = ($zipInt >= 9480 && $zipInt <= 9499);
+
+            if ($iso === 'LI' && !$isLiZip) {
+                $error = $this->translator->trans('TopdataBetterCheckoutSW6.validation.invalidLiechtensteinZip');
+                return new JsonResponse(['success' => false, 'error' => $error], 400);
+            }
+
+            if ($iso === 'CH' && $isLiZip) {
+                $error = $this->translator->trans('TopdataBetterCheckoutSW6.validation.swissZipForLiechtenstein');
+                return new JsonResponse(['success' => false, 'error' => $error], 400);
+            }
         }
 
         $addressData['countryCode'] = $iso;

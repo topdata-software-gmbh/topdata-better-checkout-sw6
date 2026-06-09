@@ -49,6 +49,10 @@
             "errorText": "Falha na verificação de endereço:",
             "autocompleteZipPlaceholder": "Introduza o código postal...",
             "autocompleteStreetPlaceholder": "Introduza a rua..."
+        },
+        "validation": {
+            "invalidLiechtensteinZip": "O código postal não é válido para o Liechtenstein (esperado 9480-9499).",
+            "swissZipForLiechtenstein": "Este código postal pertence ao Liechtenstein. Por favor, selecione Liechtenstein como país."
         }
     }
 }

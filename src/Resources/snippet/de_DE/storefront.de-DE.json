@@ -49,6 +49,10 @@
             "errorText": "Fehler bei der Adressprüfung:",
             "autocompleteZipPlaceholder": "PLZ eingeben...",
             "autocompleteStreetPlaceholder": "Strasse eingeben..."
+        },
+        "validation": {
+            "invalidLiechtensteinZip": "Die Postleitzahl ist für Liechtenstein nicht gültig (erwartet wird 9480-9499).",
+            "swissZipForLiechtenstein": "Diese Postleitzahl gehört zu Liechtenstein. Bitte wählen Sie Liechtenstein als Land aus."
         }
     }
 }
