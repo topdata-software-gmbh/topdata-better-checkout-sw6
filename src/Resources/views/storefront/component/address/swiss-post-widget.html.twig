@@ -1,24 +1,28 @@
-<div class="swiss-post-validation-wrapper d-none my-3" data-swiss-post-validation="true">
-    <div class="card border">
-        <div class="card-header bg-light py-2">
-            <strong>{{ "TopdataBetterCheckoutSW6.swissPost.validationTitle"|trans|sw_sanitize }}</strong>
-        </div>
-        <div class="card-body py-2">
-            <div class="status-msg status-default text-muted">
-                {{ "TopdataBetterCheckoutSW6.swissPost.defaultText"|trans|sw_sanitize }}
+    <div class="swiss-post-validation-wrapper d-none my-3" data-swiss-post-validation="true" data-error-message="{{ "better-checkout.swissPostValidationFailed"|trans|sw_sanitize }}">
+        <div class="card border">
+            <div class="card-header bg-light py-2">
+                <strong>{{ "TopdataBetterCheckoutSW6.swissPost.validationTitle"|trans|sw_sanitize }}</strong>
             </div>
-            <div class="status-msg status-certified text-success d-none">
-                {% sw_icon 'checkmark-circle' style { size: 'xs', pack: 'solid' } %}
-                {{ "TopdataBetterCheckoutSW6.swissPost.certifiedText"|trans|sw_sanitize }}
-            </div>
-            <div class="status-msg status-not-certified text-warning d-none">
-                {% sw_icon 'warning' style { size: 'xs', pack: 'solid' } %}
-                {{ "TopdataBetterCheckoutSW6.swissPost.notCertifiedText"|trans|sw_sanitize }}
-            </div>
-            <div class="status-msg status-error text-danger d-none">
-                {% sw_icon 'blocked' style { size: 'xs', pack: 'solid' } %}
-                <span class="error-details"></span>
+            <div class="card-body py-2">
+                <div class="status-msg status-default text-muted">
+                    {{ "TopdataBetterCheckoutSW6.swissPost.defaultText"|trans|sw_sanitize }}
+                </div>
+                <div class="status-msg status-certified text-success d-none">
+                    {% sw_icon 'checkmark-circle' style { size: 'xs', pack: 'solid' } %}
+                    {{ "TopdataBetterCheckoutSW6.swissPost.certifiedText"|trans|sw_sanitize }}
+                </div>
+                <div class="status-msg status-usable text-info d-none">
+                    {% sw_icon 'checkmark-circle' style { size: 'xs', pack: 'solid' } %}
+                    {{ "TopdataBetterCheckoutSW6.swissPost.usableText"|trans|sw_sanitize }}
+                </div>
+                <div class="status-msg status-not-certified text-warning d-none">
+                    {% sw_icon 'warning' style { size: 'xs', pack: 'solid' } %}
+                    {{ "TopdataBetterCheckoutSW6.swissPost.notCertifiedText"|trans|sw_sanitize }}
+                </div>
+                <div class="status-msg status-error text-danger d-none">
+                    {% sw_icon 'blocked' style { size: 'xs', pack: 'solid' } %}
+                    <span class="error-details"></span>
+                </div>
             </div>
         </div>
     </div>
-</div>

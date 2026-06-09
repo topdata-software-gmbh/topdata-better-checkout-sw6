@@ -44,6 +44,7 @@
             "validationTitle": "Address check (Swiss Post)",
             "defaultText": "The check will be executed as soon as all fields are filled in.",
             "certifiedText": "The address is certified by Swiss Post.",
+            "usableText": "The address was recognized but is not officially certified.",
             "notCertifiedText": "The system could not detect an acceptable address.",
             "errorText": "Address check failure:",
             "autocompleteZipPlaceholder": "Enter ZIP code...",

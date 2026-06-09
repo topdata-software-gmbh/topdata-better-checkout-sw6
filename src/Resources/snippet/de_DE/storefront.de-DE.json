@@ -44,6 +44,7 @@
             "validationTitle": "Adressprüfung (Swiss Post)",
             "defaultText": "Die Prüfung wird ausgeführt, sobald alle Felder ausgefüllt sind.",
             "certifiedText": "Die Adresse ist von der Swiss Post zertifiziert.",
+            "usableText": "Die Adresse wurde erkannt, ist aber nicht offiziell zertifiziert.",
             "notCertifiedText": "Das System konnte keine akzeptable Adresse erkennen.",
             "errorText": "Fehler bei der Adressprüfung:",
             "autocompleteZipPlaceholder": "PLZ eingeben...",

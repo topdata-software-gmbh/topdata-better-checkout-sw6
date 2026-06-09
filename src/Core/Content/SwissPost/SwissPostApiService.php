@@ -14,12 +14,17 @@ class SwissPostApiService
 {
     private const AUTH_URL = 'https://api.post.ch/OAuth/token';
     private const BASE_API_URL = 'https://dcapi.apis.post.ch/address/v1';
-    private const CACHE_KEY_TOKEN = 'topdata_swiss_post_oauth_token';
     private const CACHE_KEY_PREFIX_ZIP = 'topdata_swiss_post_zip_';
     private const CACHE_KEY_PREFIX_STREET = 'topdata_swiss_post_street_';
     private const CACHE_KEY_PREFIX_HOUSENR = 'topdata_swiss_post_housenr_';
-    private const LOG_FILE = '{LOGS_DIR}/swiss-post.jsonl';
-    private static $pathLogFile;
+    private const LOG_FILE_AUTOCOMPLETE = '{LOGS_DIR}/swiss-post-autocomplete.jsonl';
+    private const LOG_FILE_VALIDATION = '{LOGS_DIR}/swiss-post-validation.jsonl';
+    private const TOKEN_CACHE_FILE = '{LOGS_DIR}/.swiss-post-oauth-token';
+    private static string $autocompleteLogFile;
+    private static string $validationLogFile;
+    private static string $tokenCacheFile;
+
+    private string $currentLogFile = '';
 
 
     public function __construct(
@@ -31,7 +36,9 @@ class SwissPostApiService
         private readonly LoggerInterface $logger,
         string $logsDir,
     ) {
-        self::$pathLogFile = str_replace('{LOGS_DIR}', $logsDir, self::LOG_FILE);
+        self::$autocompleteLogFile = str_replace('{LOGS_DIR}', $logsDir, self::LOG_FILE_AUTOCOMPLETE);
+        self::$validationLogFile = str_replace('{LOGS_DIR}', $logsDir, self::LOG_FILE_VALIDATION);
+        self::$tokenCacheFile = str_replace('{LOGS_DIR}', $logsDir, self::TOKEN_CACHE_FILE);
     }
 
 
@@ -69,11 +76,9 @@ class SwissPostApiService
 
     public function getAccessToken(?string $salesChannelId = null): ?string
     {
-        $cacheKey = self::CACHE_KEY_TOKEN . '_' . ($salesChannelId ?? 'global');
-        $cacheItem = $this->cache->getItem($cacheKey);
-
-        if ($cacheItem->isHit()) {
-            return $cacheItem->get();
+        $cached = $this->readTokenFromCache($salesChannelId);
+        if ($cached !== null) {
+            return $cached;
         }
 
         $clientId = $this->systemConfigService->getString('TopdataBetterCheckoutSW6.config.swissPostClientId', $salesChannelId);
@@ -97,9 +102,7 @@ class SwissPostApiService
         $expiresIn = (int) ($data['expires_in'] ?? 3500);
 
         if ($token) {
-            $cacheItem->set($token);
-            $cacheItem->expiresAfter($expiresIn - 60);
-            $this->cache->save($cacheItem);
+            $this->writeTokenToCache($token, $expiresIn, $salesChannelId);
 
             $this->logToJsonl([
                 'action' => 'getAccessToken',
@@ -173,12 +176,15 @@ class SwissPostApiService
 
     public function validateAddress(array $address, ?string $salesChannelId = null): array
     {
+        $this->currentLogFile = self::$validationLogFile;
+
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
             $this->logToJsonl([
                 'action' => 'validate',
+                'direction' => 'request',
                 'error' => 'No token available',
-                'address' => $this->redactAddress($address),
+                'address' => $address,
             ]);
 
             return ['success' => false, 'error' => 'Could not authenticate with Swiss Post API'];
@@ -200,6 +206,13 @@ class SwissPostApiService
             $payload = json_encode($dto);
             $uri = self::BASE_API_URL . '/addresses/validation';
 
+            $this->logToJsonl([
+                'action' => 'validate',
+                'direction' => 'request',
+                'address' => $address,
+                'payload' => $dto->jsonSerialize(),
+            ]);
+
             $request = $this->requestFactory->createRequest('POST', $uri)
                 ->withHeader('Authorization', 'Bearer ' . $token)
                 ->withHeader('Content-Type', 'application/json')
@@ -216,8 +229,9 @@ class SwissPostApiService
                 } else {
                     $this->logToJsonl([
                         'action' => 'validate',
+                        'direction' => 'response',
                         'error' => 'Re-auth failed after 401',
-                        'address' => $this->redactAddress($address),
+                        'address' => $address,
                     ]);
 
                     return ['success' => false, 'error' => 'Could not re-authenticate with Swiss Post API'];
@@ -227,22 +241,37 @@ class SwissPostApiService
             $contents = $response->getBody()->getContents();
             $statusCode = $response->getStatusCode();
 
-            $this->logToJsonl([
-                'action' => 'validate',
-                'status' => $statusCode,
-                'address' => $this->redactAddress($address),
-            ]);
-
             if ($statusCode === 200) {
                 $result = json_decode($contents, true);
                 $quality = $result['quality'] ?? 'UNKNOWN';
 
-                return [
-                    'success' => $quality !== 'UNUSABLE',
+                $isUnusable = $quality === 'UNUSABLE';
+                $errorMsg = $isUnusable ? ('Swiss Post could not validate this address (quality: ' . $quality . ')') : null;
+
+                $this->logToJsonl([
+                    'action' => 'validate',
+                    'direction' => 'response',
+                    'status' => $statusCode,
                     'quality' => $quality,
                     'originalResponse' => $result,
+                ]);
+
+                return [
+                    'success' => !$isUnusable,
+                    'quality' => $quality,
+                    'originalResponse' => $result,
+                    'error' => $errorMsg,
                 ];
             }
+
+            $this->logToJsonl([
+                'action' => 'validate',
+                'direction' => 'response',
+                'status' => $statusCode,
+                'error' => 'API returned status ' . $statusCode,
+                'body' => json_decode($contents, true),
+                'address' => $address,
+            ]);
 
             return [
                 'success' => false,
@@ -252,21 +281,13 @@ class SwissPostApiService
         } catch (\Throwable $e) {
             $this->logToJsonl([
                 'action' => 'validate',
+                'direction' => 'response',
                 'error' => $e->getMessage(),
-                'address' => $this->redactAddress($address),
+                'address' => $address,
             ]);
 
             return ['success' => false, 'error' => $e->getMessage()];
         }
-    }
-
-    private function redactAddress(array $address): array
-    {
-        return [
-            'zip' => $address['zipcode'] ?? '',
-            'city' => $address['city'] ?? '',
-            'country' => $address['countryCode'] ?? '',
-        ];
     }
 
     private function splitStreet(string $street): array
@@ -283,14 +304,20 @@ class SwissPostApiService
 
     private function invalidateTokenCache(?string $salesChannelId = null): void
     {
-        $cacheKey = self::CACHE_KEY_TOKEN . '_' . ($salesChannelId ?? 'global');
-        $this->cache->deleteItem($cacheKey);
+        $file = $this->getTokenCacheFilePath($salesChannelId);
+        if (is_file($file)) {
+            @unlink($file);
+        }
     }
 
     private function logToJsonl(array $entry): void
     {
+        if (empty($this->currentLogFile)) {
+            return;
+        }
+
         try {
-            $dir = \dirname(self::$pathLogFile);
+            $dir = \dirname($this->currentLogFile);
             if (!is_dir($dir)) {
                 mkdir($dir, 0775, true);
             }
@@ -300,7 +327,7 @@ class SwissPostApiService
                 $entry
             ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-            file_put_contents(self::$pathLogFile, $line . "\n", FILE_APPEND | LOCK_EX);
+            file_put_contents($this->currentLogFile, $line . "\n", FILE_APPEND | LOCK_EX);
         } catch (\Throwable $e) {
             // Silently ignore logging failures
         }
@@ -308,6 +335,8 @@ class SwissPostApiService
 
     public function autocompleteZip(string $query, ?string $salesChannelId = null): array
     {
+        $this->currentLogFile = self::$autocompleteLogFile;
+
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
             $this->logToJsonl([
@@ -400,6 +429,8 @@ class SwissPostApiService
 
     public function autocompleteStreet(string $query, string $zip, ?string $salesChannelId = null): array
     {
+        $this->currentLogFile = self::$autocompleteLogFile;
+
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
             $this->logToJsonl([
@@ -499,6 +530,8 @@ class SwissPostApiService
 
     public function autocompleteHouseNumber(string $query, string $street, string $zip, ?string $salesChannelId = null): array
     {
+        $this->currentLogFile = self::$autocompleteLogFile;
+
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
             $this->logToJsonl([
@@ -601,5 +634,53 @@ class SwissPostApiService
         }
 
         return [];
+    }
+
+    private function getTokenCacheFilePath(?string $salesChannelId): string
+    {
+        return self::$tokenCacheFile . '_' . ($salesChannelId ?? 'global');
+    }
+
+    private function readTokenFromCache(?string $salesChannelId): ?string
+    {
+        $file = $this->getTokenCacheFilePath($salesChannelId);
+
+        if (!is_file($file)) {
+            return null;
+        }
+
+        $data = file_get_contents($file);
+        if ($data === false) {
+            return null;
+        }
+
+        $entry = json_decode($data, true);
+        if (!isset($entry['token'], $entry['expires_at'])) {
+            return null;
+        }
+
+        if (strtotime($entry['expires_at']) <= time() + 60) {
+            return null;
+        }
+
+        return $entry['token'];
+    }
+
+    private function writeTokenToCache(string $token, int $expiresIn, ?string $salesChannelId): void
+    {
+        $file = $this->getTokenCacheFilePath($salesChannelId);
+        $dir = \dirname($file);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $entry = json_encode([
+            'token' => $token,
+            'expires_at' => date('c', time() + $expiresIn - 60),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        $tmp = $file . '.tmp';
+        file_put_contents($tmp, $entry, LOCK_EX);
+        rename($tmp, $file);
     }
 }

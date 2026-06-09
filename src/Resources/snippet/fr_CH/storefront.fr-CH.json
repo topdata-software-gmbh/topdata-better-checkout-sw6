@@ -44,6 +44,7 @@
             "validationTitle": "Vérification d'adresse (Swiss Post)",
             "defaultText": "La vérification sera exécutée dès que tous les champs seront remplis.",
             "certifiedText": "L'adresse est certifiée par Swiss Post.",
+            "usableText": "L'adresse a été reconnue mais n'est pas officiellement certifiée.",
             "notCertifiedText": "Le système n'a pas pu détecter une adresse acceptable.",
             "errorText": "Échec de la vérification d'adresse :",
             "autocompleteZipPlaceholder": "Entrez le code postal...",

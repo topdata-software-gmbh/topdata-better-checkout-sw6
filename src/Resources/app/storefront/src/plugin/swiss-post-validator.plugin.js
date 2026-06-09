@@ -150,11 +150,13 @@ export default class TopdataAddressValidator extends Plugin {
                 if (data.success) {
                     if (['CERTIFIED', 'DOMICILE_CERTIFIED'].includes(data.quality)) {
                         this._updateWidgetState('certified');
+                    } else if (data.quality === 'USABLE') {
+                        this._updateWidgetState('usable');
                     } else {
                         this._updateWidgetState('not-certified');
                     }
                 } else {
-                    this._updateWidgetState('error', data.error || 'Server validation error');
+                    this._updateWidgetState('error', this.widget?.dataset?.errorMessage || 'Address validation failed');
                 }
             } catch (e) {
                 console.error(LOG_PREFIX, 'Validation response parse error:', e);
