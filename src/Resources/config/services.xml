@@ -90,6 +90,8 @@
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AddressValidationSubscriber">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="Symfony\Component\HttpFoundation\RequestStack"/>
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
+            <argument type="service" id="country.repository"/>
             <tag name="kernel.event_subscriber"/>
         </service>
 

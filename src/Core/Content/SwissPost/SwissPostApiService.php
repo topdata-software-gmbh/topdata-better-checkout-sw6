@@ -18,6 +18,7 @@ class SwissPostApiService
     private const CACHE_KEY_PREFIX_ZIP = 'topdata_swiss_post_zip_';
     private const CACHE_KEY_PREFIX_STREET = 'topdata_swiss_post_street_';
     private const CACHE_KEY_PREFIX_HOUSENR = 'topdata_swiss_post_housenr_';
+    private const LOG_FILE = '/var/log/swiss-post.jsonl';
 
     public function __construct(
         private readonly ClientInterface $httpClient,
@@ -74,6 +75,11 @@ class SwissPostApiService
         $clientSecret = $this->systemConfigService->getString('TopdataBetterCheckoutSW6.config.swissPostClientSecret', $salesChannelId);
 
         if (empty($clientId) || empty($clientSecret)) {
+            $this->logToJsonl([
+                'action' => 'getAccessToken',
+                'error' => 'Missing credentials',
+            ]);
+
             return null;
         }
 
@@ -90,8 +96,18 @@ class SwissPostApiService
             $cacheItem->expiresAfter($expiresIn - 60);
             $this->cache->save($cacheItem);
 
+            $this->logToJsonl([
+                'action' => 'getAccessToken',
+                'success' => true,
+            ]);
+
             return $token;
         }
+
+        $this->logToJsonl([
+            'action' => 'getAccessToken',
+            'error' => 'No access_token in response',
+        ]);
 
         return null;
     }
@@ -127,6 +143,11 @@ class SwissPostApiService
 
             $response = $this->httpClient->sendRequest($request);
 
+            $this->logToJsonl([
+                'action' => 'auth',
+                'status' => $response->getStatusCode(),
+            ]);
+
             if ($response->getStatusCode() !== 200) {
                 $this->logger->error('Swiss Post Auth Failure', ['status' => $response->getStatusCode()]);
 
@@ -136,6 +157,10 @@ class SwissPostApiService
             return json_decode($response->getBody()->getContents(), true);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post Auth Exception', ['exception' => $e->getMessage()]);
+            $this->logToJsonl([
+                'action' => 'auth',
+                'error' => $e->getMessage(),
+            ]);
 
             return null;
         }
@@ -145,6 +170,12 @@ class SwissPostApiService
     {
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
+            $this->logToJsonl([
+                'action' => 'validate',
+                'error' => 'No token available',
+                'address' => $this->redactAddress($address),
+            ]);
+
             return ['success' => false, 'error' => 'Could not authenticate with Swiss Post API'];
         }
 
@@ -178,13 +209,26 @@ class SwissPostApiService
                     $request = $request->withHeader('Authorization', 'Bearer ' . $token);
                     $response = $this->httpClient->sendRequest($request);
                 } else {
+                    $this->logToJsonl([
+                        'action' => 'validate',
+                        'error' => 'Re-auth failed after 401',
+                        'address' => $this->redactAddress($address),
+                    ]);
+
                     return ['success' => false, 'error' => 'Could not re-authenticate with Swiss Post API'];
                 }
             }
 
             $contents = $response->getBody()->getContents();
+            $statusCode = $response->getStatusCode();
 
-            if ($response->getStatusCode() === 200) {
+            $this->logToJsonl([
+                'action' => 'validate',
+                'status' => $statusCode,
+                'address' => $this->redactAddress($address),
+            ]);
+
+            if ($statusCode === 200) {
                 $result = json_decode($contents, true);
 
                 return [
@@ -196,12 +240,27 @@ class SwissPostApiService
 
             return [
                 'success' => false,
-                'error' => 'API returned status ' . $response->getStatusCode(),
+                'error' => 'API returned status ' . $statusCode,
                 'details' => json_decode($contents, true),
             ];
         } catch (\Throwable $e) {
+            $this->logToJsonl([
+                'action' => 'validate',
+                'error' => $e->getMessage(),
+                'address' => $this->redactAddress($address),
+            ]);
+
             return ['success' => false, 'error' => $e->getMessage()];
         }
+    }
+
+    private function redactAddress(array $address): array
+    {
+        return [
+            'zip' => $address['zipcode'] ?? '',
+            'city' => $address['city'] ?? '',
+            'country' => $address['countryCode'] ?? '',
+        ];
     }
 
     private function splitStreet(string $street): array
@@ -222,10 +281,35 @@ class SwissPostApiService
         $this->cache->deleteItem($cacheKey);
     }
 
+    private function logToJsonl(array $entry): void
+    {
+        try {
+            $dir = \dirname(self::LOG_FILE);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+
+            $line = json_encode(array_merge(
+                ['timestamp' => date('c')],
+                $entry
+            ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+            file_put_contents(self::LOG_FILE, $line . "\n", FILE_APPEND | LOCK_EX);
+        } catch (\Throwable $e) {
+            // Silently ignore logging failures
+        }
+    }
+
     public function autocompleteZip(string $query, ?string $salesChannelId = null): array
     {
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
+            $this->logToJsonl([
+                'action' => 'autocompleteZip',
+                'error' => 'No token',
+                'query' => $query,
+            ]);
+
             return [];
         }
 
@@ -233,6 +317,12 @@ class SwissPostApiService
         $cacheItem = $this->cache->getItem($cacheKey);
 
         if ($cacheItem->isHit()) {
+            $this->logToJsonl([
+                'action' => 'autocompleteZip',
+                'cache' => true,
+                'query' => $query,
+            ]);
+
             return $cacheItem->get();
         }
 
@@ -251,11 +341,19 @@ class SwissPostApiService
                     $request = $request->withHeader('Authorization', 'Bearer ' . $token);
                     $response = $this->httpClient->sendRequest($request);
                 } else {
+                    $this->logToJsonl([
+                        'action' => 'autocompleteZip',
+                        'error' => 'Re-auth failed',
+                        'query' => $query,
+                    ]);
+
                     return [];
                 }
             }
 
-            if ($response->getStatusCode() === 200) {
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
 
                 $results = array_map(static fn ($item) => [
@@ -267,10 +365,28 @@ class SwissPostApiService
                 $cacheItem->expiresAfter(86400);
                 $this->cache->save($cacheItem);
 
+                $this->logToJsonl([
+                    'action' => 'autocompleteZip',
+                    'status' => $statusCode,
+                    'query' => $query,
+                    'results' => count($results),
+                ]);
+
                 return $results;
             }
+
+            $this->logToJsonl([
+                'action' => 'autocompleteZip',
+                'status' => $statusCode,
+                'query' => $query,
+            ]);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post Autocomplete Exception', ['exception' => $e->getMessage()]);
+            $this->logToJsonl([
+                'action' => 'autocompleteZip',
+                'error' => $e->getMessage(),
+                'query' => $query,
+            ]);
         }
 
         return [];
@@ -280,6 +396,13 @@ class SwissPostApiService
     {
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
+            $this->logToJsonl([
+                'action' => 'autocompleteStreet',
+                'error' => 'No token',
+                'query' => $query,
+                'zip' => $zip,
+            ]);
+
             return [];
         }
 
@@ -287,6 +410,13 @@ class SwissPostApiService
         $cacheItem = $this->cache->getItem($cacheKey);
 
         if ($cacheItem->isHit()) {
+            $this->logToJsonl([
+                'action' => 'autocompleteStreet',
+                'cache' => true,
+                'query' => $query,
+                'zip' => $zip,
+            ]);
+
             return $cacheItem->get();
         }
 
@@ -305,11 +435,20 @@ class SwissPostApiService
                     $request = $request->withHeader('Authorization', 'Bearer ' . $token);
                     $response = $this->httpClient->sendRequest($request);
                 } else {
+                    $this->logToJsonl([
+                        'action' => 'autocompleteStreet',
+                        'error' => 'Re-auth failed',
+                        'query' => $query,
+                        'zip' => $zip,
+                    ]);
+
                     return [];
                 }
             }
 
-            if ($response->getStatusCode() === 200) {
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
 
                 $results = array_map(static fn ($item) => [
@@ -322,10 +461,31 @@ class SwissPostApiService
                 $cacheItem->expiresAfter(86400);
                 $this->cache->save($cacheItem);
 
+                $this->logToJsonl([
+                    'action' => 'autocompleteStreet',
+                    'status' => $statusCode,
+                    'query' => $query,
+                    'zip' => $zip,
+                    'results' => count($results),
+                ]);
+
                 return $results;
             }
+
+            $this->logToJsonl([
+                'action' => 'autocompleteStreet',
+                'status' => $statusCode,
+                'query' => $query,
+                'zip' => $zip,
+            ]);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post Street Autocomplete Exception', ['exception' => $e->getMessage()]);
+            $this->logToJsonl([
+                'action' => 'autocompleteStreet',
+                'error' => $e->getMessage(),
+                'query' => $query,
+                'zip' => $zip,
+            ]);
         }
 
         return [];
@@ -335,6 +495,14 @@ class SwissPostApiService
     {
         $token = $this->getAccessToken($salesChannelId);
         if (!$token) {
+            $this->logToJsonl([
+                'action' => 'autocompleteHouseNumber',
+                'error' => 'No token',
+                'query' => $query,
+                'street' => $street,
+                'zip' => $zip,
+            ]);
+
             return [];
         }
 
@@ -342,6 +510,14 @@ class SwissPostApiService
         $cacheItem = $this->cache->getItem($cacheKey);
 
         if ($cacheItem->isHit()) {
+            $this->logToJsonl([
+                'action' => 'autocompleteHouseNumber',
+                'cache' => true,
+                'query' => $query,
+                'street' => $street,
+                'zip' => $zip,
+            ]);
+
             return $cacheItem->get();
         }
 
@@ -360,11 +536,21 @@ class SwissPostApiService
                     $request = $request->withHeader('Authorization', 'Bearer ' . $token);
                     $response = $this->httpClient->sendRequest($request);
                 } else {
+                    $this->logToJsonl([
+                        'action' => 'autocompleteHouseNumber',
+                        'error' => 'Re-auth failed',
+                        'query' => $query,
+                        'street' => $street,
+                        'zip' => $zip,
+                    ]);
+
                     return [];
                 }
             }
 
-            if ($response->getStatusCode() === 200) {
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
 
                 $results = array_map(static fn ($item) => [
@@ -378,10 +564,34 @@ class SwissPostApiService
                 $cacheItem->expiresAfter(86400);
                 $this->cache->save($cacheItem);
 
+                $this->logToJsonl([
+                    'action' => 'autocompleteHouseNumber',
+                    'status' => $statusCode,
+                    'query' => $query,
+                    'street' => $street,
+                    'zip' => $zip,
+                    'results' => count($results),
+                ]);
+
                 return $results;
             }
+
+            $this->logToJsonl([
+                'action' => 'autocompleteHouseNumber',
+                'status' => $statusCode,
+                'query' => $query,
+                'street' => $street,
+                'zip' => $zip,
+            ]);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post House Number Autocomplete Exception', ['exception' => $e->getMessage()]);
+            $this->logToJsonl([
+                'action' => 'autocompleteHouseNumber',
+                'error' => $e->getMessage(),
+                'query' => $query,
+                'street' => $street,
+                'zip' => $zip,
+            ]);
         }
 
         return [];

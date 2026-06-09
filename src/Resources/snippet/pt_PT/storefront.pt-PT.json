@@ -12,6 +12,7 @@
         "register": {
             "emailAlreadyRegistered": "Já está registado como cliente - por favor, inicie sessão."
         },
+        "swissPostValidationFailed": "O endereço não pôde ser validado pelo Swiss Post. Por favor, verifique os detalhes do seu endereço.",
         "account": {
             "addressesTitle": "Endereço de faturação",
             "addressesAvailable": "Endereços de entrega disponíveis"

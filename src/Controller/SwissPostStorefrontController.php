@@ -34,6 +34,7 @@ class SwissPostStorefrontController extends StorefrontController
         path: '/bettercheckoutsw6/swiss-post/validate',
         name: 'frontend.bettercheckoutsw6.swiss-post.validate',
         options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true],
         methods: ['POST']
     )]
     public function validate(Request $request, SalesChannelContext $context): JsonResponse
@@ -59,6 +60,7 @@ class SwissPostStorefrontController extends StorefrontController
         path: '/bettercheckoutsw6/swiss-post/autocomplete',
         name: 'frontend.bettercheckoutsw6.swiss-post.autocomplete',
         options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true],
         methods: ['GET']
     )]
     public function autocomplete(Request $request, SalesChannelContext $context): JsonResponse
@@ -86,6 +88,7 @@ class SwissPostStorefrontController extends StorefrontController
         path: '/bettercheckoutsw6/swiss-post/country-ids',
         name: 'frontend.bettercheckoutsw6.swiss-post.country-ids',
         options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true],
         methods: ['GET']
     )]
     public function getCountryIds(): JsonResponse
@@ -101,6 +104,7 @@ class SwissPostStorefrontController extends StorefrontController
         path: '/bettercheckoutsw6/swiss-post/autocomplete-street',
         name: 'frontend.bettercheckoutsw6.swiss-post.autocomplete-street',
         options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true],
         methods: ['GET']
     )]
     public function autocompleteStreet(Request $request, SalesChannelContext $context): JsonResponse
@@ -124,6 +128,7 @@ class SwissPostStorefrontController extends StorefrontController
         path: '/bettercheckoutsw6/swiss-post/autocomplete-house-number',
         name: 'frontend.bettercheckoutsw6.swiss-post.autocomplete-house-number',
         options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true],
         methods: ['GET']
     )]
     public function autocompleteHouseNumber(Request $request, SalesChannelContext $context): JsonResponse

@@ -227,4 +227,5 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
             }
         }
     }
+
 }

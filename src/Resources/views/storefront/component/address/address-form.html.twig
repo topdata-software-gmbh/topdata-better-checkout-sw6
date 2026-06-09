@@ -16,7 +16,7 @@
         {% set autocompleteOptions = { countryIdsUrl: swissPostCountryIdsUrl } %}
     {% endif %}
 
-    <div{% if swissPostValidationEnabled %} data-topdata-address-validator='{{ validatorOptions|json_encode }}'{% endif %}{% if swissPostAutocompleteEnabled %} data-topdata-zip-autocomplete='{{ autocompleteOptions|json_encode }}'{% endif %}>
+    <div{% if swissPostValidationEnabled %} data-topdata-address-validator data-topdata-address-validator-options='{{ validatorOptions|json_encode }}'{% endif %}{% if swissPostAutocompleteEnabled %} data-topdata-zip-autocomplete data-topdata-zip-autocomplete-options='{{ autocompleteOptions|json_encode }}'{% endif %}>
         {{ parent() }}
 
         {% if swissPostValidationEnabled %}

@@ -12,6 +12,7 @@
         "register": {
             "emailAlreadyRegistered": "You are already registered as a customer - please log in."
         },
+        "swissPostValidationFailed": "The address could not be validated by Swiss Post. Please check your address details.",
         "account": {
             "addressesTitle": "Billing address",
             "addressesAvailable": "Available shipping addresses"
