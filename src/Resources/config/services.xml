@@ -153,11 +153,22 @@
             <tag name="messenger.message_handler"/>
         </service>
 
+        <!-- Address Quality Service -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\AddressQualityService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="customer_address.repository"/>
+        </service>
+
         <!-- COMMANDS -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Command\BackfillAddressQualityCommand">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
-            <argument type="service" id="country.repository"/>
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\AddressQualityService"/>
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <service id="Topdata\TopdataBetterCheckoutSW6\Command\CertificationStatsCommand">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
             <tag name="console.command"/>
         </service>
     </services>

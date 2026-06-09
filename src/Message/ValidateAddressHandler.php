@@ -7,15 +7,15 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\AddressQualityService;
 use Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService;
 
 #[AsMessageHandler]
 class ValidateAddressHandler
 {
-    public const METADATA_KEY = 'topdata_swiss_post_certification_status';
-
     public function __construct(
         private readonly SwissPostApiService $apiService,
+        private readonly AddressQualityService $addressQualityService,
         private readonly EntityRepository $customerAddressRepository,
         private readonly LoggerInterface $logger,
     ) {
@@ -37,7 +37,8 @@ class ValidateAddressHandler
             }
 
             $iso = $address->getCountry()->getIso();
-            if ($iso !== 'CH' && $iso !== 'LI') {
+            if (!$this->addressQualityService->isApplicableCountry($iso)) {
+                $this->addressQualityService->setNotApplicable($addressId, $context);
                 return;
             }
 
@@ -53,7 +54,7 @@ class ValidateAddressHandler
             $quality = $validation['quality'] ?? ($validation['success'] ? 'UNKNOWN' : 'INVALID');
 
             $customFields = $address->getCustomFields() ?? [];
-            $customFields[self::METADATA_KEY] = $quality;
+            $customFields[AddressQualityService::METADATA_KEY] = $quality;
 
             $this->customerAddressRepository->update([
                 [
