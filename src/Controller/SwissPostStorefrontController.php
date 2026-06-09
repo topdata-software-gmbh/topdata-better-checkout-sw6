@@ -38,7 +38,7 @@ class SwissPostStorefrontController extends StorefrontController
     )]
     public function validate(Request $request, SalesChannelContext $context): JsonResponse
     {
-        if (!$this->apiService->isEnabled($context->getSalesChannelId())) {
+        if (!$this->apiService->isValidationEnabled($context->getSalesChannelId())) {
             return new JsonResponse(['success' => false, 'error' => 'Swiss Post Validation is disabled.'], 403);
         }
 
@@ -63,7 +63,7 @@ class SwissPostStorefrontController extends StorefrontController
     )]
     public function autocomplete(Request $request, SalesChannelContext $context): JsonResponse
     {
-        if (!$this->apiService->isEnabled($context->getSalesChannelId())) {
+        if (!$this->apiService->isAutocompleteEnabled($context->getSalesChannelId())) {
             return new JsonResponse([], 403);
         }
 
@@ -95,5 +95,52 @@ class SwissPostStorefrontController extends StorefrontController
         );
 
         return new JsonResponse($ids);
+    }
+
+    #[Route(
+        path: '/bettercheckoutsw6/swiss-post/autocomplete-street',
+        name: 'frontend.bettercheckoutsw6.swiss-post.autocomplete-street',
+        options: ['seo' => false],
+        methods: ['GET']
+    )]
+    public function autocompleteStreet(Request $request, SalesChannelContext $context): JsonResponse
+    {
+        if (!$this->apiService->isAutocompleteEnabled($context->getSalesChannelId())) {
+            return new JsonResponse([], 403);
+        }
+
+        $query = $request->query->getString('query');
+        $zip = $request->query->getString('zip');
+        if (mb_strlen($query) < 2 || empty($zip)) {
+            return new JsonResponse([]);
+        }
+
+        $results = $this->apiService->autocompleteStreet($query, $zip, $context->getSalesChannelId());
+
+        return new JsonResponse($results);
+    }
+
+    #[Route(
+        path: '/bettercheckoutsw6/swiss-post/autocomplete-house-number',
+        name: 'frontend.bettercheckoutsw6.swiss-post.autocomplete-house-number',
+        options: ['seo' => false],
+        methods: ['GET']
+    )]
+    public function autocompleteHouseNumber(Request $request, SalesChannelContext $context): JsonResponse
+    {
+        if (!$this->apiService->isAutocompleteEnabled($context->getSalesChannelId())) {
+            return new JsonResponse([], 403);
+        }
+
+        $query = $request->query->getString('query');
+        $street = $request->query->getString('street');
+        $zip = $request->query->getString('zip');
+        if (mb_strlen($query) < 1 || empty($street) || empty($zip)) {
+            return new JsonResponse([]);
+        }
+
+        $results = $this->apiService->autocompleteHouseNumber($query, $street, $zip, $context->getSalesChannelId());
+
+        return new JsonResponse($results);
     }
 }

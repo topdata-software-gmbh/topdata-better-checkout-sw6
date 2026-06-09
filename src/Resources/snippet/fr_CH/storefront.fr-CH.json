@@ -38,6 +38,15 @@
         "logoutRedirectRoute": "Route de redirection après déconnexion",
         "logoutRedirectRouteHelp": "Nom de route ou chemin URL. Par langue : une ligne locale=cible (de-DE=/newsletter, fr-FR=/fr/newsletter). _default comme fallback.",
         "cloneBillingAsShipping": "Cloner l'adresse de facturation en adresse de livraison",
-        "cloneBillingAsShippingHelp": "Lorsqu'activé, crée deux entités d'adresse séparées même si les adresses de facturation et de livraison sont identiques. Requis pour l'isolation de l'adresse de facturation."
+        "cloneBillingAsShippingHelp": "Lorsqu'activé, crée deux entités d'adresse séparées même si les adresses de facturation et de livraison sont identiques. Requis pour l'isolation de l'adresse de facturation.",
+        "swissPost": {
+            "validationTitle": "Vérification d'adresse (Swiss Post)",
+            "defaultText": "La vérification sera exécutée dès que tous les champs seront remplis.",
+            "certifiedText": "L'adresse est certifiée par Swiss Post.",
+            "notCertifiedText": "Le système n'a pas pu détecter une adresse acceptable.",
+            "errorText": "Échec de la vérification d'adresse :",
+            "autocompleteZipPlaceholder": "Entrez le code postal...",
+            "autocompleteStreetPlaceholder": "Entrez la rue..."
+        }
     }
 }

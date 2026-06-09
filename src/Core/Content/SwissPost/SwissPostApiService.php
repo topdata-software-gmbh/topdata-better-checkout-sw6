@@ -16,6 +16,8 @@ class SwissPostApiService
     private const BASE_API_URL = 'https://dcapi.apis.post.ch/address/v1';
     private const CACHE_KEY_TOKEN = 'topdata_swiss_post_oauth_token';
     private const CACHE_KEY_PREFIX_ZIP = 'topdata_swiss_post_zip_';
+    private const CACHE_KEY_PREFIX_STREET = 'topdata_swiss_post_street_';
+    private const CACHE_KEY_PREFIX_HOUSENR = 'topdata_swiss_post_housenr_';
 
     public function __construct(
         private readonly ClientInterface $httpClient,
@@ -31,6 +33,30 @@ class SwissPostApiService
     {
         return $this->systemConfigService->getBool(
             'TopdataBetterCheckoutSW6.config.swissPostEnabled',
+            $salesChannelId
+        );
+    }
+
+    public function isValidationEnabled(?string $salesChannelId = null): bool
+    {
+        if (!$this->isEnabled($salesChannelId)) {
+            return false;
+        }
+
+        return $this->systemConfigService->getBool(
+            'TopdataBetterCheckoutSW6.config.swissPostValidationEnabled',
+            $salesChannelId
+        );
+    }
+
+    public function isAutocompleteEnabled(?string $salesChannelId = null): bool
+    {
+        if (!$this->isEnabled($salesChannelId)) {
+            return false;
+        }
+
+        return $this->systemConfigService->getBool(
+            'TopdataBetterCheckoutSW6.config.swissPostAutocompleteEnabled',
             $salesChannelId
         );
     }
@@ -245,6 +271,117 @@ class SwissPostApiService
             }
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post Autocomplete Exception', ['exception' => $e->getMessage()]);
+        }
+
+        return [];
+    }
+
+    public function autocompleteStreet(string $query, string $zip, ?string $salesChannelId = null): array
+    {
+        $token = $this->getAccessToken($salesChannelId);
+        if (!$token) {
+            return [];
+        }
+
+        $cacheKey = self::CACHE_KEY_PREFIX_STREET . md5($query . $zip);
+        $cacheItem = $this->cache->getItem($cacheKey);
+
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        try {
+            $url = self::BASE_API_URL . '/streets?street=' . urlencode($query) . '&zip=' . urlencode($zip) . '&type=DOMICILE';
+            $request = $this->requestFactory->createRequest('GET', $url)
+                ->withHeader('Authorization', 'Bearer ' . $token)
+                ->withHeader('Accept', 'application/json');
+
+            $response = $this->httpClient->sendRequest($request);
+
+            if ($response->getStatusCode() === 401) {
+                $this->invalidateTokenCache($salesChannelId);
+                $token = $this->getAccessToken($salesChannelId);
+                if ($token) {
+                    $request = $request->withHeader('Authorization', 'Bearer ' . $token);
+                    $response = $this->httpClient->sendRequest($request);
+                } else {
+                    return [];
+                }
+            }
+
+            if ($response->getStatusCode() === 200) {
+                $data = json_decode($response->getBody()->getContents(), true) ?? [];
+
+                $results = array_map(static fn ($item) => [
+                    'street' => $item['street'] ?? '',
+                    'zip' => $item['zip'] ?? '',
+                    'city' => $item['city18'] ?? $item['city27'] ?? '',
+                ], $data);
+
+                $cacheItem->set($results);
+                $cacheItem->expiresAfter(86400);
+                $this->cache->save($cacheItem);
+
+                return $results;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Swiss Post Street Autocomplete Exception', ['exception' => $e->getMessage()]);
+        }
+
+        return [];
+    }
+
+    public function autocompleteHouseNumber(string $query, string $street, string $zip, ?string $salesChannelId = null): array
+    {
+        $token = $this->getAccessToken($salesChannelId);
+        if (!$token) {
+            return [];
+        }
+
+        $cacheKey = self::CACHE_KEY_PREFIX_HOUSENR . md5($query . $street . $zip);
+        $cacheItem = $this->cache->getItem($cacheKey);
+
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        try {
+            $url = self::BASE_API_URL . '/house-numbers?houseNumber=' . urlencode($query) . '&street=' . urlencode($street) . '&zip=' . urlencode($zip) . '&type=DOMICILE';
+            $request = $this->requestFactory->createRequest('GET', $url)
+                ->withHeader('Authorization', 'Bearer ' . $token)
+                ->withHeader('Accept', 'application/json');
+
+            $response = $this->httpClient->sendRequest($request);
+
+            if ($response->getStatusCode() === 401) {
+                $this->invalidateTokenCache($salesChannelId);
+                $token = $this->getAccessToken($salesChannelId);
+                if ($token) {
+                    $request = $request->withHeader('Authorization', 'Bearer ' . $token);
+                    $response = $this->httpClient->sendRequest($request);
+                } else {
+                    return [];
+                }
+            }
+
+            if ($response->getStatusCode() === 200) {
+                $data = json_decode($response->getBody()->getContents(), true) ?? [];
+
+                $results = array_map(static fn ($item) => [
+                    'houseNumber' => $item['houseNumber'] ?? '',
+                    'street' => $item['street'] ?? '',
+                    'zip' => $item['zip'] ?? '',
+                    'city' => $item['city18'] ?? $item['city27'] ?? '',
+                ], $data);
+
+                $cacheItem->set($results);
+                $cacheItem->expiresAfter(86400);
+                $this->cache->save($cacheItem);
+
+                return $results;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Swiss Post House Number Autocomplete Exception', ['exception' => $e->getMessage()]);
         }
 
         return [];

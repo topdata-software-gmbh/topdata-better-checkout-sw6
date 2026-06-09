@@ -31,7 +31,7 @@ class AddressCertificationSubscriber implements EventSubscriberInterface
         $context = $event->getContext();
         $salesChannelId = null;
 
-        if (!$this->apiService->isEnabled($salesChannelId)) {
+        if (!$this->apiService->isValidationEnabled($salesChannelId)) {
             return;
         }
 

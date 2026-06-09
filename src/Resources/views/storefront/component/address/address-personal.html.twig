@@ -1,10 +1,22 @@
 {% sw_extends '@Storefront/storefront/component/address/address-personal.html.twig' %}
 
-{% set swissPostCountryIdsUrl = path('frontend.bettercheckoutsw6.swiss-post.country-ids') %}
-
 {% block component_address_personal_fields %}
-    <div data-topdata-address-validator='{"countryIdsUrl": "{{ swissPostCountryIdsUrl }}"}'
-         data-topdata-zip-autocomplete='{"countryIdsUrl": "{{ swissPostCountryIdsUrl }}"}'>
+    {% set swissPostEnabled = config('TopdataBetterCheckoutSW6.config.swissPostEnabled') %}
+    {% set swissPostValidationEnabled = swissPostEnabled and config('TopdataBetterCheckoutSW6.config.swissPostValidationEnabled') %}
+    {% set swissPostAutocompleteEnabled = swissPostEnabled and config('TopdataBetterCheckoutSW6.config.swissPostAutocompleteEnabled') %}
+    {% set swissPostCountryIdsUrl = path('frontend.bettercheckoutsw6.swiss-post.country-ids') %}
+
+    {% set validatorOptions = {} %}
+    {% if swissPostValidationEnabled %}
+        {% set validatorOptions = { countryIdsUrl: swissPostCountryIdsUrl } %}
+    {% endif %}
+
+    {% set autocompleteOptions = {} %}
+    {% if swissPostAutocompleteEnabled %}
+        {% set autocompleteOptions = { countryIdsUrl: swissPostCountryIdsUrl } %}
+    {% endif %}
+
+    <div{% if swissPostValidationEnabled %} data-topdata-address-validator='{{ validatorOptions|json_encode }}'{% endif %}{% if swissPostAutocompleteEnabled %} data-topdata-zip-autocomplete='{{ autocompleteOptions|json_encode }}'{% endif %}>
         {{ parent() }}
     </div>
 {% endblock %}

@@ -44,7 +44,9 @@
             "defaultText": "The check will be executed as soon as all fields are filled in.",
             "certifiedText": "The address is certified by Swiss Post.",
             "notCertifiedText": "The system could not detect an acceptable address.",
-            "errorText": "Address check failure:"
+            "errorText": "Address check failure:",
+            "autocompleteZipPlaceholder": "Enter ZIP code...",
+            "autocompleteStreetPlaceholder": "Enter street..."
         }
     }
 }

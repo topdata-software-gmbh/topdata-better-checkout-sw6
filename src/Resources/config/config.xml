@@ -169,14 +169,40 @@
     </card>
 
     <card>
-        <title>Swiss Post Address Validation</title>
-        <title lang="de-DE">Swiss Post Adressprüfung</title>
+        <title>Swiss Post Address Services</title>
+        <title lang="de-DE">Swiss Post Adressdienste</title>
+        <title lang="fr-FR">Services d'adresse Swiss Post</title>
+        <title lang="fr-CH">Services d'adresse Swiss Post</title>
 
         <input-field type="bool">
             <name>swissPostEnabled</name>
-            <label>Enable Swiss Post Address Validation</label>
-            <label lang="de-DE">Swiss Post Adressprüfung aktivieren</label>
+            <label>Enable Swiss Post Integration</label>
+            <label lang="de-DE">Swiss Post Integration aktivieren</label>
+            <label lang="fr-FR">Activer l'intégration Swiss Post</label>
+            <label lang="fr-CH">Activer l'intégration Swiss Post</label>
             <defaultValue>false</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>swissPostValidationEnabled</name>
+            <label>Enable Address Validation</label>
+            <label lang="de-DE">Adressprüfung aktivieren</label>
+            <label lang="fr-FR">Activer la validation d'adresse</label>
+            <label lang="fr-CH">Activer la validation d'adresse</label>
+            <helpText>Validates CH/LI addresses against the Swiss Post certified address database and displays a certification status widget.</helpText>
+            <helpText lang="de-DE">Validiert CH/LI-Adressen gegen die zertifizierte Adressdatenbank der Swiss Post und zeigt einen Zertifizierungsstatus an.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>swissPostAutocompleteEnabled</name>
+            <label>Enable Address Autocomplete</label>
+            <label lang="de-DE">Adress-Autovervollständigung aktivieren</label>
+            <label lang="fr-FR">Activer la saisie semi-automatique d'adresse</label>
+            <label lang="fr-CH">Activer la saisie semi-automatique d'adresse</label>
+            <helpText>Provides ZIP, city, street and house-number autocomplete for CH/LI addresses.</helpText>
+            <helpText lang="de-DE">Bietet PLZ-, Ort-, Strassen- und Hausnummer-Autovervollständigung für CH/LI-Adressen.</helpText>
+            <defaultValue>true</defaultValue>
         </input-field>
 
         <input-field type="text">

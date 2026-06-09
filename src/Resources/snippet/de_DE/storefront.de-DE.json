@@ -44,7 +44,9 @@
             "defaultText": "Die Prüfung wird ausgeführt, sobald alle Felder ausgefüllt sind.",
             "certifiedText": "Die Adresse ist von der Swiss Post zertifiziert.",
             "notCertifiedText": "Das System konnte keine akzeptable Adresse erkennen.",
-            "errorText": "Fehler bei der Adressprüfung:"
+            "errorText": "Fehler bei der Adressprüfung:",
+            "autocompleteZipPlaceholder": "PLZ eingeben...",
+            "autocompleteStreetPlaceholder": "Strasse eingeben..."
         }
     }
 }

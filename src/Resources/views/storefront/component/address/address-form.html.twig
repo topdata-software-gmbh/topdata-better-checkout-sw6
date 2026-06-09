@@ -3,7 +3,10 @@
 {% block component_address_form_address_fields %}
     {{ parent() }}
 
-    {% if config('TopdataBetterCheckoutSW6.config.swissPostEnabled') %}
+    {% set swissPostEnabled = config('TopdataBetterCheckoutSW6.config.swissPostEnabled') %}
+    {% set swissPostValidationEnabled = swissPostEnabled and config('TopdataBetterCheckoutSW6.config.swissPostValidationEnabled') %}
+
+    {% if swissPostValidationEnabled %}
         {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
     {% endif %}
 {% endblock %}
