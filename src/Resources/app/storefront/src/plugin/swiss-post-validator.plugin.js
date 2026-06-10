@@ -142,7 +142,7 @@ export default class TopdataAddressValidator extends Plugin {
     _onValidate() {
         const address = this._getAddressPayload();
 
-        if (!address.firstName || !address.lastName || !address.street || !address.zipcode || !address.city) {
+        if (!address.street || !address.zipcode || !address.city) {
             console.debug(LOG_PREFIX, 'Validation skipped — not all fields filled');
             this._updateWidgetState('default');
             return;

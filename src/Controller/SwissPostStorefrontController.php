@@ -148,6 +148,17 @@ class SwissPostStorefrontController extends StorefrontController
 
         $results = $this->apiService->autocompleteZip($query, $context->getSalesChannelId());
 
+        if (!empty($results)) {
+            $chId = $this->connection->fetchOne("SELECT LOWER(HEX(id)) FROM country WHERE iso = 'CH'");
+            $liId = $this->connection->fetchOne("SELECT LOWER(HEX(id)) FROM country WHERE iso = 'LI'");
+
+            $results = array_map(function (array $item) use ($chId, $liId): array {
+                $zipInt = (int)($item['zip'] ?? 0);
+                $item['countryId'] = ($zipInt >= 9480 && $zipInt <= 9499) ? $liId : $chId;
+                return $item;
+            }, $results);
+        }
+
         return new JsonResponse($results);
     }
 

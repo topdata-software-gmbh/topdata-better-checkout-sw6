@@ -51,7 +51,10 @@ export default class TopdataZipAutocomplete extends Plugin {
         if (!this._supportedCountryIds) return true;
 
         const selectedOption = this.countrySelect.options[this.countrySelect.selectedIndex];
-        return selectedOption && this._supportedCountryIds.includes(selectedOption.value);
+        if (!selectedOption) return false;
+        if (!selectedOption.value) return true;
+
+        return this._supportedCountryIds.includes(selectedOption.value);
     }
 
     _registerEvents() {
@@ -143,6 +146,10 @@ export default class TopdataZipAutocomplete extends Plugin {
         }
         if (this.cityInput) {
             this.cityInput.value = item.city;
+        }
+        if (this.countrySelect && item.countryId) {
+            this.countrySelect.value = item.countryId;
+            this.countrySelect.dispatchEvent(new Event('change', { bubbles: true }));
         }
         if (this.zipInput) {
             this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
