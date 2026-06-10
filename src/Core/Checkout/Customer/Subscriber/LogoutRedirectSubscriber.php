@@ -52,6 +52,10 @@ class LogoutRedirectSubscriber implements EventSubscriberInterface
             $salesChannelId
         );
 
+        if ($config === '') {
+            return;
+        }
+
         $locale = $this->getLocaleFromRequest($request);
         $target = $this->resolveTarget($config, $locale);
 
@@ -85,11 +89,10 @@ class LogoutRedirectSubscriber implements EventSubscriberInterface
 
     private function resolveTarget(string $config, string $locale): string
     {
-        if (!str_contains($config, "\n")) {
-            return $config;
-        }
+        $lines = str_contains($config, "\n")
+            ? explode("\n", str_replace("\r\n", "\n", $config))
+            : [$config];
 
-        $lines = explode("\n", str_replace("\r\n", "\n", $config));
         $map = [];
         foreach ($lines as $line) {
             $line = trim($line);
@@ -101,6 +104,10 @@ class LogoutRedirectSubscriber implements EventSubscriberInterface
                 $key = $this->normalizeLocale(trim($parts[0]));
                 $map[$key] = trim($parts[1]);
             }
+        }
+
+        if (empty($map)) {
+            return $config;
         }
 
         $normalized = $this->normalizeLocale($locale);
