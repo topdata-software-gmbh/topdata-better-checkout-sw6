@@ -61,9 +61,16 @@ In the Shopware Administration under the plugin settings:
 
 ## Swiss Post Address Validation
 
-When the optional Swiss Post address validation feature is enabled, addresses are validated in real-time against the [Swiss Post Digital Commerce API (DCAPI)](https://developer.post.ch/en/digital-commerce-api) during checkout, registration, and account address editing. The feature uses the [OAuth2 Client Credentials flow](https://developer.post.ch/en/digital-commerce-api#3-4-client-credential-flow) for server-to-server authentication with the `DCAPI_ADDRESS_VALIDATE` and `DCAPI_ADDRESS_AUTOCOMPLETE` scopes. ZIP/city autocomplete is also available via the [`/address/v1/zips`](https://developer.post.ch/en/digital-commerce-api#5-2-zip-auto-completion) endpoint.
+When the optional Swiss Post address validation feature is enabled, addresses are validated in real-time against the [Swiss Post Digital Commerce API (DCAPI)](https://developer.post.ch/en/digital-commerce-api) during checkout, registration, and account address editing. The feature uses the [OAuth2 Client Credentials flow](https://developer.post.ch/en/digital-commerce-api#3-4-client-credential-flow) for server-to-server authentication with the `DCAPI_ADDRESS_VALIDATE` and `DCAPI_ADDRESS_AUTOCOMPLETE` scopes. ZIP/city autocomplete is available via the [`/address/v1/zips`](https://developer.post.ch/en/digital-commerce-api#5-2-zip-auto-completion) endpoint and full address validation via the [`/address/v1/addresses/validation`](https://developer.post.ch/en/digital-commerce-api#5-3-address-validation) endpoint.
 
 To use this feature, you need a Swiss Post developer account and API credentials (Client ID + Client Secret) from the [Swiss Post Developer Portal](https://developer.post.ch).
+
+### Known API Limitations
+
+- **Street autocomplete not available**: The Swiss Post DCAPI `/address/v1/streets` endpoint returns HTTP 500 for all requests on the current API generation. There is no known workaround — it is a limitation of the DCAPI service itself. This plugin provides ZIP code and city autocomplete as an alternative.
+- **House number autocomplete not available**: The `/address/v1/house-numbers` endpoint returns HTTP 403, indicating the `DCAPI_ADDRESS_AUTOCOMPLETE` OAuth scope does not grant access to this endpoint.
+- **Country restriction**: Address validation and autocomplete are only supported for Switzerland (CH) and Liechtenstein (LI). Requests for other countries are rejected on the client side.
+- **ZIP-Country correlation**: Swiss postal codes (4 digits) are validated against the correct country. Liechtenstein addresses must use ZIP codes in the `9480–9499` range; Swiss addresses outside this range are rejected if a Liechtenstein ZIP is used and vice versa.
 
 ## Requirements
 

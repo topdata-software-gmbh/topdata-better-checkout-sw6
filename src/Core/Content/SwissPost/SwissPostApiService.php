@@ -403,10 +403,16 @@ class SwissPostApiService
             if ($statusCode === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
 
+                // Swiss Post may return {zips: [...]} or a flat array
+                $items = $data['zips'] ?? $data;
+                if (!is_array($items) || !isset($items[0])) {
+                    $items = is_array($data) ? $data : [];
+                }
+
                 $results = array_map(static fn ($item) => [
                     'zip' => $item['zip'] ?? '',
                     'city' => $item['city18'] ?? $item['city27'] ?? '',
-                ], $data);
+                ], $items);
 
                 $cacheItem->set($results);
                 $cacheItem->expiresAfter(86400);
@@ -521,11 +527,14 @@ class SwissPostApiService
                 return $results;
             }
 
+            $responseBody = $response->getBody()->getContents();
+
             $this->logToJsonl([
                 'action' => 'autocompleteStreet',
                 'status' => $statusCode,
                 'query' => $query,
                 'zip' => $zip,
+                'body' => $responseBody,
             ]);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post Street Autocomplete Exception', ['exception' => $e->getMessage()]);
