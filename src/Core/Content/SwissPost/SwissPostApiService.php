@@ -260,6 +260,8 @@ class SwissPostApiService
                     'success' => !$isUnusable,
                     'quality' => $quality,
                     'originalResponse' => $result,
+                    'errorKey' => $isUnusable ? 'better-checkout.swissPostValidationFailed' : null,
+                    'details' => $isUnusable ? 'quality: UNUSABLE' : null,
                     'error' => $errorMsg,
                 ];
             }
@@ -275,8 +277,11 @@ class SwissPostApiService
 
             return [
                 'success' => false,
+                'quality' => null,
+                'originalResponse' => null,
+                'errorKey' => 'better-checkout.swissPostValidationFailed',
+                'details' => 'API returned status ' . $statusCode,
                 'error' => 'API returned status ' . $statusCode,
-                'details' => json_decode($contents, true),
             ];
         } catch (\Throwable $e) {
             $this->logToJsonl([
@@ -286,7 +291,14 @@ class SwissPostApiService
                 'address' => $address,
             ]);
 
-            return ['success' => false, 'error' => $e->getMessage()];
+            return [
+                'success' => false,
+                'quality' => null,
+                'originalResponse' => null,
+                'errorKey' => 'better-checkout.swissPostValidationFailed',
+                'details' => $e->getMessage(),
+                'error' => $e->getMessage(),
+            ];
         }
     }
 

@@ -42,14 +42,24 @@ class SwissPostStorefrontController extends StorefrontController
     public function validate(Request $request, SalesChannelContext $context): JsonResponse
     {
         if (!$this->apiService->isValidationEnabled($context->getSalesChannelId())) {
-            return new JsonResponse(['success' => false, 'error' => 'Swiss Post Validation is disabled.'], 403);
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Swiss Post Validation is disabled.',
+                'errorKey' => null,
+                'details' => 'Swiss Post Validation is disabled'
+            ], 403);
         }
 
         $addressData = $request->request->all('address');
 
         $countryId = $addressData['countryId'] ?? null;
         if (empty($countryId)) {
-            return new JsonResponse(['success' => false, 'error' => 'Country ID is required for address validation.'], 400);
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Country ID is required for address validation.',
+                'errorKey' => null,
+                'details' => 'Country ID is required for address validation'
+            ], 400);
         }
 
         $iso = $this->connection->fetchOne(
@@ -57,11 +67,21 @@ class SwissPostStorefrontController extends StorefrontController
             [$countryId]
         );
         if (!$iso) {
-            return new JsonResponse(['success' => false, 'error' => 'Invalid country ID: could not resolve country ISO.'], 400);
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Invalid country ID: could not resolve country ISO.',
+                'errorKey' => null,
+                'details' => 'Invalid country ID: could not resolve country ISO'
+            ], 400);
         }
 
         if (!in_array($iso, ['CH', 'LI'], true)) {
-            return new JsonResponse(['success' => false, 'error' => 'Address validation is only available for Switzerland and Liechtenstein.'], 400);
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Address validation is only available for Switzerland and Liechtenstein.',
+                'errorKey' => null,
+                'details' => 'Address validation is only available for Switzerland and Liechtenstein'
+            ], 400);
         }
 
         $zipcode = $addressData['zipcode'] ?? '';
@@ -70,19 +90,33 @@ class SwissPostStorefrontController extends StorefrontController
             $isLiZip = ($zipInt >= 9480 && $zipInt <= 9499);
 
             if ($iso === 'LI' && !$isLiZip) {
-                $error = $this->translator->trans('TopdataBetterCheckoutSW6.validation.invalidLiechtensteinZip');
-                return new JsonResponse(['success' => false, 'error' => $error], 400);
+                $errorKey = 'TopdataBetterCheckoutSW6.validation.invalidLiechtensteinZip';
+                return new JsonResponse([
+                    'success' => false,
+                    'errorKey' => $errorKey,
+                    'error' => $this->translator->trans($errorKey),
+                    'details' => null
+                ], 400);
             }
 
             if ($iso === 'CH' && $isLiZip) {
-                $error = $this->translator->trans('TopdataBetterCheckoutSW6.validation.swissZipForLiechtenstein');
-                return new JsonResponse(['success' => false, 'error' => $error], 400);
+                $errorKey = 'TopdataBetterCheckoutSW6.validation.swissZipForLiechtenstein';
+                return new JsonResponse([
+                    'success' => false,
+                    'errorKey' => $errorKey,
+                    'error' => $this->translator->trans($errorKey),
+                    'details' => null
+                ], 400);
             }
         }
 
         $addressData['countryCode'] = $iso;
 
         $result = $this->apiService->validateAddress($addressData, $context->getSalesChannelId());
+
+        if (isset($result['errorKey']) && !empty($result['errorKey'])) {
+            $result['error'] = $this->translator->trans($result['errorKey']);
+        }
 
         return new JsonResponse($result);
     }

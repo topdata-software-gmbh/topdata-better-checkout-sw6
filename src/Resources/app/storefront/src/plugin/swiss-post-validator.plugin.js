@@ -156,7 +156,11 @@ export default class TopdataAddressValidator extends Plugin {
                         this._updateWidgetState('not-certified');
                     }
                 } else {
-                    this._updateWidgetState('error', data.error || this.widget?.dataset?.errorMessage || 'Address validation failed');
+                    let errMsg = data.error || this.widget?.dataset?.errorMessage || 'Address validation failed';
+                    if (data.details) {
+                        errMsg += ` (${data.details})`;
+                    }
+                    this._updateWidgetState('error', errMsg);
                 }
             } catch (e) {
                 console.error(LOG_PREFIX, 'Validation response parse error:', e);
