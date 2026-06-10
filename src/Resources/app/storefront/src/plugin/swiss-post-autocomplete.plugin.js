@@ -16,6 +16,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         this._supportedCountryIds = null;
         this._dropdownActive = null;
         this._activeInput = null;
+        this._suppressAutocomplete = false;
 
         this._initElements();
 
@@ -61,6 +62,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         if (this.zipInput) {
             const debounced = Debouncer.debounce(this._onAutocomplete.bind(this), 300);
             this.zipInput.addEventListener('input', (e) => {
+                if (this._suppressAutocomplete) return;
                 this._activeInput = 'zip';
                 debounced(e.target.value);
             });
@@ -70,6 +72,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         if (this.cityInput) {
             const debounced = Debouncer.debounce(this._onAutocomplete.bind(this), 300);
             this.cityInput.addEventListener('input', (e) => {
+                if (this._suppressAutocomplete) return;
                 this._activeInput = 'city';
                 debounced(e.target.value);
             });
@@ -151,12 +154,14 @@ export default class TopdataZipAutocomplete extends Plugin {
             this.countrySelect.value = item.countryId;
             this.countrySelect.dispatchEvent(new Event('change', { bubbles: true }));
         }
+        this._suppressAutocomplete = true;
         if (this.zipInput) {
             this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
         if (this.cityInput) {
             this.cityInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
+        this._suppressAutocomplete = false;
         this._closeDropdown();
     }
 
