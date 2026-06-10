@@ -99,9 +99,21 @@ export default class TopdataAddressValidator extends Plugin {
             return;
         }
 
+        const triggerSelector = [
+            this.options.streetInputSelector,
+            this.options.zipInputSelector,
+            this.options.cityInputSelector,
+            this.options.countrySelectSelector,
+        ].join(', ');
+
         const debouncedValidate = Debouncer.debounce(this._onValidate.bind(this), 400);
         this.el.addEventListener('input', (e) => {
-            if (e.target.matches('input')) {
+            if (e.target.matches(triggerSelector)) {
+                debouncedValidate();
+            }
+        });
+        this.el.addEventListener('change', (e) => {
+            if (e.target.matches(this.options.countrySelectSelector)) {
                 debouncedValidate();
             }
         });
