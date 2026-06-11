@@ -190,7 +190,7 @@ export default class TopdataZipAutocomplete extends Plugin {
 
         if (!this.streetInput) return;
 
-        const zip = this._streetAutocompleteZip || '';
+        const zip = this.zipInput ? this.zipInput.value.trim() : '';
         const city = this.cityInput ? this.cityInput.value.trim() : '';
         const hasLocation = !!(zip || city);
 
