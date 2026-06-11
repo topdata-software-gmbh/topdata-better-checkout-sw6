@@ -1,0 +1,20 @@
+{% sw_extends '@Storefront/storefront/component/address/field/address-city-field.html.twig' %}
+
+{% block component_address_field_city %}
+    {% if formViolations.getViolations('/city') is not empty %}
+        {% set violationPath = '/city' %}
+    {% elseif formViolations.getViolations("/#{prefix}/city") is not empty %}
+        {% set violationPath = "/#{prefix}/city" %}
+    {% endif %}
+
+    {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
+        label: 'address.cityLabel'|trans|sw_sanitize,
+        id: idPrefix ~ prefix ~ 'AddressCity',
+        name: prefix ~ '[city]',
+        value: data.get('city'),
+        autocomplete: 'off',
+        violationPath: violationPath,
+        validationRules: 'required',
+        additionalClass: additionalClass ?? 'col-md-3 col-8',
+    } %}
+{% endblock %}
