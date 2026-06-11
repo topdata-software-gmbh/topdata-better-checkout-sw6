@@ -204,6 +204,10 @@ class SwissPostStorefrontController extends StorefrontController
 
         $results = $this->apiService->autocompleteStreet($query, $zip, $context->getSalesChannelId());
 
+        if ($zip !== '') {
+            $results = array_map(static fn (array $item) => array_merge($item, ['zip' => $zip]), $results);
+        }
+
         return new JsonResponse($results);
     }
 

@@ -19,6 +19,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         this._dropdownActive = null;
         this._activeInput = null;
         this._suppressAutocomplete = false;
+        this._streetAutocompleteZip = '';
 
         this._initElements();
 
@@ -133,6 +134,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         }
 
         const zip = this.zipInput ? this.zipInput.value.trim() : '';
+        this._streetAutocompleteZip = zip;
         let url = `${this.options.autocompleteStreetUrl}?query=${encodeURIComponent(query)}`;
         if (zip) {
             url += `&zip=${encodeURIComponent(zip)}`;
@@ -188,6 +190,10 @@ export default class TopdataZipAutocomplete extends Plugin {
 
         if (!this.streetInput) return;
 
+        const zip = this._streetAutocompleteZip || '';
+        const city = this.cityInput ? this.cityInput.value.trim() : '';
+        const hasLocation = !!(zip || city);
+
         const dropdown = document.createElement('div');
         dropdown.className = 'swiss-post-autocomplete-dropdown list-group position-absolute w-100 shadow-sm';
         dropdown.style.zIndex = '1000';
@@ -198,7 +204,10 @@ export default class TopdataZipAutocomplete extends Plugin {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'list-group-item list-group-item-action py-2 text-start';
-            btn.textContent = item.street;
+            const label = hasLocation
+                ? `${item.street} <span class="text-muted">(${zip} ${city})</span>`
+                : item.street;
+            btn.innerHTML = label;
             btn.addEventListener('click', () => {
                 this._selectStreetItem(item);
             });
@@ -219,9 +228,15 @@ export default class TopdataZipAutocomplete extends Plugin {
         if (this.streetInput) {
             this.streetInput.value = item.street;
         }
+        if (item.zip && this.zipInput && !this.zipInput.value.trim()) {
+            this.zipInput.value = item.zip;
+        }
         this._suppressAutocomplete = true;
         if (this.streetInput) {
             this.streetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (item.zip && this.zipInput && !this.zipInput.value.trim()) {
+            this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
         this._suppressAutocomplete = false;
         this._closeDropdown();
@@ -305,5 +320,6 @@ export default class TopdataZipAutocomplete extends Plugin {
             this._dropdownActive = null;
         }
         this._activeInput = null;
+        this._streetAutocompleteZip = '';
     }
 }

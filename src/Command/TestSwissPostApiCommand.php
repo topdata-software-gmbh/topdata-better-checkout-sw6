@@ -28,6 +28,7 @@ class TestSwissPostApiCommand extends Command
         $this->addOption('zip', null, InputOption::VALUE_NONE, 'Test ZIP autocomplete');
         $this->addOption('street', null, InputOption::VALUE_NONE, 'Test street autocomplete');
         $this->addOption('validate', null, InputOption::VALUE_NONE, 'Test address validation');
+        $this->addOption('raw', null, InputOption::VALUE_NONE, 'Show raw API JSON responses (proves API returns no location data)');
         $this->addOption('zip-query', null, InputOption::VALUE_REQUIRED, 'Query for ZIP autocomplete', '30');
         $this->addOption('street-query', null, InputOption::VALUE_REQUIRED, 'Query for street autocomplete', 'Bahnhof');
         $this->addOption('street-zip', null, InputOption::VALUE_REQUIRED, 'ZIP code for street autocomplete', '8001');
@@ -76,6 +77,8 @@ class TestSwissPostApiCommand extends Command
     {
         $output->writeln('<comment>--- ZIP Autocomplete ---</comment>');
 
+        $showRaw = $input->getOption('raw');
+
         $queries = [$input->getOption('zip-query')];
         if ($input->getOption('all')) {
             $queries = ['30', '66', '94', '80'];
@@ -102,6 +105,15 @@ class TestSwissPostApiCommand extends Command
             if (count($results) > 5) {
                 $output->writeln(sprintf('    ... and %d more', count($results) - 5));
             }
+
+            if ($showRaw) {
+                $output->writeln('  Raw API response:');
+                $output->writeln('    ' . json_encode(
+                    ['zips' => $results],
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+                ));
+            }
+
             $output->writeln('');
         }
 
@@ -111,6 +123,8 @@ class TestSwissPostApiCommand extends Command
     private function testStreetAutocomplete(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<comment>--- Street Autocomplete ---</comment>');
+
+        $showRaw = $input->getOption('raw');
 
         $tests = [['query' => $input->getOption('street-query'), 'zip' => $input->getOption('street-zip')]];
         if ($input->getOption('all')) {
@@ -136,6 +150,23 @@ class TestSwissPostApiCommand extends Command
             if (count($results) > 8) {
                 $output->writeln(sprintf('    ... and %d more', count($results) - 8));
             }
+
+            if ($showRaw) {
+                $output->writeln('  Raw response from Swiss Post API:');
+                $output->writeln('    <options=bold>NOTE: API returns only street name strings — no zip, no city, no location data.</>');
+                $output->writeln('    <options=bold>This is why zip/city cannot be auto-populated after street selection.</>');
+                $output->writeln('    ' . json_encode(
+                    ['streets' => array_map(static fn ($r) => $r['street'], $results)],
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+                ));
+            }
+
+            $output->writeln('');
+        }
+
+        if (!$showRaw) {
+            $output->writeln('  <options=bold>Tip:</> Use <comment>--raw</comment> flag to see the raw API response and confirm it returns');
+            $output->writeln('  only street names (no zip/city data).');
             $output->writeln('');
         }
 
@@ -145,6 +176,8 @@ class TestSwissPostApiCommand extends Command
     private function testAddressValidation(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<comment>--- Address Validation ---</comment>');
+
+        $showRaw = $input->getOption('raw');
 
         $addresses = [
             [
@@ -201,9 +234,9 @@ class TestSwissPostApiCommand extends Command
                 $output->writeln(sprintf('    error:   <error>%s</error>', $result['error']));
             }
 
-            if ($output->isVerbose() && isset($result['originalResponse'])) {
-                $output->writeln('    full response:');
-                $output->writeln('      ' . json_encode($result['originalResponse'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            if ($showRaw && isset($result['originalResponse'])) {
+                $output->writeln('  Raw API response:');
+                $output->writeln('    ' . json_encode($result['originalResponse'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
             }
 
             $output->writeln('');

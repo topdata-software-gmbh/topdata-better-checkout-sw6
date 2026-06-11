@@ -65,6 +65,30 @@ When the optional Swiss Post address validation feature is enabled, addresses ar
 
 To use this feature, you need a Swiss Post developer account and API credentials (Client ID + Client Secret) from the [Swiss Post Developer Portal](https://developer.post.ch).
 
+### Street Autocomplete
+
+Street autocomplete uses the Swiss Post DCAPI [`/address/v1/streets`](https://developer.post.ch/en/digital-commerce-api#5-2-3-street-name-auto-completion) endpoint. It is available when the user has typed at least 2 characters. If a ZIP code has already been entered, the street suggestions are filtered to that postal code area.
+
+**Known limitation — no location data in API response:**
+
+The Swiss Post `/address/v1/streets` endpoint returns only a flat array of street name strings:
+
+```json
+{"streets": ["Bahnhofbrücke", "Bahnhofstrasse", "Bahnhofplatz"]}
+```
+
+It does **not** return ZIP codes, cities, or any other location metadata per street. This means:
+
+- **Dropdown shows only the street name** (if ZIP is known from context, it is displayed as secondary info: `"Bahnhofstrasse (8001 Zürich)"`)
+- **Selecting a street cannot auto-populate ZIP or city fields** — the API simply does not provide this data
+- Recommended UX flow: enter/select ZIP first (auto-fills city), then the street autocomplete will show only streets in that area
+
+To verify this limitation directly, run:
+```bash
+php bin/console topdata:better-checkout:test-swiss-post --street --raw
+```
+This shows the raw API response, confirming that only street name strings are returned.
+
 ### Known API Limitations
 
 - **House number autocomplete not available**: The `/address/v1/houses` endpoint returns HTTP 403, indicating the `DCAPI_ADDRESS_AUTOCOMPLETE` OAuth scope does not grant access to this endpoint.
