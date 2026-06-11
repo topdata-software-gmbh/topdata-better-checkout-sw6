@@ -198,7 +198,7 @@ class SwissPostStorefrontController extends StorefrontController
 
         $query = $request->query->getString('query');
         $zip = $request->query->getString('zip');
-        if (mb_strlen($query) < 2 || empty($zip)) {
+        if (mb_strlen($query) < 2) {
             return new JsonResponse([]);
         }
 

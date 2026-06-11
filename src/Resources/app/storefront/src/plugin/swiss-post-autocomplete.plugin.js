@@ -5,10 +5,12 @@ import Debouncer from 'src/helper/debouncer.helper';
 export default class TopdataZipAutocomplete extends Plugin {
     static options = {
         autocompleteUrl: '/bettercheckoutsw6/swiss-post/autocomplete',
+        autocompleteStreetUrl: '/bettercheckoutsw6/swiss-post/autocomplete-street',
         countryIdsUrl: null,
         countrySelectSelector: '.country-select',
         zipInputSelector: 'input[name$="[zipcode]"], input[name="zipcode"]',
         cityInputSelector: 'input[name$="[city]"], input[name="city"]',
+        streetInputSelector: 'input[name$="[street]"], input[name="street"]',
     };
 
     init() {
@@ -32,6 +34,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         this.countrySelect = this.el.querySelector(this.options.countrySelectSelector);
         this.zipInput = this.el.querySelector(this.options.zipInputSelector);
         this.cityInput = this.el.querySelector(this.options.cityInputSelector);
+        this.streetInput = this.el.querySelector(this.options.streetInputSelector);
     }
 
     _fetchCountryIds() {
@@ -79,6 +82,15 @@ export default class TopdataZipAutocomplete extends Plugin {
             this.cityInput.addEventListener('keydown', this._onKeydown.bind(this));
         }
 
+        if (this.streetInput) {
+            const debounced = Debouncer.debounce(this._onStreetAutocomplete.bind(this), 300);
+            this.streetInput.addEventListener('input', (e) => {
+                if (this._suppressAutocomplete) return;
+                debounced(e.target.value);
+            });
+            this.streetInput.addEventListener('keydown', this._onKeydown.bind(this));
+        }
+
         document.addEventListener('click', (e) => {
             if (this._dropdownActive && !this._dropdownActive.contains(e.target)) {
                 this._closeDropdown();
@@ -103,6 +115,33 @@ export default class TopdataZipAutocomplete extends Plugin {
             try {
                 const data = JSON.parse(response);
                 this._renderDropdown(data);
+            } catch (e) {
+                this._closeDropdown();
+            }
+        });
+    }
+
+    _onStreetAutocomplete(query) {
+        if (query.length < 2) {
+            this._closeDropdown();
+            return;
+        }
+
+        if (!this._isCountrySupported()) {
+            this._closeDropdown();
+            return;
+        }
+
+        const zip = this.zipInput ? this.zipInput.value.trim() : '';
+        let url = `${this.options.autocompleteStreetUrl}?query=${encodeURIComponent(query)}`;
+        if (zip) {
+            url += `&zip=${encodeURIComponent(zip)}`;
+        }
+
+        this._client.get(url, (response) => {
+            try {
+                const data = JSON.parse(response);
+                this._renderStreetDropdown(data);
             } catch (e) {
                 this._closeDropdown();
             }
@@ -141,6 +180,51 @@ export default class TopdataZipAutocomplete extends Plugin {
         inputEl.parentNode.style.position = 'relative';
         inputEl.parentNode.appendChild(dropdown);
         this._dropdownActive = dropdown;
+    }
+
+    _renderStreetDropdown(items) {
+        this._closeDropdown();
+        if (!items || items.length === 0) return;
+
+        if (!this.streetInput) return;
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'swiss-post-autocomplete-dropdown list-group position-absolute w-100 shadow-sm';
+        dropdown.style.zIndex = '1000';
+        dropdown.style.maxHeight = '240px';
+        dropdown.style.overflowY = 'auto';
+
+        items.forEach((item) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'list-group-item list-group-item-action py-2 text-start';
+            btn.textContent = item.street;
+            btn.addEventListener('click', () => {
+                this._selectStreetItem(item);
+            });
+            btn.addEventListener('mouseenter', () => {
+                const allItems = dropdown.querySelectorAll('.list-group-item');
+                allItems.forEach(i => i.classList.remove('active'));
+                btn.classList.add('active');
+            });
+            dropdown.appendChild(btn);
+        });
+
+        this.streetInput.parentNode.style.position = 'relative';
+        this.streetInput.parentNode.appendChild(dropdown);
+        this._dropdownActive = dropdown;
+    }
+
+    _selectStreetItem(item) {
+        if (this.streetInput) {
+            this.streetInput.value = item.street;
+        }
+        this._suppressAutocomplete = true;
+        if (this.streetInput) {
+            this.streetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        this._suppressAutocomplete = false;
+        this._closeDropdown();
     }
 
     _selectItem(item) {

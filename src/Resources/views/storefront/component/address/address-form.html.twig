@@ -13,7 +13,11 @@
 
     {% set autocompleteOptions = {} %}
     {% if swissPostAutocompleteEnabled %}
-        {% set autocompleteOptions = { countryIdsUrl: swissPostCountryIdsUrl } %}
+        {% set autocompleteStreetUrl = path('frontend.bettercheckoutsw6.swiss-post.autocomplete-street') %}
+        {% set autocompleteOptions = {
+            countryIdsUrl: swissPostCountryIdsUrl,
+            autocompleteStreetUrl: autocompleteStreetUrl,
+        } %}
     {% endif %}
 
     <div{% if swissPostValidationEnabled %} data-topdata-address-validator data-topdata-address-validator-options='{{ validatorOptions|json_encode }}'{% endif %}{% if swissPostAutocompleteEnabled %} data-topdata-zip-autocomplete data-topdata-zip-autocomplete-options='{{ autocompleteOptions|json_encode }}'{% endif %}>

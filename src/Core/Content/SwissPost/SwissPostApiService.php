@@ -445,7 +445,7 @@ class SwissPostApiService
         return [];
     }
 
-    public function autocompleteStreet(string $query, string $zip, ?string $salesChannelId = null): array
+    public function autocompleteStreet(string $query, string $zip = '', ?string $salesChannelId = null): array
     {
         $this->currentLogFile = self::$autocompleteLogFile;
 
@@ -476,7 +476,7 @@ class SwissPostApiService
         }
 
         try {
-            $url = self::BASE_API_URL . '/streets?street=' . urlencode($query) . '&zip=' . urlencode($zip) . '&type=DOMICILE';
+            $url = self::BASE_API_URL . '/streets?name=' . urlencode($query) . ($zip !== '' ? '&zip=' . urlencode($zip) : '');
             $request = $this->requestFactory->createRequest('GET', $url)
                 ->withHeader('Authorization', 'Bearer ' . $token)
                 ->withHeader('Accept', 'application/json');
@@ -506,11 +506,10 @@ class SwissPostApiService
             if ($statusCode === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
 
-                $results = array_map(static fn ($item) => [
-                    'street' => $item['street'] ?? '',
-                    'zip' => $item['zip'] ?? '',
-                    'city' => $item['city18'] ?? $item['city27'] ?? '',
-                ], $data);
+                $streets = $data['streets'] ?? [];
+                $results = array_map(static fn (string $streetName) => [
+                    'street' => $streetName,
+                ], $streets);
 
                 $cacheItem->set($results);
                 $cacheItem->expiresAfter(86400);

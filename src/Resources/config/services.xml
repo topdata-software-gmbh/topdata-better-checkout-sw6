@@ -185,5 +185,10 @@
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
             <tag name="console.command"/>
         </service>
+
+        <service id="Topdata\TopdataBetterCheckoutSW6\Command\TestSwissPostApiCommand">
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\SwissPost\SwissPostApiService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>
