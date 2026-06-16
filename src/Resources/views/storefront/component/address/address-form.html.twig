@@ -40,6 +40,16 @@
                 </div>
             {% endblock %}
 
+            {% block component_address_form_country_field %}
+                <div class="row g-2 country-and-state-form-elements"
+                     data-country-state-select="true"
+                     data-country-state-select-options="{{ { scopeElementSelector, prefix }|json_encode }}">
+                    {% sw_include '@Storefront/storefront/component/address/field/address-country-field.html.twig' with {
+                        additionalClass: 'col-md'
+                    } %}
+                </div>
+            {% endblock %}
+
             {% if swissPostValidationEnabled %}
                 {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
             {% endif %}
