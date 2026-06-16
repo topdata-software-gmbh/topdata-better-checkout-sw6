@@ -48,7 +48,8 @@
             "notCertifiedText": "Das System konnte keine akzeptable Adresse erkennen.",
             "errorText": "Fehler bei der Adressprüfung:",
             "autocompleteZipPlaceholder": "PLZ eingeben...",
-            "autocompleteStreetPlaceholder": "Strasse eingeben..."
+            "autocompleteStreetPlaceholder": "Strasse eingeben...",
+            "houseNumberLabel": "Hausnummer"
         },
         "validation": {
             "invalidLiechtensteinZip": "Die Postleitzahl ist für Liechtenstein nicht gültig (erwartet wird 9480-9499).",

@@ -12,6 +12,7 @@ export default class TopdataAddressValidator extends Plugin {
         zipInputSelector: 'input[name$="[zipcode]"], input[name="zipcode"]',
         cityInputSelector: 'input[name$="[city]"], input[name="city"]',
         streetInputSelector: 'input[name$="[street]"], input[name="street"]',
+        houseNumberInputSelector: 'input[data-topdata-house-number]',
         firstNameInputSelector: 'input[name$="[firstName]"], input[name="firstName"]',
         lastNameInputSelector: 'input[name$="[lastName]"], input[name="lastName"]',
     };
@@ -42,6 +43,7 @@ export default class TopdataAddressValidator extends Plugin {
             'zip:', !!this.zipInput,
             'city:', !!this.cityInput,
             'street:', !!this.streetInput,
+            'houseNumber:', !!this.houseNumberInput,
             'firstName:', !!this.firstNameInput,
             'lastName:', !!this.lastNameInput,
             'widget:', !!this.widget);
@@ -56,6 +58,7 @@ export default class TopdataAddressValidator extends Plugin {
         this.zipInput = this.el.querySelector(this.options.zipInputSelector);
         this.cityInput = this.el.querySelector(this.options.cityInputSelector);
         this.streetInput = this.el.querySelector(this.options.streetInputSelector);
+        this.houseNumberInput = this.el.querySelector(this.options.houseNumberInputSelector);
         this.firstNameInput = this._findElement(this.options.firstNameInputSelector);
         this.lastNameInput = this._findElement(this.options.lastNameInputSelector);
         this.widget = this.el.querySelector('[data-swiss-post-validation]');
@@ -183,10 +186,17 @@ export default class TopdataAddressValidator extends Plugin {
 
     _getAddressPayload() {
         const selectedOption = this.countrySelect.options[this.countrySelect.selectedIndex];
+        let street = this.streetInput ? this.streetInput.value.trim() : '';
+        const houseNumber = this.houseNumberInput ? this.houseNumberInput.value.trim() : '';
+
+        if (houseNumber && !street.includes(houseNumber)) {
+            street = street + ' ' + houseNumber;
+        }
+
         return {
             firstName: this.firstNameInput ? this.firstNameInput.value.trim() : '',
             lastName: this.lastNameInput ? this.lastNameInput.value.trim() : '',
-            street: this.streetInput ? this.streetInput.value.trim() : '',
+            street: street,
             zipcode: this.zipInput ? this.zipInput.value.trim() : '',
             city: this.cityInput ? this.cityInput.value.trim() : '',
             countryId: selectedOption ? selectedOption.value : '',

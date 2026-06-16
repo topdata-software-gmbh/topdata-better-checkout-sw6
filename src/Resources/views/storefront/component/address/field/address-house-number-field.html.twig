@@ -1,0 +1,13 @@
+{% block component_address_field_house_number %}
+    <div class="{% if additionalClass is defined %}{{ additionalClass }}{% else %}col-md-6{% endif %}">
+        <label class="form-label" for="{{ idPrefix }}{{ prefix }}AddressHouseNumber">
+            {{ 'TopdataBetterCheckoutSW6.swissPost.houseNumberLabel'|trans|sw_sanitize }}
+        </label>
+        <input type="text"
+               class="form-control"
+               id="{{ idPrefix }}{{ prefix }}AddressHouseNumber"
+               placeholder="{{ 'TopdataBetterCheckoutSW6.swissPost.houseNumberLabel'|trans|sw_sanitize }}"
+               autocomplete="off"
+               data-topdata-house-number="true">
+    </div>
+{% endblock %}

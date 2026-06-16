@@ -6,6 +6,8 @@
     {% set swissPostAutocompleteEnabled = swissPostEnabled and config('TopdataBetterCheckoutSW6.config.swissPostAutocompleteEnabled') %}
     {% set swissPostCountryIdsUrl = path('frontend.bettercheckoutsw6.swiss-post.country-ids') %}
 
+    {% set isNewAddress = data is null or data.get('id') is null %}
+
     {% set validatorOptions = {} %}
     {% if swissPostValidationEnabled %}
         {% set validatorOptions = { countryIdsUrl: swissPostCountryIdsUrl } %}
@@ -14,17 +16,58 @@
     {% set autocompleteOptions = {} %}
     {% if swissPostAutocompleteEnabled %}
         {% set autocompleteStreetUrl = path('frontend.bettercheckoutsw6.swiss-post.autocomplete-street') %}
+        {% set autocompleteHouseNumberUrl = path('frontend.bettercheckoutsw6.swiss-post.autocomplete-house-number') %}
         {% set autocompleteOptions = {
             countryIdsUrl: swissPostCountryIdsUrl,
             autocompleteStreetUrl: autocompleteStreetUrl,
+            autocompleteHouseNumberUrl: autocompleteHouseNumberUrl,
         } %}
     {% endif %}
 
     <div{% if swissPostValidationEnabled %} data-topdata-address-validator data-topdata-address-validator-options='{{ validatorOptions|json_encode }}'{% endif %}{% if swissPostAutocompleteEnabled %} data-topdata-zip-autocomplete data-topdata-zip-autocomplete-options='{{ autocompleteOptions|json_encode }}'{% endif %}>
-        {{ parent() }}
+        {% if isNewAddress %}
+            {% block component_address_form_zip_and_city_row %}
+                <div class="row g-2">
+                    {% sw_include '@Storefront/storefront/component/address/field/address-zipcode-field.html.twig' with { additionalClass: 'col-md-4 col-4' } %}
+                    {% sw_include '@Storefront/storefront/component/address/field/address-city-field.html.twig' with { additionalClass: 'col-md-8 col-8' } %}
+                </div>
+            {% endblock %}
 
-        {% if swissPostValidationEnabled %}
-            {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
+            {% block component_address_form_street_and_house_number_row %}
+                <div class="row g-2">
+                    {% sw_include '@Storefront/storefront/component/address/field/address-street-field.html.twig' with { additionalClass: 'col-md-6' } %}
+                    {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/field/address-house-number-field.html.twig' %}
+                </div>
+            {% endblock %}
+
+            {% if swissPostValidationEnabled %}
+                {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
+            {% endif %}
+
+            {% block component_address_form_phone_number %}
+                {% if formViolations.getViolations('/phoneNumber') is not empty %}
+                    {% set violationPath = '/phoneNumber' %}
+                {% elseif formViolations.getViolations("/#{prefix}/phoneNumber") is not empty %}
+                    {% set violationPath = "/#{prefix}/phoneNumber" %}
+                {% endif %}
+                <div class="row g-2">
+                    {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
+                        label: 'address.phoneNumberLabel'|trans|sw_sanitize,
+                        id: idPrefix ~ prefix ~ 'AddressPhoneNumber',
+                        name: prefix ~ '[phoneNumber]',
+                        value: data.get('phoneNumber'),
+                        violationPath: violationPath,
+                        validationRules: 'required',
+                        additionalClass: 'col-sm-6',
+                    } %}
+                </div>
+            {% endblock %}
+        {% else %}
+            {{ parent() }}
+
+            {% if swissPostValidationEnabled %}
+                {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

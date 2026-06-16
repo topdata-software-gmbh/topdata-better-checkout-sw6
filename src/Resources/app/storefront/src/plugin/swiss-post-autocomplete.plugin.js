@@ -6,11 +6,13 @@ export default class TopdataZipAutocomplete extends Plugin {
     static options = {
         autocompleteUrl: '/bettercheckoutsw6/swiss-post/autocomplete',
         autocompleteStreetUrl: '/bettercheckoutsw6/swiss-post/autocomplete-street',
+        autocompleteHouseNumberUrl: '/bettercheckoutsw6/swiss-post/autocomplete-house-number',
         countryIdsUrl: null,
         countrySelectSelector: '.country-select',
         zipInputSelector: 'input[name$="[zipcode]"], input[name="zipcode"]',
         cityInputSelector: 'input[name$="[city]"], input[name="city"]',
         streetInputSelector: 'input[name$="[street]"], input[name="street"]',
+        houseNumberInputSelector: 'input[data-topdata-house-number]',
     };
 
     init() {
@@ -36,6 +38,7 @@ export default class TopdataZipAutocomplete extends Plugin {
         this.zipInput = this.el.querySelector(this.options.zipInputSelector);
         this.cityInput = this.el.querySelector(this.options.cityInputSelector);
         this.streetInput = this.el.querySelector(this.options.streetInputSelector);
+        this.houseNumberInput = this.el.querySelector(this.options.houseNumberInputSelector);
     }
 
     _fetchCountryIds() {
@@ -92,9 +95,34 @@ export default class TopdataZipAutocomplete extends Plugin {
             this.streetInput.addEventListener('keydown', this._onKeydown.bind(this));
         }
 
+        if (this.houseNumberInput) {
+            const debounced = Debouncer.debounce(this._onHouseNumberAutocomplete.bind(this), 300);
+            this.houseNumberInput.addEventListener('input', (e) => {
+                if (this._suppressAutocomplete) return;
+                debounced(e.target.value);
+            });
+            this.houseNumberInput.addEventListener('keydown', this._onKeydown.bind(this));
+        }
+
         document.addEventListener('click', (e) => {
             if (this._dropdownActive && !this._dropdownActive.contains(e.target)) {
                 this._closeDropdown();
+            }
+        });
+
+        this._registerFormSubmitHandler();
+    }
+
+    _registerFormSubmitHandler() {
+        const form = this.el.closest('form');
+        if (!form || !this.streetInput || !this.houseNumberInput) return;
+
+        form.addEventListener('submit', () => {
+            const streetVal = this.streetInput.value.trim();
+            const houseNumVal = this.houseNumberInput.value.trim();
+
+            if (houseNumVal && streetVal && !streetVal.endsWith(houseNumVal)) {
+                this.streetInput.value = streetVal + ' ' + houseNumVal;
             }
         });
     }
@@ -144,6 +172,37 @@ export default class TopdataZipAutocomplete extends Plugin {
             try {
                 const data = JSON.parse(response);
                 this._renderStreetDropdown(data);
+            } catch (e) {
+                this._closeDropdown();
+            }
+        });
+    }
+
+    _onHouseNumberAutocomplete(query) {
+        if (query.length < 1) {
+            this._closeDropdown();
+            return;
+        }
+
+        if (!this._isCountrySupported()) {
+            this._closeDropdown();
+            return;
+        }
+
+        const street = this.streetInput ? this.streetInput.value.trim() : '';
+        const zip = this.zipInput ? this.zipInput.value.trim() : '';
+
+        if (!street || !zip) {
+            this._closeDropdown();
+            return;
+        }
+
+        const url = `${this.options.autocompleteHouseNumberUrl}?query=${encodeURIComponent(query)}&street=${encodeURIComponent(street)}&zip=${encodeURIComponent(zip)}`;
+
+        this._client.get(url, (response) => {
+            try {
+                const data = JSON.parse(response);
+                this._renderHouseNumberDropdown(data);
             } catch (e) {
                 this._closeDropdown();
             }
@@ -224,6 +283,39 @@ export default class TopdataZipAutocomplete extends Plugin {
         this._dropdownActive = dropdown;
     }
 
+    _renderHouseNumberDropdown(items) {
+        this._closeDropdown();
+        if (!items || items.length === 0) return;
+
+        if (!this.houseNumberInput) return;
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'swiss-post-autocomplete-dropdown list-group position-absolute w-100 shadow-sm';
+        dropdown.style.zIndex = '1000';
+        dropdown.style.maxHeight = '240px';
+        dropdown.style.overflowY = 'auto';
+
+        items.forEach((item) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'list-group-item list-group-item-action py-2 text-start';
+            btn.innerHTML = `<strong>${item.houseNumber}</strong>`;
+            btn.addEventListener('click', () => {
+                this._selectHouseNumberItem(item);
+            });
+            btn.addEventListener('mouseenter', () => {
+                const allItems = dropdown.querySelectorAll('.list-group-item');
+                allItems.forEach(i => i.classList.remove('active'));
+                btn.classList.add('active');
+            });
+            dropdown.appendChild(btn);
+        });
+
+        this.houseNumberInput.parentNode.style.position = 'relative';
+        this.houseNumberInput.parentNode.appendChild(dropdown);
+        this._dropdownActive = dropdown;
+    }
+
     _selectStreetItem(item) {
         if (this.streetInput) {
             this.streetInput.value = item.street;
@@ -237,6 +329,38 @@ export default class TopdataZipAutocomplete extends Plugin {
         }
         if (item.zip && this.zipInput && !this.zipInput.value.trim()) {
             this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        this._suppressAutocomplete = false;
+        this._closeDropdown();
+    }
+
+    _selectHouseNumberItem(item) {
+        if (this.houseNumberInput) {
+            this.houseNumberInput.value = item.houseNumber;
+        }
+        if (item.street && this.streetInput) {
+            const currentStreet = this.streetInput.value.trim();
+            const fullStreet = item.street + ' ' + item.houseNumber;
+            if (currentStreet !== fullStreet) {
+                this.streetInput.value = fullStreet;
+            }
+        }
+        if (item.zip && this.zipInput && !this.zipInput.value.trim()) {
+            this.zipInput.value = item.zip;
+        }
+        if (item.city && this.cityInput && !this.cityInput.value.trim()) {
+            this.cityInput.value = item.city;
+        }
+
+        this._suppressAutocomplete = true;
+        if (this.streetInput) {
+            this.streetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (item.zip && this.zipInput && !this.zipInput.value.trim()) {
+            this.zipInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (item.city && this.cityInput && !this.cityInput.value.trim()) {
+            this.cityInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
         this._suppressAutocomplete = false;
         this._closeDropdown();

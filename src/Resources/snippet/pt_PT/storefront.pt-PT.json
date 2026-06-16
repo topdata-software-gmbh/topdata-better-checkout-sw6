@@ -48,7 +48,8 @@
             "notCertifiedText": "O sistema não conseguiu detetar um endereço aceitável.",
             "errorText": "Falha na verificação de endereço:",
             "autocompleteZipPlaceholder": "Introduza o código postal...",
-            "autocompleteStreetPlaceholder": "Introduza a rua..."
+            "autocompleteStreetPlaceholder": "Introduza a rua...",
+            "houseNumberLabel": "Número de porta"
         },
         "validation": {
             "invalidLiechtensteinZip": "O código postal não é válido para o Liechtenstein (esperado 9480-9499).",
