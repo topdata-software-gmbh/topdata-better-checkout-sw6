@@ -107,6 +107,7 @@ export default class TopdataAddressValidator extends Plugin {
             this.options.zipInputSelector,
             this.options.cityInputSelector,
             this.options.countrySelectSelector,
+            this.options.houseNumberInputSelector,
         ].join(', ');
 
         const debouncedValidate = Debouncer.debounce(this._onValidate.bind(this), 400);

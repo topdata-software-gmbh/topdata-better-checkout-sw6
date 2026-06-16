@@ -27,11 +27,15 @@ class TestSwissPostApiCommand extends Command
         $this->addOption('all', null, InputOption::VALUE_NONE, 'Run all test scenarios (default)');
         $this->addOption('zip', null, InputOption::VALUE_NONE, 'Test ZIP autocomplete');
         $this->addOption('street', null, InputOption::VALUE_NONE, 'Test street autocomplete');
+        $this->addOption('housenumber', null, InputOption::VALUE_NONE, 'Test house number autocomplete');
         $this->addOption('validate', null, InputOption::VALUE_NONE, 'Test address validation');
         $this->addOption('raw', null, InputOption::VALUE_NONE, 'Show raw API JSON responses (proves API returns no location data)');
         $this->addOption('zip-query', null, InputOption::VALUE_REQUIRED, 'Query for ZIP autocomplete', '30');
         $this->addOption('street-query', null, InputOption::VALUE_REQUIRED, 'Query for street autocomplete', 'Bahnhof');
         $this->addOption('street-zip', null, InputOption::VALUE_REQUIRED, 'ZIP code for street autocomplete', '8001');
+        $this->addOption('hn-query', null, InputOption::VALUE_REQUIRED, 'Query for house number autocomplete', '2');
+        $this->addOption('hn-street', null, InputOption::VALUE_REQUIRED, 'Street for house number autocomplete', 'Via Serafino Balestra');
+        $this->addOption('hn-zip', null, InputOption::VALUE_REQUIRED, 'ZIP for house number autocomplete', '6600');
         $this->addOption('firstname', null, InputOption::VALUE_REQUIRED, 'First name for validation test', 'Hans');
         $this->addOption('lastname', null, InputOption::VALUE_REQUIRED, 'Last name for validation test', 'Muster');
         $this->addOption('test-street', null, InputOption::VALUE_REQUIRED, 'Street for validation test', 'viale Stazione');
@@ -57,6 +61,12 @@ class TestSwissPostApiCommand extends Command
 
         if ($runAll || $input->getOption('street')) {
             if ($this->testStreetAutocomplete($input, $output) !== Command::SUCCESS) {
+                $exitCode = Command::FAILURE;
+            }
+        }
+
+        if ($runAll || $input->getOption('housenumber')) {
+            if ($this->testHouseNumberAutocomplete($input, $output) !== Command::SUCCESS) {
                 $exitCode = Command::FAILURE;
             }
         }
@@ -167,6 +177,62 @@ class TestSwissPostApiCommand extends Command
         if (!$showRaw) {
             $output->writeln('  <options=bold>Tip:</> Use <comment>--raw</comment> flag to see the raw API response and confirm it returns');
             $output->writeln('  only street names (no zip/city data).');
+            $output->writeln('');
+        }
+
+        return Command::SUCCESS;
+    }
+
+    private function testHouseNumberAutocomplete(InputInterface $input, OutputInterface $output): int
+    {
+        $output->writeln('<comment>--- House Number Autocomplete ---</comment>');
+
+        $showRaw = $input->getOption('raw');
+
+        $tests = [[
+            'query' => $input->getOption('hn-query'),
+            'street' => $input->getOption('hn-street'),
+            'zip' => $input->getOption('hn-zip'),
+        ]];
+        if ($input->getOption('all')) {
+            $tests = [
+                ['query' => '2', 'street' => 'Via Serafino Balestra', 'zip' => '6600'],
+                ['query' => '33', 'street' => 'Brüggackerstrasse', 'zip' => '3303'],
+                ['query' => '1', 'street' => 'Bahnhofstrasse', 'zip' => '8001'],
+                ['query' => '15', 'street' => 'viale Stazione', 'zip' => '6500'],
+            ];
+        }
+
+        foreach ($tests as $test) {
+            $output->writeln(sprintf('  Request:  GET /address/v1/houses?zip=%s&streetname=%s&number=%s', $test['zip'], $test['street'], $test['query']));
+
+            $start = microtime(true);
+            $results = $this->apiService->autocompleteHouseNumber($test['query'], $test['street'], $test['zip']);
+            $elapsed = round((microtime(true) - $start) * 1000);
+
+            $output->writeln(sprintf('  Response: <info>%d results</info> in %d ms', count($results), $elapsed));
+            if (empty($results)) {
+                $output->writeln('  <error>ERROR: No results returned. Check credentials or API availability.</error>');
+                $output->writeln('');
+
+                return Command::FAILURE;
+            }
+
+            foreach (array_slice($results, 0, 15) as $item) {
+                $output->writeln(sprintf('    - %s', $item['houseNumber'] ?? ''));
+            }
+            if (count($results) > 15) {
+                $output->writeln(sprintf('    ... and %d more', count($results) - 15));
+            }
+
+            if ($showRaw) {
+                $output->writeln('  Raw API response:');
+                $output->writeln('    ' . json_encode(
+                    ['houses' => array_map(static fn ($r) => $r['houseNumber'], $results)],
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+                ));
+            }
+
             $output->writeln('');
         }
 

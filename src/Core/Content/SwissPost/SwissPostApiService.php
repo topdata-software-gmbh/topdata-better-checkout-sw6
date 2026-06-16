@@ -581,7 +581,7 @@ class SwissPostApiService
         }
 
         try {
-            $url = self::BASE_API_URL . '/house-numbers?houseNumber=' . urlencode($query) . '&street=' . urlencode($street) . '&zip=' . urlencode($zip) . '&type=DOMICILE';
+            $url = self::BASE_API_URL . '/houses?zip=' . urlencode($zip) . '&streetname=' . urlencode($street) . '&number=' . urlencode($query);
             $request = $this->requestFactory->createRequest('GET', $url)
                 ->withHeader('Authorization', 'Bearer ' . $token)
                 ->withHeader('Accept', 'application/json');
@@ -612,12 +612,16 @@ class SwissPostApiService
             if ($statusCode === 200) {
                 $data = json_decode($response->getBody()->getContents(), true) ?? [];
 
-                $results = array_map(static fn ($item) => [
-                    'houseNumber' => $item['houseNumber'] ?? '',
-                    'street' => $item['street'] ?? '',
-                    'zip' => $item['zip'] ?? '',
-                    'city' => $item['city18'] ?? $item['city27'] ?? '',
-                ], $data);
+                $houses = $data['houses'] ?? [];
+                if (!is_array($houses)) {
+                    $houses = [];
+                }
+
+                $results = array_map(static fn (string $houseNumber) => [
+                    'houseNumber' => $houseNumber,
+                    'street' => $street,
+                    'zip' => $zip,
+                ], $houses);
 
                 $cacheItem->set($results);
                 $cacheItem->expiresAfter(86400);
@@ -630,6 +634,7 @@ class SwissPostApiService
                     'street' => $street,
                     'zip' => $zip,
                     'results' => count($results),
+                    'houses' => $results,
                 ]);
 
                 return $results;
@@ -641,6 +646,7 @@ class SwissPostApiService
                 'query' => $query,
                 'street' => $street,
                 'zip' => $zip,
+                'body' => $response->getBody()->getContents(),
             ]);
         } catch (\Throwable $e) {
             $this->logger->error('Swiss Post House Number Autocomplete Exception', ['exception' => $e->getMessage()]);
