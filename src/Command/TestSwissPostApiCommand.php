@@ -189,6 +189,25 @@ class TestSwissPostApiCommand extends Command
 
         $showRaw = $input->getOption('raw');
 
+        // ---- test 1: empty query (proves API limitation) ----
+        $output->writeln('  <options=bold>Test 1: Empty query (on-input-focus scenario)</>');
+        $output->writeln('  Swiss Post DCAPI requires a non-empty "number" parameter.');
+        $output->writeln('  An empty query always returns 0 results — this is an <options=bold>API limitation, not a bug</>.');
+        $output->writeln(sprintf('  Request:  GET /address/v1/houses?zip=%s&streetname=%s&number=(empty)', $input->getOption('hn-zip'), $input->getOption('hn-street')));
+
+        $start = microtime(true);
+        $results = $this->apiService->autocompleteHouseNumber('', $input->getOption('hn-street'), $input->getOption('hn-zip'));
+        $elapsed = round((microtime(true) - $start) * 1000);
+
+        $output->writeln(sprintf('  Response: <info>%d results</info> in %d ms', count($results), $elapsed));
+        if (count($results) === 0) {
+            $output->writeln('  <comment>✓ Confirmed: empty query returns 0 results (expected API behaviour)</>');
+        } else {
+            $output->writeln(sprintf('  <info>  Got %d results (unexpected — API behaviour may have changed)</>', count($results)));
+        }
+        $output->writeln('');
+
+        // ---- test 2: user-provided or default queries ----
         $tests = [[
             'query' => $input->getOption('hn-query'),
             'street' => $input->getOption('hn-street'),
@@ -203,7 +222,10 @@ class TestSwissPostApiCommand extends Command
             ];
         }
 
-        foreach ($tests as $test) {
+        $exitCode = Command::SUCCESS;
+
+        foreach ($tests as $i => $test) {
+            $output->writeln(sprintf('  <options=bold>Test %d: Non-empty query "%s"</>', $i + 2, $test['query']));
             $output->writeln(sprintf('  Request:  GET /address/v1/houses?zip=%s&streetname=%s&number=%s', $test['zip'], $test['street'], $test['query']));
 
             $start = microtime(true);
@@ -213,16 +235,14 @@ class TestSwissPostApiCommand extends Command
             $output->writeln(sprintf('  Response: <info>%d results</info> in %d ms', count($results), $elapsed));
             if (empty($results)) {
                 $output->writeln('  <error>ERROR: No results returned. Check credentials or API availability.</error>');
-                $output->writeln('');
-
-                return Command::FAILURE;
-            }
-
-            foreach (array_slice($results, 0, 15) as $item) {
-                $output->writeln(sprintf('    - %s', $item['houseNumber'] ?? ''));
-            }
-            if (count($results) > 15) {
-                $output->writeln(sprintf('    ... and %d more', count($results) - 15));
+                $exitCode = Command::FAILURE;
+            } else {
+                foreach (array_slice($results, 0, 15) as $item) {
+                    $output->writeln(sprintf('    - %s', $item['houseNumber'] ?? ''));
+                }
+                if (count($results) > 15) {
+                    $output->writeln(sprintf('    ... and %d more', count($results) - 15));
+                }
             }
 
             if ($showRaw) {
@@ -236,7 +256,7 @@ class TestSwissPostApiCommand extends Command
             $output->writeln('');
         }
 
-        return Command::SUCCESS;
+        return $exitCode;
     }
 
     private function testAddressValidation(InputInterface $input, OutputInterface $output): int

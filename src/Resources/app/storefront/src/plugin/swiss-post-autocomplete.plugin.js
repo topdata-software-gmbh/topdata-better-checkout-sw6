@@ -101,6 +101,13 @@ export default class TopdataZipAutocomplete extends Plugin {
                 if (this._suppressAutocomplete) return;
                 debounced(e.target.value);
             });
+            this.houseNumberInput.addEventListener('focus', () => {
+                if (this._suppressAutocomplete) return;
+                const value = this.houseNumberInput.value.trim();
+                if (value) {
+                    this._onHouseNumberAutocomplete(value);
+                }
+            });
             this.houseNumberInput.addEventListener('keydown', this._onKeydown.bind(this));
         }
 
