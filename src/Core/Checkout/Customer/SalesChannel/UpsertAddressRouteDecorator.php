@@ -27,6 +27,7 @@ class UpsertAddressRouteDecorator extends AbstractUpsertAddressRoute
     public function upsert(?string $addressId, RequestDataBag $data, SalesChannelContext $context, CustomerEntity $customer): UpsertAddressRouteResponse
     {
         $this->enforceAccountType($data, $context);
+        $this->concatenateHouseNumber($data);
 
         return $this->decorated->upsert($addressId, $data, $context, $customer);
     }
@@ -52,5 +53,22 @@ class UpsertAddressRouteDecorator extends AbstractUpsertAddressRoute
             $data->remove('company');
             $data->remove('vatId');
         }
+    }
+
+    private function concatenateHouseNumber(RequestDataBag $data): void
+    {
+        $houseNumber = $data->getString('topdataHouseNumber');
+        if ($houseNumber === '') {
+            return;
+        }
+
+        $street = $data->getString('street');
+        if ($street !== '' && !str_ends_with($street, $houseNumber)) {
+            $data->set('street', $street . ' ' . $houseNumber);
+        } elseif ($street === '') {
+            $data->set('street', $houseNumber);
+        }
+
+        $data->remove('topdataHouseNumber');
     }
 }

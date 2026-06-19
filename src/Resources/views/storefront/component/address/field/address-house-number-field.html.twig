@@ -2,12 +2,15 @@
     <div class="{% if additionalClass is defined %}{{ additionalClass }}{% else %}col-md-6{% endif %}">
         <label class="form-label" for="{{ idPrefix }}{{ prefix }}AddressHouseNumber">
             {{ 'TopdataBetterCheckoutSW6.swissPost.houseNumberLabel'|trans|sw_sanitize }}
+            <span class="form-required-label" aria-hidden="true">{{ 'general.required'|trans|sw_sanitize }}</span>
         </label>
         <input type="text"
                class="form-control"
                id="{{ idPrefix }}{{ prefix }}AddressHouseNumber"
-               placeholder="{{ 'TopdataBetterCheckoutSW6.swissPost.houseNumberLabel'|trans|sw_sanitize }}"
+               name="{{ prefix }}[topdataHouseNumber]"
                autocomplete="off"
+               data-validation="required"
+               aria-required="true"
                data-topdata-house-number="true">
     </div>
 {% endblock %}

@@ -49,7 +49,10 @@
             "errorText": "Falha na verificação de endereço:",
             "autocompleteZipPlaceholder": "Introduza o código postal...",
             "autocompleteStreetPlaceholder": "Introduza a rua...",
-            "houseNumberLabel": "Número de porta"
+            "houseNumberLabel": "Número *",
+            "phonePlaceholder": "012 345 67",
+            "phoneHint": "Por favor, indique um número de telefone válido, p.ex. 012 345 67 89 ou +41 12 345 67 89.",
+            "autocompleteHelperText": "Introduza o primeiro dígito do seu código postal e a primeira letra do nome da sua rua. O endereço será sugerido automaticamente. Se não aparecer, pode introduzi-lo manualmente."
         },
         "validation": {
             "invalidLiechtensteinZip": "O código postal não é válido para o Liechtenstein (esperado 9480-9499).",

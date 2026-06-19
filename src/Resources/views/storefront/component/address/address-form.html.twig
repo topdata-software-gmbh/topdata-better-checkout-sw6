@@ -25,6 +25,12 @@
     {% endif %}
 
     <div{% if swissPostValidationEnabled %} data-topdata-address-validator data-topdata-address-validator-options='{{ validatorOptions|json_encode }}'{% endif %}{% if swissPostAutocompleteEnabled %} data-topdata-zip-autocomplete data-topdata-zip-autocomplete-options='{{ autocompleteOptions|json_encode }}'{% endif %}>
+        {% if swissPostAutocompleteEnabled %}
+            {% block component_address_form_autocomplete_helper %}
+                <p class="text-muted small mb-3">{{ 'TopdataBetterCheckoutSW6.swissPost.autocompleteHelperText'|trans|sw_sanitize }}</p>
+            {% endblock %}
+        {% endif %}
+
         {% if isNewAddress %}
             {% block component_address_form_zip_and_city_row %}
                 <div class="row g-2">
@@ -61,15 +67,18 @@
                     {% set violationPath = "/#{prefix}/phoneNumber" %}
                 {% endif %}
                 <div class="row g-2">
-                    {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
-                        label: 'address.phoneNumberLabel'|trans|sw_sanitize,
-                        id: idPrefix ~ prefix ~ 'AddressPhoneNumber',
-                        name: prefix ~ '[phoneNumber]',
-                        value: data.get('phoneNumber'),
-                        violationPath: violationPath,
-                        validationRules: 'required',
-                        additionalClass: 'col-sm-6',
-                    } %}
+                    <div class="col-12">
+                        {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
+                            label: 'address.phoneNumberLabel'|trans|sw_sanitize,
+                            id: idPrefix ~ prefix ~ 'AddressPhoneNumber',
+                            name: prefix ~ '[phoneNumber]',
+                            value: data.get('phoneNumber'),
+                            placeholder: 'TopdataBetterCheckoutSW6.swissPost.phonePlaceholder'|trans,
+                            violationPath: violationPath,
+                            validationRules: 'required',
+                        } %}
+                        <p class="text-muted" style="font-size: 0.8rem; margin-top: -0.5rem;">{{ 'TopdataBetterCheckoutSW6.swissPost.phoneHint'|trans|sw_sanitize }}</p>
+                    </div>
                 </div>
             {% endblock %}
         {% else %}

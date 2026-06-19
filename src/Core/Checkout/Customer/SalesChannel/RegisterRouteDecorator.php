@@ -53,6 +53,7 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
         }
 
         $this->enforceAccountType($data, $context, $isGuest);
+        $this->concatenateHouseNumber($data);
         $this->cloneBillingAsShippingIfEnabled($data, $context);
 
         return $this->decorated->register($data, $context, $validateStorefrontUrl, $additionalValidationDefinitions);
@@ -226,6 +227,38 @@ class RegisterRouteDecorator extends AbstractRegisterRoute
                 }
             }
         }
+    }
+
+    private function concatenateHouseNumber(RequestDataBag $data): void
+    {
+        $this->concatenateHouseNumberInAddress($data, 'billingAddress');
+        $this->concatenateHouseNumberInAddress($data, 'shippingAddress');
+    }
+
+    private function concatenateHouseNumberInAddress(RequestDataBag $data, string $addressKey): void
+    {
+        if (!$data->has($addressKey)) {
+            return;
+        }
+
+        $address = $data->get($addressKey);
+        if (!$address instanceof RequestDataBag) {
+            return;
+        }
+
+        $houseNumber = $address->getString('topdataHouseNumber');
+        if ($houseNumber === '') {
+            return;
+        }
+
+        $street = $address->getString('street');
+        if ($street !== '' && !str_ends_with($street, $houseNumber)) {
+            $address->set('street', $street . ' ' . $houseNumber);
+        } elseif ($street === '') {
+            $address->set('street', $houseNumber);
+        }
+
+        $address->remove('topdataHouseNumber');
     }
 
 }

@@ -49,7 +49,10 @@
             "errorText": "Fehler bei der Adressprüfung:",
             "autocompleteZipPlaceholder": "PLZ eingeben...",
             "autocompleteStreetPlaceholder": "Strasse eingeben...",
-            "houseNumberLabel": "Hausnummer"
+            "houseNumberLabel": "Hausnummer",
+            "phonePlaceholder": "012 345 67",
+            "phoneHint": "Bitte geben Sie eine korrekte Telefonnummer an, z.B. 012 345 67 89 oder +41 12 345 67 89.",
+            "autocompleteHelperText": "Geben Sie die erste Ziffer Ihrer PLZ und den ersten Buchstaben Ihres Strassennamens ein. Die Adresse wird automatisch vorgeschlagen. Falls sie nicht erscheint, können Sie sie manuell eingeben."
         },
         "validation": {
             "invalidLiechtensteinZip": "Die Postleitzahl ist für Liechtenstein nicht gültig (erwartet wird 9480-9499).",
