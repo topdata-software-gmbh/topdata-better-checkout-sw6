@@ -17,5 +17,7 @@
         </div>
     {% endif %}
 
-    {{ parent() }}
+    <h1 class="account-welcome">
+        {{ "better-checkout.account.addressesTitle"|trans|sw_sanitize }}
+    </h1>
 {% endblock %}

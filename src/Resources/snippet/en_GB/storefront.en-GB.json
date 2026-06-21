@@ -15,7 +15,7 @@
         "swissPostValidationFailed": "The address could not be validated by Swiss Post. Please check your address details.",
         "account": {
             "addressesTitle": "Billing address",
-            "addressesAvailable": "Available shipping addresses"
+            "addressesAvailable": "Shipping addresses"
         },
         "billingAddressEdit": {
             "title": "Edit billing address",
@@ -30,7 +30,9 @@
         }
     },
     "account": {
-        "addressesTitleDefaultBillingAddress": "Billing address"
+        "addressesTitleDefaultBillingAddress": "Billing address",
+        "addressText": "Manage your shipping addresses",
+        "addressCreateBtn": "Add new shipping address"
     },
     "checkout": {
         "confirmChangeBillingAddress": "Edit billing address"

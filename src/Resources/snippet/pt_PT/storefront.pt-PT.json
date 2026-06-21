@@ -15,7 +15,7 @@
         "swissPostValidationFailed": "O endereço não pôde ser validado pelo Swiss Post. Por favor, verifique os detalhes do seu endereço.",
         "account": {
             "addressesTitle": "Endereço de faturação",
-            "addressesAvailable": "Endereços de entrega disponíveis"
+            "addressesAvailable": "Endereços de entrega"
         },
         "billingAddressEdit": {
             "title": "Editar endereço de faturação",
@@ -30,7 +30,9 @@
         }
     },
     "account": {
-        "addressesTitleDefaultBillingAddress": "Endereço de faturação"
+        "addressesTitleDefaultBillingAddress": "Endereço de faturação",
+        "addressText": "Gerencie os seus endereços de entrega",
+        "addressCreateBtn": "Adicionar novo endereço de entrega"
     },
     "checkout": {
         "confirmChangeBillingAddress": "Editar endereço de faturação"
