@@ -45,7 +45,7 @@
                 data-form-handler="true"
             >
                 <input type="hidden" name="addressId" value="{{ addressId }}">
-                <input type="hidden" name="returnRoute" value="{{ app.request.attributes.get('_route') }}">
+                <input type="hidden" name="returnRoute" value="{{ returnRoute }}">
 
                 <div class="form-group mb-3">
                     <label for="newCompanyName" class="form-label">
@@ -86,6 +86,7 @@
                 data-form-handler="true"
             >
                 <input type="hidden" name="addressId" value="{{ addressId }}">
+                <input type="hidden" name="returnRoute" value="{{ returnRoute }}">
 
                 <div class="form-group mb-3">
                     <label for="newCompanyName" class="form-label">

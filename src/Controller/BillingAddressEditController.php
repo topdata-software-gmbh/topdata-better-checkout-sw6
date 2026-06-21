@@ -121,6 +121,7 @@ class BillingAddressEditController extends StorefrontController
     )]
     public function getCompanyNameChangeRequestModal(
         string $addressId,
+        Request $request,
         SalesChannelContext $context,
         CustomerEntity $customer,
     ): Response {
@@ -138,6 +139,7 @@ class BillingAddressEditController extends StorefrontController
                 'addressId' => $addressId,
                 'currentCompanyName' => $address->getCompany() ?? '',
                 'pendingRequest' => $pendingRequest,
+                'returnRoute' => $request->query->get('returnRoute', ''),
             ],
         );
         $response->headers->set('x-robots-tag', 'noindex');
@@ -161,7 +163,7 @@ class BillingAddressEditController extends StorefrontController
 
         if ($newCompanyName === '') {
             $this->addFlash(self::DANGER, $this->trans('better-checkout.companyChange.changeRequestEmpty'));
-            return $this->redirectToRoute('frontend.checkout.confirm.page');
+            return $this->redirectToRefererOrProfile($request);
         }
 
         $address = $this->getCustomerAddress($addressId, $context, $customer);
@@ -169,7 +171,7 @@ class BillingAddressEditController extends StorefrontController
 
         if ($newCompanyName === $oldCompanyName) {
             $this->addFlash(self::INFO, $this->trans('better-checkout.companyChange.changeRequestSameName'));
-            return $this->redirectToRoute('frontend.checkout.confirm.page');
+            return $this->redirectToRefererOrProfile($request);
         }
 
         $this->companyNameChangeRequestService->createChangeRequest(
@@ -182,7 +184,7 @@ class BillingAddressEditController extends StorefrontController
 
         $this->addFlash(self::SUCCESS, $this->trans('better-checkout.companyChange.changeRequestSubmitted'));
 
-        return $this->redirectToRoute('frontend.checkout.confirm.page');
+        return $this->redirectToRefererOrProfile($request);
     }
 
     #[Route(
@@ -234,6 +236,13 @@ class BillingAddressEditController extends StorefrontController
 
         if ($returnRoute === 'frontend.checkout.confirm.page') {
             return $this->redirectToRoute('frontend.checkout.confirm.page');
+        }
+
+        if ($returnRoute === 'frontend.account.address.edit.page') {
+            $addressId = $request->request->get('addressId', '');
+            if ($addressId !== '') {
+                return $this->redirectToRoute('frontend.account.address.edit.page', ['addressId' => $addressId]);
+            }
         }
 
         return $this->redirectToRoute('frontend.account.profile.page');

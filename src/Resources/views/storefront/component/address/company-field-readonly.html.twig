@@ -10,7 +10,7 @@
             type="button"
             class="btn btn-sm btn-outline-primary"
             data-ajax-modal="true"
-            data-url="{{ path('frontend.checkout.company-name-change-request.get', { addressId: addressId }) }}"
+            data-url="{{ path('frontend.checkout.company-name-change-request.get', { addressId: addressId, returnRoute: app.request.attributes.get('_route') }) }}"
             title="{% if pendingRequest is defined and pendingRequest is not null %}{{ 'better-checkout.companyChange.changeRequestEditButton'|trans|striptags }}{% else %}{{ 'better-checkout.companyChange.changeRequestButton'|trans|striptags }}{% endif %}"
         >
             {% if pendingRequest is defined and pendingRequest is not null %}
