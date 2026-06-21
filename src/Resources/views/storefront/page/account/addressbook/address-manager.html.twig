@@ -32,59 +32,48 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[AddressDebug] DOM loaded');
+            var searchContainer = document.querySelector('[data-address-search]');
+            if (!searchContainer) return;
 
-            const searchContainer = document.querySelector('[data-address-search]');
-            if (!searchContainer) {
-                console.log('[AddressDebug] No search container found');
-                return;
-            }
+            var searchInput = searchContainer.querySelector('.address-manager-list-search');
+            var searchContent = searchContainer.querySelector('.address-manager-list-wrapper');
+            var notFound = searchContainer.querySelector('.address-manager-no-address');
+            var empty = searchContainer.querySelector('.address-manager-empty-address');
+            if (!searchInput || !searchContent) return;
 
-            console.log('[AddressDebug] Search container:', searchContainer);
+            function filterAddresses() {
+                var query = searchInput.value.toLowerCase();
+                var items = searchContent.children;
+                var visibleCount = 0;
 
-            const searchInput = searchContainer.querySelector('.address-manager-list-search');
-            const searchContent = searchContainer.querySelector('.address-manager-list-wrapper');
+                Array.from(items).forEach(function(item) {
+                    var searchItem = item.querySelector('.address-manager-select-address');
+                    if (!searchItem) return;
 
-            console.log('[AddressDebug] Search input:', searchInput);
-            console.log('[AddressDebug] Search content:', searchContent);
-
-            if (searchContent) {
-                const children = searchContent.children;
-                console.log('[AddressDebug] Number of address items:', children.length);
-
-                Array.from(children).forEach((child, index) => {
-                    console.log(`[AddressDebug] Item ${index}:`, child);
-                    const searchItem = child.querySelector('.address-manager-select-address');
-                    console.log(`[AddressDebug]   Has .address-manager-select-address:`, !!searchItem);
-                    if (searchItem) {
-                        console.log(`[AddressDebug]   Text: "${searchItem.textContent.substring(0, 100)}"`);
+                    var text = searchItem.textContent.toLowerCase();
+                    if (text.includes(query)) {
+                        item.style.removeProperty('display');
+                        item.classList.remove('d-none');
+                        visibleCount++;
+                    } else {
+                        item.style.setProperty('display', 'none', 'important');
+                        item.classList.add('d-none');
                     }
                 });
+
+                if (notFound) notFound.classList.add('d-none');
+                if (empty) empty.classList.add('d-none');
+
+                if (visibleCount === 0) {
+                    if (query.length === 0) {
+                        if (empty) empty.classList.remove('d-none');
+                    } else {
+                        if (notFound) notFound.classList.remove('d-none');
+                    }
+                }
             }
 
-            if (searchInput) {
-                searchInput.addEventListener('input', function(event) {
-                    const query = event.target.value.toLowerCase();
-                    console.log('[AddressDebug] Search query:', query);
-
-                    const items = searchContent.children;
-                    Array.from(items).forEach((item, index) => {
-                        const searchItem = item.querySelector('.address-manager-select-address');
-                        if (searchItem) {
-                            const text = searchItem.textContent.toLowerCase();
-                            const matches = text.includes(query);
-                            console.log(`[AddressDebug] Item ${index} matches: ${matches}`);
-
-                            if (matches) {
-                                item.classList.remove('d-none');
-                            } else {
-                                item.classList.add('d-none');
-                            }
-                        }
-                    });
-                });
-                console.log('[AddressDebug] Search listener attached');
-            }
+            searchInput.addEventListener('input', filterAddresses);
         });
     </script>
 {% endblock %}
