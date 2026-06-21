@@ -30,6 +30,7 @@
         }
     },
     "account": {
+        "addressesTitleDefaultShippingAddress": "Standard",
         "addressesTitleDefaultBillingAddress": "Rechnungsadresse",
         "addressText": "Verwalten Sie Ihre Lieferadressen",
         "addressCreateBtn": "Neue Lieferadresse hinzufügen"

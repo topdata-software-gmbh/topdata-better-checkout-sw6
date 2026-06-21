@@ -30,6 +30,7 @@
         }
     },
     "account": {
+        "addressesTitleDefaultShippingAddress": "Default",
         "addressesTitleDefaultBillingAddress": "Billing address",
         "addressText": "Manage your shipping addresses",
         "addressCreateBtn": "Add new shipping address"
