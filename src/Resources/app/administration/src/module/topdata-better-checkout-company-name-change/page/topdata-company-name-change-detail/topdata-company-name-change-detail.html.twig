@@ -4,6 +4,10 @@
     </template>
 
     <template #smart-bar-actions>
+        <sw-button @click="$router.push({ name: 'topdata.better.checkout.company.name.change.list' })">
+            {{ $tc('global.default.back') }}
+        </sw-button>
+
         <sw-button
             v-if="isPending"
             variant="danger"
@@ -75,6 +79,11 @@
 
                     <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.customerEmail') }}</dt>
                     <dd>{{ item.customer.email }}</dd>
+
+                    <template v-if="item.address?.phoneNumber">
+                        <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.phoneNumber') }}</dt>
+                        <dd>{{ item.address.phoneNumber }}</dd>
+                    </template>
                 </sw-description-list>
             </sw-card>
 

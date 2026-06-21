@@ -33,7 +33,8 @@
                 "reviewedAt": "Reviewed At",
                 "reviewComment": "Comment",
                 "customerName": "Customer Name",
-                "customerEmail": "Customer Email"
+                "customerEmail": "Customer Email",
+                "phoneNumber": "Phone Number"
             },
             "placeholder": {
                 "reviewComment": "Optional comment for the decision..."

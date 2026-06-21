@@ -33,7 +33,8 @@
                 "reviewedAt": "Geprüft am",
                 "reviewComment": "Kommentar",
                 "customerName": "Kundenname",
-                "customerEmail": "Kunden-E-Mail"
+                "customerEmail": "Kunden-E-Mail",
+                "phoneNumber": "Telefonnummer"
             },
             "placeholder": {
                 "reviewComment": "Optionaler Kommentar zur Entscheidung..."
