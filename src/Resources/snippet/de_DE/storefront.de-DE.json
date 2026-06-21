@@ -22,6 +22,9 @@
             "cancel": "Abbrechen",
             "save": "Speichern"
         },
+        "shippingAddressEdit": {
+            "title": "Lieferadresse bearbeiten"
+        },
         "companyChange": {
             "blockedTitle": "Bestellung derzeit nicht möglich",
             "blockedMessage": "Ihr Antrag auf Änderung des Firmennamens von \"%oldCompany%\" zu \"%newCompany%\" wird gerade geprüft. Bis zur Bestätigung können Sie keine Bestellung aufgeben.",

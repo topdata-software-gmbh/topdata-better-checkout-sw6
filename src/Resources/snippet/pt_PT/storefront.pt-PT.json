@@ -22,6 +22,9 @@
             "cancel": "Cancelar",
             "save": "Guardar"
         },
+        "shippingAddressEdit": {
+            "title": "Editar endereço de entrega"
+        },
         "companyChange": {
             "blockedTitle": "Encomenda não possível neste momento",
             "blockedMessage": "O seu pedido de alteração do nome da empresa de \"%oldCompany%\" para \"%newCompany%\" está em revisão. Não pode fazer encomendas até a alteração ser confirmada.",

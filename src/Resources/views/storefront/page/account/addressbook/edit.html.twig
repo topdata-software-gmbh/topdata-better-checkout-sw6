@@ -1,0 +1,51 @@
+{% sw_extends '@Storefront/storefront/page/account/addressbook/edit.html.twig' %}
+
+{% block page_account_address_form_welcome_headline %}
+    {% set isBillingAddress = page.address.id == context.customer.defaultBillingAddressId %}
+    <h1 class="account-welcome">
+        {% if isBillingAddress %}
+            {{ 'better-checkout.billingAddressEdit.title'|trans|sw_sanitize }}
+        {% else %}
+            {{ 'better-checkout.shippingAddressEdit.title'|trans|sw_sanitize }}
+        {% endif %}
+    </h1>
+{% endblock %}
+
+{% block page_account_address_form_edit_personal %}
+    {% set isBillingAddress = page.address.id == context.customer.defaultBillingAddressId %}
+
+    {% set pendingRequest = null %}
+    {% if isBillingAddress and page.extensions.topdataCompanyNameChangePending is defined %}
+        {% set pendingRequest = page.extensions.topdataCompanyNameChangePending.changeRequest %}
+    {% endif %}
+
+    {% sw_include '@Storefront/storefront/component/address/address-personal.html.twig' with {
+        data: page.address,
+        prefix: 'address',
+        showCompanyFields: not isBillingAddress,
+    } %}
+
+    {% if isBillingAddress %}
+        <div class="row g-2 mt-2">
+            <div class="col-12">
+                {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/company-field-readonly.html.twig' with {
+                    currentCompanyName: page.address.company ?? '',
+                    addressId: page.address.id,
+                    pendingRequest: pendingRequest,
+                } %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block page_account_address_form_edit_general %}
+    {% set isBillingAddress = page.address.id == context.customer.defaultBillingAddressId %}
+
+    {% sw_include '@Storefront/storefront/component/address/address-form.html.twig' with {
+        data: page.address,
+        prefix: 'address',
+        showFormCompany: not isBillingAddress,
+        showNoShippingPostfix: true,
+        scopeElementSelector: '.account-address-form',
+    } %}
+{% endblock %}

@@ -22,6 +22,9 @@
             "cancel": "Cancel",
             "save": "Save"
         },
+        "shippingAddressEdit": {
+            "title": "Edit shipping address"
+        },
         "companyChange": {
             "blockedTitle": "Order not possible at this time",
             "blockedMessage": "Your request to change the company name from \"%oldCompany%\" to \"%newCompany%\" is currently under review. You cannot place an order until the change is confirmed.",
