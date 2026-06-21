@@ -3,79 +3,119 @@
 {% set addressDropdownIcon = config('TopdataBetterCheckoutSW6.config.addressDropdownIcon') %}
 {% set showPhone = config('TopdataBetterCheckoutSW6.config.showPhoneNumberOnAddressCards') %}
 
-{% block address_item_dropdown_button %}
-    <button
-        type="button"
-        id="address-item-dropdown-btn-{{ address.id }}"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        aria-label="{{ 'account.addressOptionsBtn'|trans|sw_sanitize }}"
-        class="bg-transparent border-0"
-    >
-        {% sw_icon addressDropdownIcon|default('more-vertical') style {size: 's'} %}
-    </button>
-{% endblock %}
+{% block address_item %}
+<li class="col-12 col-lg-6 d-flex">
+    <div class="p-3 border address-manager-select-address flex-fill">
+        <div class="row h-100">
+            <div class="d-flex justify-content-between">
+                {% block address_item_address %}
+                    {% sw_include '@Storefront/storefront/component/address/address.html.twig' with {
+                        address: address
+                    } %}
+                {% endblock %}
 
-{% block address_item_dropdown_items %}
-    <li>
-        <a
-            class="dropdown-item address-manager-modal-address-form"
-            href="{{ path('frontend.account.address.edit.page', {addressId: address.id}) }}"
-        >
-            {{ 'global.default.edit'|trans|sw_sanitize }}
-        </a>
-    </li>
-    {% if not defaultShipping and not defaultBilling %}
-        <li>
-            <form
-                action="{{ path('frontend.account.address.set-default-address', {type: 'shipping', addressId: address.id}) }}"
-                method="post"
-            >
-                <button
-                    type="submit"
-                    title="{{ 'account.addressesSetAsDefaultShippingAction'|trans|striptags }}"
-                    class="dropdown-item"{% if not address.country.shippingAvailable %}disabled="disabled"{% endif %}
-                >
-                    {{ 'account.addressesSetAsDefaultShippingAction'|trans|sw_sanitize }}
-                </button>
-            </form>
-        </li>
-    {% endif %}
-    {% if not (defaultShipping or defaultBilling) %}
-        <li>
-            <form
-                action="{{ path('frontend.account.address.delete', {addressId: address.id}) }}"
-                method="post"
-            >
-                <button type="submit" class="dropdown-item text-danger">
-                    {{ 'account.addressesContentItemActionDelete'|trans|sw_sanitize }}
-                </button>
-            </form>
-        </li>
-    {% endif %}
-{% endblock %}
+                {% block address_item_dropdown %}
+                    {% set addressItemDropdownId = 'address-item-dropdown-' ~ random() %}
 
-{% block address_item_address %}
-    {{ parent() }}
-    {% if showPhone and address.phoneNumber %}
-        <div class="address-phone">
-            <span class="fw-semibold">{{ 'TopdataBetterCheckoutSW6.address.phone'|trans|sw_sanitize }}</span>
-            {{ address.phoneNumber }}
+                    <div class="dropdown">
+                        {% block address_item_dropdown_button %}
+                            <button
+                                type="button"
+                                id="{{ addressItemDropdownId }}"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                aria-label="{{ 'account.addressOptionsBtn'|trans|sw_sanitize }}"
+                                class="bg-transparent border-0"
+                            >
+                                {% sw_icon addressDropdownIcon|default('more-vertical') style {size: 's'} %}
+                            </button>
+                        {% endblock %}
+
+                        <ul class="dropdown-menu" aria-labelledby="{{ addressItemDropdownId }}">
+                            {% block address_item_dropdown_items %}
+                                <li>
+                                    <a
+                                        class="dropdown-item address-manager-modal-address-form"
+                                        href="{{ path('frontend.account.address.edit.page', {addressId: address.id}) }}"
+                                    >
+                                        {{ 'global.default.edit'|trans|sw_sanitize }}
+                                    </a>
+                                </li>
+                                {% if not defaultShipping %}
+                                    <li>
+                                        <form
+                                            action="{{ path('frontend.account.address.set-default-address', {type: 'shipping', addressId: address.id}) }}"
+                                            method="post"
+                                        >
+                                            <button
+                                                type="submit"
+                                                title="{{ 'account.addressesSetAsDefaultShippingAction'|trans|striptags }}"
+                                                class="dropdown-item"{% if not address.country.shippingAvailable %}disabled="disabled"{% endif %}
+                                            >
+                                                {{ 'account.addressesSetAsDefaultShippingAction'|trans|sw_sanitize }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                {% endif %}
+                                {% if not defaultBilling %}
+                                    <li>
+                                        <form
+                                            action="{{ path('frontend.account.address.set-default-address', {type: 'billing', addressId: address.id}) }}"
+                                            method="post"
+                                        >
+                                            <button
+                                                type="submit"
+                                                title="{{ 'account.addressesSetAsDefaultBillingAction'|trans|striptags }}"
+                                                class="dropdown-item"
+                                            >
+                                                {{ 'account.addressesSetAsDefaultBillingAction'|trans|sw_sanitize }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                {% endif %}
+                                {% if not (defaultShipping or defaultBilling) %}
+                                    <li>
+                                        <form
+                                            action="{{ path('frontend.account.address.delete', {addressId: address.id}) }}"
+                                            method="post"
+                                        >
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                {{ 'account.addressesContentItemActionDelete'|trans|sw_sanitize }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                {% endif %}
+                            {% endblock %}
+                        </ul>
+                    </div>
+                {% endblock %}
+            </div>
+
+            {% if showPhone and address.phoneNumber %}
+                <div class="address-phone mt-2">
+                    <span class="fw-semibold">{{ 'TopdataBetterCheckoutSW6.address.phone'|trans|sw_sanitize }}</span>
+                    {{ address.phoneNumber }}
+                </div>
+            {% endif %}
+
+            {% if defaultShipping %}
+                {% set snippet = 'account.addressesTitleDefaultShippingAddress' %}
+            {% elseif defaultBilling %}
+                {% set snippet = 'account.addressesTitleDefaultBillingAddress' %}
+            {% endif %}
+
+            {% block address_item_badge_content %}
+                {% if defaultShipping or defaultBilling %}
+                    {% block address_item_badge %}
+                        <div class="mt-auto d-flex justify-content-end">
+                            <span class="address-item-default-badge fs-6 fw-semibold px-4 py-1 rounded-pill text-bg-info">
+                                {{ snippet|trans|sw_sanitize }}
+                            </span>
+                        </div>
+                    {% endblock %}
+                {% endif %}
+            {% endblock %}
         </div>
-    {% endif %}
-{% endblock %}
-
-{% block address_item_badge %}
-    {#
-       We intentionally suppress the billing badge to keep the UI clean,
-       but we preserve the shipping badge using native Shopware core HTML.
-    #}
-    {% set originalDefaultBilling = defaultBilling %}
-    {% set defaultBilling = false %}
-
-    {% if defaultShipping %}
-        {{ parent() }}
-    {% endif %}
-
-    {% set defaultBilling = originalDefaultBilling %}
+    </div>
+</li>
 {% endblock %}
