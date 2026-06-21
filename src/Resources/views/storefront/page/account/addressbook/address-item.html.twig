@@ -41,7 +41,7 @@
                                         {{ 'global.default.edit'|trans|sw_sanitize }}
                                     </a>
                                 </li>
-                                {% if not defaultShipping %}
+                                {% if not defaultShipping and not defaultBilling %}
                                     <li>
                                         <form
                                             action="{{ path('frontend.account.address.set-default-address', {type: 'shipping', addressId: address.id}) }}"
@@ -53,22 +53,6 @@
                                                 class="dropdown-item"{% if not address.country.shippingAvailable %}disabled="disabled"{% endif %}
                                             >
                                                 {{ 'account.addressesSetAsDefaultShippingAction'|trans|sw_sanitize }}
-                                            </button>
-                                        </form>
-                                    </li>
-                                {% endif %}
-                                {% if not defaultBilling %}
-                                    <li>
-                                        <form
-                                            action="{{ path('frontend.account.address.set-default-address', {type: 'billing', addressId: address.id}) }}"
-                                            method="post"
-                                        >
-                                            <button
-                                                type="submit"
-                                                title="{{ 'account.addressesSetAsDefaultBillingAction'|trans|striptags }}"
-                                                class="dropdown-item"
-                                            >
-                                                {{ 'account.addressesSetAsDefaultBillingAction'|trans|sw_sanitize }}
                                             </button>
                                         </form>
                                     </li>
@@ -100,12 +84,10 @@
 
             {% if defaultShipping %}
                 {% set snippet = 'account.addressesTitleDefaultShippingAddress' %}
-            {% elseif defaultBilling %}
-                {% set snippet = 'account.addressesTitleDefaultBillingAddress' %}
             {% endif %}
 
             {% block address_item_badge_content %}
-                {% if defaultShipping or defaultBilling %}
+                {% if defaultShipping %}
                     {% block address_item_badge %}
                         <div class="mt-auto d-flex justify-content-end">
                             <span class="address-item-default-badge fs-6 fw-semibold px-4 py-1 rounded-pill text-bg-info">
