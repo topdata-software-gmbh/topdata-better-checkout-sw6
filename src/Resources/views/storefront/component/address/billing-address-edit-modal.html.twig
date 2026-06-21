@@ -15,20 +15,6 @@
     </div>
 
     <div class="modal-body">
-        {% if hasPendingCompanyNameChange is defined and hasPendingCompanyNameChange %}
-            <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
-                <div class="me-3">
-                    {% sw_icon 'warning' style { size: 'md' } %}
-                </div>
-                <div>
-                    <strong>{{ 'better-checkout.companyChange.pendingTitle'|trans|sw_sanitize }}</strong>
-                    <p class="mb-0 mt-1">
-                        {{ 'better-checkout.companyChange.pendingMessage'|trans|sw_sanitize }}
-                    </p>
-                </div>
-            </div>
-        {% endif %}
-
         {% block billing_address_edit_modal_form %}
             <form
                 method="post"

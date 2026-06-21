@@ -1,0 +1,30 @@
+{% sw_extends '@Storefront/storefront/page/account/profile/index.html.twig' %}
+
+{% block page_account_profile_personal_fields %}
+    {% set showVatIdField = true %}
+
+    {% if context.customer %}
+        {% set onlyCompanyRegistration = false %}
+    {% else %}
+        {% set onlyCompanyRegistration = context.currentCustomerGroup.translated.registrationOnlyCompanyRegistration ?? false %}
+    {% endif %}
+
+    {% set billingAddressId = context.customer.defaultBillingAddressId ?? '' %}
+
+    {% sw_include '@Storefront/storefront/component/address/address-personal.html.twig' with {
+        prefix: '',
+        showBirthdayField: config('core.loginRegistration.showBirthdayField'),
+        data: context.customer,
+        onlyCompanyRegistration: onlyCompanyRegistration,
+        showCompanyFields: false,
+    } %}
+
+    <div class="row g-2 mt-2">
+        <div class="col-12">
+            {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/company-field-readonly.html.twig' with {
+                currentCompanyName: context.customer.company ?? '',
+                addressId: billingAddressId,
+            } %}
+        </div>
+    </div>
+{% endblock %}

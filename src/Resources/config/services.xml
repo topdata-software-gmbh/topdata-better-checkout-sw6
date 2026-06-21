@@ -22,6 +22,7 @@
             <argument type="service" id="tdbc_company_name_change_request.repository"/>
             <argument type="service" id="customer_address.repository"/>
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestEmailService"/>
+            <argument type="service" id="customer.repository"/>
         </service>
 
         <!-- CONTROLLERS -->
@@ -119,6 +120,12 @@
 
         <!-- Account Address Page Subscriber -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AccountAddressPageSubscriber">
+            <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Account Profile Page Subscriber -->
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\AccountProfilePageSubscriber">
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
             <tag name="kernel.event_subscriber"/>
         </service>

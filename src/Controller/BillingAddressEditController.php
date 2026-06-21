@@ -17,9 +17,9 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\Salutation\SalesChannel\AbstractSalutationRoute;
 use Shopware\Storefront\Controller\StorefrontController;
 use Symfony\Component\HttpFoundation\Request;
+use Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService;
 
 #[Route(defaults: ['_routeScope' => ['storefront']])]
 class BillingAddressEditController extends StorefrontController
@@ -48,7 +48,7 @@ class BillingAddressEditController extends StorefrontController
         $address = $this->getCustomerAddress($addressId, $context, $customer);
         $page = $this->getPageWithCountries($context);
 
-        $hasPendingRequest = $this->companyNameChangeRequestService->hasPendingChangeRequest(
+        $pendingRequest = $this->companyNameChangeRequestService->findPendingChangeRequest(
             $customer->getId(),
             $addressId,
             $context->getContext()
@@ -59,7 +59,7 @@ class BillingAddressEditController extends StorefrontController
             [
                 'address' => $address,
                 'page' => $page,
-                'hasPendingCompanyNameChange' => $hasPendingRequest,
+                'pendingCompanyNameChangeRequest' => $pendingRequest,
             ],
         );
         $response->headers->set('x-robots-tag', 'noindex');
@@ -84,25 +84,6 @@ class BillingAddressEditController extends StorefrontController
         /** @var RequestDataBag $addressData */
         $addressData = $data->get('address');
         $addressData->set('id', $addressId);
-
-        $newCompanyName = $addressData->get('company', $address->getCompany() ?? '');
-        $oldCompanyName = $address->getCompany() ?? '';
-
-        if ($newCompanyName !== $oldCompanyName && trim($newCompanyName) !== '') {
-            $this->companyNameChangeRequestService->createChangeRequest(
-                $customer->getId(),
-                $addressId,
-                $oldCompanyName,
-                $newCompanyName,
-                $context->getContext()
-            );
-
-            $addressData->remove('company');
-
-            if ($addressData->count() === 1 && $addressData->has('id')) {
-                return $this->redirectToRoute('frontend.checkout.confirm.page');
-            }
-        }
 
         try {
             $this->upsertAddressRoute->upsert(
@@ -129,6 +110,79 @@ class BillingAddressEditController extends StorefrontController
             $response->headers->set('x-robots-tag', 'noindex');
             return $response;
         }
+    }
+
+    #[Route(
+        path: '/widgets/checkout/company-name-change-request/{addressId}',
+        name: 'frontend.checkout.company-name-change-request.get',
+        options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true, '_loginRequired' => true],
+        methods: ['GET']
+    )]
+    public function getCompanyNameChangeRequestModal(
+        string $addressId,
+        SalesChannelContext $context,
+        CustomerEntity $customer,
+    ): Response {
+        $address = $this->getCustomerAddress($addressId, $context, $customer);
+
+        $pendingRequest = $this->companyNameChangeRequestService->findPendingChangeRequest(
+            $customer->getId(),
+            $addressId,
+            $context->getContext()
+        );
+
+        $response = $this->renderStorefront(
+            '@TopdataBetterCheckoutSW6/storefront/component/address/company-name-change-request-modal.html.twig',
+            [
+                'addressId' => $addressId,
+                'currentCompanyName' => $address->getCompany() ?? '',
+                'pendingRequest' => $pendingRequest,
+            ],
+        );
+        $response->headers->set('x-robots-tag', 'noindex');
+        return $response;
+    }
+
+    #[Route(
+        path: '/widgets/checkout/company-name-change-request/{addressId}',
+        name: 'frontend.checkout.company-name-change-request.save',
+        options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true, '_loginRequired' => true],
+        methods: ['POST']
+    )]
+    public function submitCompanyNameChangeRequest(
+        string $addressId,
+        Request $request,
+        SalesChannelContext $context,
+        CustomerEntity $customer,
+    ): Response {
+        $newCompanyName = trim($request->request->get('newCompanyName', ''));
+
+        if ($newCompanyName === '') {
+            $this->addFlash(self::DANGER, $this->trans('better-checkout.companyChange.changeRequestEmpty'));
+            return $this->redirectToRoute('frontend.checkout.confirm.page');
+        }
+
+        $address = $this->getCustomerAddress($addressId, $context, $customer);
+        $oldCompanyName = $address->getCompany() ?? '';
+
+        if ($newCompanyName === $oldCompanyName) {
+            $this->addFlash(self::INFO, $this->trans('better-checkout.companyChange.changeRequestSameName'));
+            return $this->redirectToRoute('frontend.checkout.confirm.page');
+        }
+
+        $this->companyNameChangeRequestService->createChangeRequest(
+            $customer->getId(),
+            $addressId,
+            $oldCompanyName,
+            $newCompanyName,
+            $context->getContext()
+        );
+
+        $this->addFlash(self::SUCCESS, $this->trans('better-checkout.companyChange.changeRequestSubmitted'));
+
+        return $this->redirectToRoute('frontend.checkout.confirm.page');
     }
 
     private function getPageWithCountries(SalesChannelContext $context): array

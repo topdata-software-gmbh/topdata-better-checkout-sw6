@@ -15,6 +15,7 @@ class CompanyNameChangeRequestService
         private readonly EntityRepository $companyNameChangeRequestRepository,
         private readonly EntityRepository $customerAddressRepository,
         private readonly CompanyNameChangeRequestEmailService $emailService,
+        private readonly EntityRepository $customerRepository,
     ) {
     }
 
@@ -74,6 +75,13 @@ class CompanyNameChangeRequestService
         $this->customerAddressRepository->update([
             [
                 'id' => $request->getAddressId(),
+                'company' => $request->getNewCompanyName(),
+            ],
+        ], $context);
+
+        $this->customerRepository->update([
+            [
+                'id' => $request->getCustomerId(),
                 'company' => $request->getNewCompanyName(),
             ],
         ], $context);

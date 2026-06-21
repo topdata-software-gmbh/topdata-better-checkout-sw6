@@ -3,7 +3,8 @@ filename: "_ai/backlog/active/260621_1908__IMPLEMENTATION_PLAN__company-name-cha
 title: "Company Name Change Request — UX Redesign"
 createdAt: 2026-06-21 19:08
 updatedAt: 2026-06-21 19:08
-status: draft
+status: completed
+completedAt: 2026-06-21 19:19
 priority: high
 tags: [company-name-change, ux-redesign, decorator-removal]
 estimatedComplexity: moderate

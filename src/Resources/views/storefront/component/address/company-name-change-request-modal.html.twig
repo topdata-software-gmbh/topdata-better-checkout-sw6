@@ -1,0 +1,80 @@
+<div class="js-pseudo-modal-template-root-element company-name-change-request-modal">
+    <div class="modal-header pb-0 align-items-start">
+        <h1 class="fs-2">
+            {{ 'better-checkout.companyChange.changeRequestTitle'|trans|sw_sanitize }}
+        </h1>
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="{{ 'global.default.close'|trans|striptags }}"
+        ></button>
+    </div>
+
+    <div class="modal-body">
+        {% if pendingRequest is defined and pendingRequest is not null %}
+            <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                <div class="me-3">
+                    {% sw_icon 'warning' style { size: 'md' } %}
+                </div>
+                <div>
+                    <strong>{{ 'better-checkout.companyChange.pendingTitle'|trans|sw_sanitize }}</strong>
+                    <p class="mb-0 mt-1">
+                        {{ 'better-checkout.companyChange.pendingDetail'|trans({
+                            '%newCompany%': pendingRequest.newCompanyName,
+                            '%date%': pendingRequest.createdAt|format_date('short', locale=app.request.locale)
+                        })|sw_sanitize }}
+                    </p>
+                </div>
+            </div>
+
+            <p class="mb-0 text-muted">
+                {{ 'better-checkout.companyChange.pendingCannotModify'|trans|sw_sanitize }}
+            </p>
+        {% else %}
+            <p class="mb-1">
+                <strong>{{ 'better-checkout.companyChange.currentCompanyName'|trans|sw_sanitize }}</strong>
+            </p>
+            <p class="mb-3">{{ currentCompanyName }}</p>
+
+            <form
+                method="post"
+                action="{{ path('frontend.checkout.company-name-change-request.save', { addressId: addressId }) }}"
+                id="company-name-change-request-form"
+                data-form-handler="true"
+            >
+                <input type="hidden" name="addressId" value="{{ addressId }}">
+
+                <div class="form-group mb-3">
+                    <label for="newCompanyName" class="form-label">
+                        {{ 'better-checkout.companyChange.newCompanyNameLabel'|trans|sw_sanitize }}
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="newCompanyName"
+                        name="newCompanyName"
+                        required="required"
+                        placeholder="{{ 'better-checkout.companyChange.newCompanyNamePlaceholder'|trans|sw_sanitize }}"
+                    >
+                </div>
+
+                <div class="modal-footer justify-content-end pt-0 px-0 border-0">
+                    <button
+                        type="button"
+                        class="btn btn-outline-dark"
+                        data-bs-dismiss="modal"
+                    >
+                        {{ 'better-checkout.companyChange.changeRequestCancel'|trans|sw_sanitize }}
+                    </button>
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        {{ 'better-checkout.companyChange.changeRequestSubmit'|trans|sw_sanitize }}
+                    </button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+</div>

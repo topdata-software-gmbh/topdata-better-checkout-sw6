@@ -1,11 +1,11 @@
-{# 
+{#
     Extends: @Storefront/storefront/component/address/address-personal-company.html.twig
     This template overrides the default company fields block for the registration/checkout page.
     Plugin: TopdataBetterCheckoutSW6 - modifies account type (business/private) behavior.
 #}
 {% sw_extends '@Storefront/storefront/component/address/address-personal-company.html.twig' %}
 
-{# 
+{#
     Block: component_account_register_company_fields
     Purpose: Replaces the original company fields section with logic to show/hide
     based on account type settings (always business, always private, or user choice)
@@ -15,7 +15,7 @@
     {# Check if current route is one of the registration or login pages #}
     {% set isRegistrationRoute = app.request.attributes.get('_route') in ['frontend.checkout.register.page', 'frontend.account.register.page', 'frontend.account.login.page'] %}
 
-    {# 
+    {#
         Variable: checkoutType
         Determine the checkout type from query string, POST data, or session data.
         Used to differentiate between guest and registration checkouts.
@@ -28,7 +28,7 @@
     {% set guestSetting = config('TopdataBetterCheckoutSW6.config.guestAccountType') ?: 'user_choice' %}
     {% set registerSetting = config('TopdataBetterCheckoutSW6.config.registrationAccountType') ?: 'always_business' %}
 
-    {# 
+    {#
         Variable: accountTypeSetting
         Choose the appropriate setting based on whether it's a guest checkout or registration.
         Falls back to registration setting for non-guest checkouts.
@@ -42,7 +42,7 @@
 
     {# Only show company fields if they are not forced hidden (always private) #}
     {% if not forcePrivateCompanyFieldsHidden %}
-        {# 
+        {#
             Condition: Show company fields if:
             - account type selection is required, OR
             - prefix is 'address' or 'shippingAddress' (separate address forms), OR
@@ -50,20 +50,20 @@
             - forced to business mode
         #}
         {% if accountTypeRequired or prefix == 'address' or prefix == 'shippingAddress' or hasSelectedBusiness or forceBusinessCompanyFieldsVisible %}
-            {# 
+            {#
                 CSS classes are dynamically set based on visibility state:
                 - d-block when forced business
                 - toggled via JS when user can choose account type
                 - hidden by default (d-none) when user has not selected business
             #}
             <div class="{% if forceBusinessCompanyFieldsVisible %}address-contact-type-company d-block{% elseif hasSelectedBusiness %}address-contact-type-company{% elseif prefix == 'address' %}js-field-toggle-contact-type-company d-block{% else %}js-field-toggle-contact-type-company{% if customToggleTarget %}-{{ prefix }}{% endif %} d-none{% endif %}">
-                {# 
+                {#
                     Block: component_address_form_company_fields
                     Purpose: Wrapper for company name, department, and VAT ID fields.
                 #}
                 {% block component_address_form_company_fields %}
                     <div class="row g-2">
-                        {# 
+                        {#
                             Block: component_address_form_company_name
                             Purpose: Contains the company name input field with conditional validation rules.
                         #}
@@ -75,49 +75,58 @@
                                 {% set violationPath = "/#{prefix}/company" %}
                             {% endif %}
 
-                            {# 
+                            {#
                                 Block: component_address_form_company_name_input
-                                Purpose: Renders the company name input with configurable validation.
-                                Validation rules depend on plugin setting (optional, required, or core).
+                                Purpose: On edit pages for billing addresses, show company as read-only text
+                                with a "Request Change" button. On create pages or shipping addresses,
+                                show the normal editable input.
                             #}
                             {% block component_address_form_company_name_input %}
+                                {% set isEditContext = address is defined and address.get('id') is not empty %}
                                 {% set isShipping = (prefix == 'shippingAddress') %}
-                                {# Get company validation setting for the appropriate address type #}
-                                {% set companyValidationSetting = isShipping ? config('TopdataBetterCheckoutSW6.config.companyValidationShipping') : config('TopdataBetterCheckoutSW6.config.companyValidationBilling') %}
+                                {% set isBillingEdit = isEditContext and not isShipping %}
 
-                                {# Fallback to default if plugin setting is empty #}
-                                {% if not companyValidationSetting %}
-                                    {% set companyValidationSetting = isShipping ? 'optional' : 'core' %}
-                                {% endif %}
+                                {% if isBillingEdit %}
+                                    {# Edit mode for billing address: show company as read-only text + "Request Change" button #}
+                                    {% set currentCompanyName = address.get('company') ?? '' %}
 
-                                {# Set HTML5 validation rules based on plugin setting #}
-                                {% set validationRules = 'required' %}
-                                {% if companyValidationSetting == 'optional' %}
-                                    {% set validationRules = '' %}
-                                {% elseif companyValidationSetting == 'required' %}
+                                    <input type="hidden" name="{{ prefix ? prefix ~ '[company]' : 'company' }}" value="{{ currentCompanyName }}">
+
+                                    {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/company-field-readonly.html.twig' with {
+                                        currentCompanyName: currentCompanyName,
+                                        addressId: address.get('id'),
+                                    } %}
+                                {% else %}
+                                    {# Create mode or shipping: show normal editable input #}
+                                    {% set companyValidationSetting = isShipping ? config('TopdataBetterCheckoutSW6.config.companyValidationShipping') : config('TopdataBetterCheckoutSW6.config.companyValidationBilling') %}
+
+                                    {% if not companyValidationSetting %}
+                                        {% set companyValidationSetting = isShipping ? 'optional' : 'core' %}
+                                    {% endif %}
+
                                     {% set validationRules = 'required' %}
-                                {% endif %}
+                                    {% if companyValidationSetting == 'optional' %}
+                                        {% set validationRules = '' %}
+                                    {% elseif companyValidationSetting == 'required' %}
+                                        {% set validationRules = 'required' %}
+                                    {% endif %}
 
-                                {# 
-                                    Include: form-input.html.twig
-                                    Purpose: Standard Shopware form input component for the company name field.
-                                    Uses sw_sanitize filter to clean the label translation.
-                                #}
-                                {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
-                                    label: 'address.companyNameLabel'|trans|sw_sanitize,
-                                    id: idPrefix ~ prefix ~ 'company',
-                                    name: prefix ? prefix ~ '[company]' : 'company',
-                                    value: address.get('company'),
-                                    autocomplete: 'section-personal organization',
-                                    violationPath: violationPath,
-                                    validationRules: validationRules,
-                                    additionalClass: 'col-12',
-                                } %}
+                                    {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
+                                        label: 'address.companyNameLabel'|trans|sw_sanitize,
+                                        id: idPrefix ~ prefix ~ 'company',
+                                        name: prefix ? prefix ~ '[company]' : 'company',
+                                        value: address.get('company'),
+                                        autocomplete: 'section-personal organization',
+                                        violationPath: violationPath,
+                                        validationRules: validationRules,
+                                        additionalClass: 'col-12',
+                                    } %}
+                                {% endif %}
                             {% endblock %}
                         {% endblock %}
                     </div>
                     <div class="row g-2">
-                        {# 
+                        {#
                             Block: component_address_form_company_department
                             Purpose: Contains the department input field.
                         #}
@@ -129,7 +138,7 @@
                                 {% set violationPath = "/#{prefix}/department" %}
                             {% endif %}
 
-                            {# 
+                            {#
                                 Block: component_address_form_company_department_input
                                 Purpose: Renders the department input field (always optional, no validation rules).
                             #}
@@ -145,14 +154,14 @@
                             {% endblock %}
                         {% endblock %}
 
-                        {# 
+                        {#
                             Block: component_address_form_company_vatId
                             Purpose: Conditionally includes the VAT ID field (only for billing addresses).
                         #}
                         {% block component_address_form_company_vatId %}
                             {# VAT ID is not shown for shipping addresses #}
                             {% if prefix != 'shippingAddress' %}
-                                {# 
+                                {#
                                     Include: address-personal-vat-id.html.twig
                                     Purpose: Renders the VAT ID input field, using data.vatIds.
                                 #}

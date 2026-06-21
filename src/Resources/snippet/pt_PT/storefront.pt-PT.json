@@ -26,7 +26,21 @@
             "blockedTitle": "Encomenda não possível neste momento",
             "blockedMessage": "O seu pedido de alteração do nome da empresa de \"%oldCompany%\" para \"%newCompany%\" está em revisão. Não pode fazer encomendas até a alteração ser confirmada.",
             "pendingTitle": "Alteração do nome da empresa em revisão",
-            "pendingMessage": "O seu pedido de alteração do nome da empresa está em revisão. Encomendas não são possíveis até a alteração ser confirmada."
+            "pendingMessage": "O seu pedido de alteração do nome da empresa está em revisão. Encomendas não são possíveis até a alteração ser confirmada.",
+            "changeRequestTitle": "Solicitar Alteração de Nome da Empresa",
+            "changeRequestButton": "Solicitar Alteração",
+            "currentCompanyName": "Nome da Empresa Atual:",
+            "newCompanyNameLabel": "Novo Nome da Empresa",
+            "newCompanyNamePlaceholder": "Insira o novo nome da empresa",
+            "changeRequestCancel": "Cancelar",
+            "changeRequestSubmit": "Submeter Pedido",
+            "changeRequestSubmitted": "O seu pedido de alteração do nome da empresa foi submetido e está em revisão.",
+            "changeRequestEmpty": "Por favor, insira um novo nome para a empresa.",
+            "changeRequestSameName": "O novo nome da empresa é igual ao atual.",
+            "pendingDetail": "Alteração para \"%newCompany%\" solicitada em %date%.",
+            "pendingCannotModify": "Não pode submeter outro pedido de alteração até que o atual seja analisado.",
+            "noCompanyName": "Nenhum nome de empresa definido",
+            "changePendingBadge": "Em revisão"
         }
     },
     "account": {

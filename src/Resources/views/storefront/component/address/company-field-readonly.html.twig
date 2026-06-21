@@ -1,0 +1,19 @@
+<div class="company-field-readonly mb-3">
+    <label class="form-label">{{ 'address.companyNameLabel'|trans|sw_sanitize }}</label>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="fw-semibold{% if currentCompanyName is empty %} text-muted{% endif %}">
+            {{ currentCompanyName ?: 'better-checkout.companyChange.noCompanyName'|trans|sw_sanitize }}
+        </span>
+
+        <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            data-ajax-modal="true"
+            data-url="{{ path('frontend.checkout.company-name-change-request.get', { addressId: addressId }) }}"
+            title="{{ 'better-checkout.companyChange.changeRequestButton'|trans|striptags }}"
+        >
+            {{ 'better-checkout.companyChange.changeRequestButton'|trans|sw_sanitize }}
+        </button>
+    </div>
+</div>
