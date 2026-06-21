@@ -41,11 +41,21 @@
                     </dd>
 
                     <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.createdAt') }}</dt>
-                    <dd>{{ date(item.createdAt) }}</dd>
+                    <dd>
+                        <sw-time-ago
+                            :date="item.createdAt"
+                            :date-time-format="{ month: '2-digit', day: '2-digit' }"
+                        />
+                    </dd>
 
                     <template v-if="item.reviewedAt">
                         <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.reviewedAt') }}</dt>
-                        <dd>{{ date(item.reviewedAt) }}</dd>
+                        <dd>
+                            <sw-time-ago
+                                :date="item.reviewedAt"
+                                :date-time-format="{ month: '2-digit', day: '2-digit' }"
+                            />
+                        </dd>
                     </template>
 
                     <template v-if="item.reviewComment">
