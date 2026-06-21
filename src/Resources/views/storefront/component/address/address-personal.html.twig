@@ -24,3 +24,9 @@
         {% endif %}
     {% endif %}
 {% endblock %}
+
+{% block component_address_personal_company %}
+    {% if showCompanyFields %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
