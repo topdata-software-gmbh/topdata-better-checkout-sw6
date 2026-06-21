@@ -59,6 +59,9 @@
         "validation": {
             "invalidLiechtensteinZip": "Le code postal n'est pas valide pour le Liechtenstein (attendu 9480-9499).",
             "swissZipForLiechtenstein": "Ce code postal appartient au Liechtenstein. Veuillez sélectionner le Liechtenstein comme pays."
+        },
+        "address": {
+            "phone": "Tél.:"
         }
     }
 }

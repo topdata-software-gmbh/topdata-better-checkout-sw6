@@ -99,6 +99,15 @@
             <helpText>Icon name for the address options dropdown button (e.g. more-vertical, paper-pencil).</helpText>
             <helpText lang="de-DE">Icon-Name für den Adress-Optionen Dropdown-Button (z.B. more-vertical, paper-pencil).</helpText>
         </input-field>
+
+        <input-field type="bool">
+            <name>showPhoneNumberOnAddressCards</name>
+            <defaultValue>false</defaultValue>
+            <label>Show phone number on address cards</label>
+            <label lang="de-DE">Telefonnummer auf Adresskarten anzeigen</label>
+            <helpText>When enabled, the phone number is displayed on address cards in the account address book.</helpText>
+            <helpText lang="de-DE">Wenn aktiviert, wird die Telefonnummer auf den Adresskarten im Adressbuch angezeigt.</helpText>
+        </input-field>
     </card>
 
     <card>

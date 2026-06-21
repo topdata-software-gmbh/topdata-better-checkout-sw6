@@ -1,6 +1,7 @@
 {% sw_extends '@Storefront/storefront/page/account/addressbook/address-item.html.twig' %}
 
 {% set addressDropdownIcon = config('TopdataBetterCheckoutSW6.config.addressDropdownIcon') %}
+{% set showPhone = config('TopdataBetterCheckoutSW6.config.showPhoneNumberOnAddressCards') %}
 
 {% block address_item_dropdown_button %}
     <button
@@ -51,6 +52,16 @@
                 </button>
             </form>
         </li>
+    {% endif %}
+{% endblock %}
+
+{% block address_item_address %}
+    {{ parent() }}
+    {% if showPhone and address.phoneNumber %}
+        <div class="address-phone">
+            <span class="fw-semibold">{{ 'TopdataBetterCheckoutSW6.address.phone'|trans|sw_sanitize }}</span>
+            {{ address.phoneNumber }}
+        </div>
     {% endif %}
 {% endblock %}
 
