@@ -110,6 +110,9 @@
         <!-- Admin API Controller -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Controller\AdminApi\CompanyNameChangeRequestController" public="true">
             <argument type="service" id="Topdata\TopdataBetterCheckoutSW6\Core\Content\CompanyNameChangeRequest\CompanyNameChangeRequestService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
         </service>
 
         <!-- Checkout Block Subscriber -->
