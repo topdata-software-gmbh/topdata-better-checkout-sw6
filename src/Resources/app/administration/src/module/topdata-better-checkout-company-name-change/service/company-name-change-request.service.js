@@ -6,7 +6,7 @@ Application.addServiceProvider('companyNameChangeRequestService', () => {
     return {
         approve(id, reviewComment = null) {
             return httpClient.post(
-                `/api/topdata-better-checkout/company-name-change-request/${id}/approve`,
+                `topdata-better-checkout/company-name-change-request/${id}/approve`,
                 { reviewComment },
                 {
                     headers: {
@@ -18,7 +18,7 @@ Application.addServiceProvider('companyNameChangeRequestService', () => {
 
         reject(id, reviewComment = null) {
             return httpClient.post(
-                `/api/topdata-better-checkout/company-name-change-request/${id}/reject`,
+                `topdata-better-checkout/company-name-change-request/${id}/reject`,
                 { reviewComment },
                 {
                     headers: {
