@@ -33,12 +33,18 @@ class CompanyNameChangeRequestEmailService
             return;
         }
 
+        $customer = $changeRequest->getCustomer();
+        $defaultBillingAddress = $customer?->getDefaultBillingAddress();
+
         $subject = 'Neuer Antrag auf Firmennameänderung / New company name change request';
 
         $htmlBody = $this->twig->render(
             '@TopdataBetterCheckoutSW6/email/admin-company-name-change-notification.html.twig',
             [
                 'changeRequest' => $changeRequest,
+                'customerNumber' => $customer?->getCustomerNumber() ?? '',
+                'customerEmail' => $customer?->getEmail() ?? '',
+                'phoneNumber' => $defaultBillingAddress?->getPhoneNumber() ?? '',
             ]
         );
 

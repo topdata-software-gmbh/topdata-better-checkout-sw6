@@ -32,6 +32,7 @@
                 "createdAt": "Created At",
                 "reviewedAt": "Reviewed At",
                 "reviewComment": "Comment",
+                "customerNumber": "Customer Number",
                 "customerName": "Customer Name",
                 "customerEmail": "Customer Email",
                 "phoneNumber": "Phone Number"

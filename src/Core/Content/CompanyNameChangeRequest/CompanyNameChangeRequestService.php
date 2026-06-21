@@ -41,6 +41,8 @@ class CompanyNameChangeRequestService
         $this->companyNameChangeRequestRepository->create([$data], $context);
 
         $criteria = new Criteria([$id]);
+        $criteria->addAssociation('customer.defaultBillingAddress');
+        $criteria->addAssociation('address');
         $request = $this->companyNameChangeRequestRepository->search($criteria, $context)->first();
 
         $this->emailService->sendAdminNotificationEmail($request, $context);
@@ -52,6 +54,7 @@ class CompanyNameChangeRequestService
     {
         $criteria = new Criteria([$changeRequestId]);
         $criteria->addAssociation('address');
+        $criteria->addAssociation('customer');
         /** @var CompanyNameChangeRequestEntity|null $request */
         $request = $this->companyNameChangeRequestRepository->search($criteria, $context)->first();
 
@@ -98,6 +101,7 @@ class CompanyNameChangeRequestService
     public function rejectChangeRequest(string $changeRequestId, Context $context, ?string $reviewComment = null): void
     {
         $criteria = new Criteria([$changeRequestId]);
+        $criteria->addAssociation('customer');
         /** @var CompanyNameChangeRequestEntity|null $request */
         $request = $this->companyNameChangeRequestRepository->search($criteria, $context)->first();
 

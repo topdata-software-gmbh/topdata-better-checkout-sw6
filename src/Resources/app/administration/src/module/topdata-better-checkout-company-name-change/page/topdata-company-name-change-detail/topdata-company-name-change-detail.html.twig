@@ -74,6 +74,9 @@
                 :title="$tc('topdata-better-checkout-company-name-change.detail.card.customerInfo')"
             >
                 <sw-description-list>
+                    <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.customerNumber') }}</dt>
+                    <dd>{{ item.customer.customerNumber }}</dd>
+
                     <dt>{{ $tc('topdata-better-checkout-company-name-change.detail.label.customerName') }}</dt>
                     <dd>{{ item.customer.firstName }} {{ item.customer.lastName }}</dd>
 

@@ -32,6 +32,7 @@
                 "createdAt": "Erstellt am",
                 "reviewedAt": "Geprüft am",
                 "reviewComment": "Kommentar",
+                "customerNumber": "Kundennummer",
                 "customerName": "Kundenname",
                 "customerEmail": "Kunden-E-Mail",
                 "phoneNumber": "Telefonnummer"
