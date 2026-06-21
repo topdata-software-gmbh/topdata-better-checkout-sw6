@@ -185,6 +185,60 @@ class BillingAddressEditController extends StorefrontController
         return $this->redirectToRoute('frontend.checkout.confirm.page');
     }
 
+    #[Route(
+        path: '/widgets/checkout/company-name-change-request/{changeRequestId}/update',
+        name: 'frontend.checkout.company-name-change-request.update',
+        options: ['seo' => false],
+        defaults: ['XmlHttpRequest' => true, '_loginRequired' => true],
+        methods: ['POST']
+    )]
+    public function updateCompanyNameChangeRequest(
+        string $changeRequestId,
+        Request $request,
+        SalesChannelContext $context,
+        CustomerEntity $customer,
+    ): Response {
+        $newCompanyName = trim($request->request->get('newCompanyName', ''));
+
+        if ($newCompanyName === '') {
+            $this->addFlash(self::DANGER, $this->trans('better-checkout.companyChange.changeRequestEmpty'));
+            return $this->redirectToRefererOrProfile($request);
+        }
+
+        $address = $this->getCustomerAddress(
+            $request->request->get('addressId', ''),
+            $context,
+            $customer
+        );
+        $oldCompanyName = $address->getCompany() ?? '';
+
+        if ($newCompanyName === $oldCompanyName) {
+            $this->addFlash(self::INFO, $this->trans('better-checkout.companyChange.changeRequestSameName'));
+            return $this->redirectToRefererOrProfile($request);
+        }
+
+        $this->companyNameChangeRequestService->updateChangeRequest(
+            $changeRequestId,
+            $newCompanyName,
+            $context->getContext()
+        );
+
+        $this->addFlash(self::SUCCESS, $this->trans('better-checkout.companyChange.changeRequestUpdated'));
+
+        return $this->redirectToRefererOrProfile($request);
+    }
+
+    private function redirectToRefererOrProfile(Request $request): Response
+    {
+        $returnRoute = $request->request->get('returnRoute', '');
+
+        if ($returnRoute === 'frontend.checkout.confirm.page') {
+            return $this->redirectToRoute('frontend.checkout.confirm.page');
+        }
+
+        return $this->redirectToRoute('frontend.account.profile.page');
+    }
+
     private function getPageWithCountries(SalesChannelContext $context): array
     {
         $criteria = (new Criteria())

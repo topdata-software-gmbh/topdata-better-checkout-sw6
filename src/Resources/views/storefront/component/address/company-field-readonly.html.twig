@@ -11,9 +11,23 @@
             class="btn btn-sm btn-outline-primary"
             data-ajax-modal="true"
             data-url="{{ path('frontend.checkout.company-name-change-request.get', { addressId: addressId }) }}"
-            title="{{ 'better-checkout.companyChange.changeRequestButton'|trans|striptags }}"
+            title="{% if pendingRequest is defined and pendingRequest is not null %}{{ 'better-checkout.companyChange.changeRequestEditButton'|trans|striptags }}{% else %}{{ 'better-checkout.companyChange.changeRequestButton'|trans|striptags }}{% endif %}"
         >
-            {{ 'better-checkout.companyChange.changeRequestButton'|trans|sw_sanitize }}
+            {% if pendingRequest is defined and pendingRequest is not null %}
+                {{ 'better-checkout.companyChange.changeRequestEditButton'|trans|sw_sanitize }}
+            {% else %}
+                {{ 'better-checkout.companyChange.changeRequestButton'|trans|sw_sanitize }}
+            {% endif %}
         </button>
     </div>
+
+    {% if pendingRequest is defined and pendingRequest is not null %}
+        <div class="mt-1 text-muted small">
+            {{ 'better-checkout.companyChange.pendingDetailWithTime'|trans({
+                '%newCompany%': pendingRequest.newCompanyName,
+                '%date%': pendingRequest.createdAt|format_date('short', locale=app.request.locale),
+                '%time%': pendingRequest.createdAt|format_time('short', locale=app.request.locale)
+            })|sw_sanitize }}
+        </div>
+    {% endif %}
 </div>

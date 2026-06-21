@@ -121,6 +121,34 @@ class CompanyNameChangeRequestService
         $this->emailService->sendCustomerStatusEmail($request, 'rejected', $context);
     }
 
+    public function updateChangeRequest(
+        string $changeRequestId,
+        string $newCompanyName,
+        Context $context
+    ): CompanyNameChangeRequestEntity {
+        $criteria = new Criteria([$changeRequestId]);
+        /** @var CompanyNameChangeRequestEntity|null $request */
+        $request = $this->companyNameChangeRequestRepository->search($criteria, $context)->first();
+
+        if (!$request instanceof CompanyNameChangeRequestEntity) {
+            throw new \InvalidArgumentException('Change request not found');
+        }
+
+        if ($request->getStatus() !== 'pending') {
+            throw new \LogicException('Only pending requests can be updated');
+        }
+
+        $this->companyNameChangeRequestRepository->update([
+            [
+                'id' => $changeRequestId,
+                'newCompanyName' => $newCompanyName,
+            ],
+        ], $context);
+
+        $criteria = new Criteria([$changeRequestId]);
+        return $this->companyNameChangeRequestRepository->search($criteria, $context)->first();
+    }
+
     public function hasPendingChangeRequest(string $customerId, string $addressId, Context $context): bool
     {
         return $this->findPendingChangeRequest($customerId, $addressId, $context) !== null;

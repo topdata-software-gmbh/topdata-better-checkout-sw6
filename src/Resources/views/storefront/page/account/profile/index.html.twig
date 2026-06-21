@@ -11,6 +11,11 @@
 
     {% set billingAddressId = context.customer.defaultBillingAddressId ?? '' %}
 
+    {% set pendingRequest = null %}
+    {% if page.extensions.topdataCompanyNameChangePending is defined %}
+        {% set pendingRequest = page.extensions.topdataCompanyNameChangePending.changeRequest %}
+    {% endif %}
+
     {% sw_include '@Storefront/storefront/component/address/address-personal.html.twig' with {
         prefix: '',
         showBirthdayField: config('core.loginRegistration.showBirthdayField'),
@@ -24,6 +29,7 @@
             {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/company-field-readonly.html.twig' with {
                 currentCompanyName: context.customer.company ?? '',
                 addressId: billingAddressId,
+                pendingRequest: pendingRequest,
             } %}
         </div>
     </div>
