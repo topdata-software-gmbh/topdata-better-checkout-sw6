@@ -104,13 +104,9 @@
                                         {% set companyValidationSetting = isShipping ? 'optional' : 'core' %}
                                     {% endif %}
 
-                                    {% set validationRules = 'required' %}
-                                    {% if companyValidationSetting == 'optional' %}
-                                        {% set validationRules = '' %}
-                                    {% elseif companyValidationSetting == 'required' %}
+                                    {% set validationRules = '' %}
+                                    {% if companyValidationSetting == 'required' or companyValidationSetting == 'core' %}
                                         {% set validationRules = 'required' %}
-                                    {% elseif companyValidationSetting == 'core' and accountTypeSetting == 'user_choice' and not hasSelectedBusiness %}
-                                        {% set validationRules = '' %}
                                     {% endif %}
 
                                     {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {

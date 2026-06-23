@@ -53,6 +53,9 @@
                     {% sw_include '@Storefront/storefront/component/address/field/address-country-field.html.twig' with {
                         additionalClass: 'col-md'
                     } %}
+                    {% sw_include '@Storefront/storefront/component/address/field/address-country-state-field.html.twig' with {
+                        additionalClass: 'col-md d-none'
+                    } %}
                 </div>
             {% endblock %}
 
