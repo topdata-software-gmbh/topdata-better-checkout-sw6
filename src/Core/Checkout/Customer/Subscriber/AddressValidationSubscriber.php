@@ -58,7 +58,7 @@ class AddressValidationSubscriber implements EventSubscriberInterface
 
             // ---- Handle company field validation based on configuration
             $billingSetting = $this->systemConfigService->getString('TopdataBetterCheckoutSW6.config.companyValidationBilling', $salesChannelId);
-            if ($billingSetting === 'optional') {
+            if ($billingSetting === 'optional' || ($billingSetting === 'core' && !$isBusiness)) {
                 $this->removeConstraint($definition, 'company', NotBlank::class);
             } elseif ($billingSetting === 'required' && $isBusiness) {
                 $this->addConstraintIfNotExists($definition, 'company', new NotBlank());
@@ -111,7 +111,7 @@ class AddressValidationSubscriber implements EventSubscriberInterface
         $setting = $this->systemConfigService->getString($configKey, $salesChannelId);
 
         // ---- Apply validation rules based on configuration setting
-        if ($setting === 'optional') {
+        if ($setting === 'optional' || ($setting === 'core' && !$isBusiness)) {
             $this->removeConstraint($definition, 'company', NotBlank::class);
         } elseif ($setting === 'required' && $isBusiness) {
             $this->addConstraintIfNotExists($definition, 'company', new NotBlank());
