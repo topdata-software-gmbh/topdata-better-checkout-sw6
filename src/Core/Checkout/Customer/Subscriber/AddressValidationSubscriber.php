@@ -103,10 +103,15 @@ class AddressValidationSubscriber implements EventSubscriberInterface
 
     private function applyValidationRules(DataValidationDefinition $definition, string $type, ?string $salesChannelId, bool $isBusiness): void
     {
+        // ---- Billing address company field is read-only (change request mechanism) — never in form data
+        if ($type === 'billing') {
+            $this->removeConstraint($definition, 'company', NotBlank::class);
+
+            return;
+        }
+
         // ---- Get the appropriate configuration key based on address type
-        $configKey = $type === 'shipping'
-            ? 'TopdataBetterCheckoutSW6.config.companyValidationShipping'
-            : 'TopdataBetterCheckoutSW6.config.companyValidationBilling';
+        $configKey = 'TopdataBetterCheckoutSW6.config.companyValidationShipping';
 
         $setting = $this->systemConfigService->getString($configKey, $salesChannelId);
 

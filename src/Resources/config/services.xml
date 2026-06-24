@@ -84,6 +84,7 @@
                  public="true">
             <argument type="service" id=".inner"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="customer_address.repository"/>
         </service>
 
         <!-- SUBSCRIBERS -->
