@@ -63,33 +63,36 @@
                 {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
             {% endif %}
 
-            {% block component_address_form_phone_number %}
-                {% if formViolations.getViolations('/phoneNumber') is not empty %}
-                    {% set violationPath = '/phoneNumber' %}
-                {% elseif formViolations.getViolations("/#{prefix}/phoneNumber") is not empty %}
-                    {% set violationPath = "/#{prefix}/phoneNumber" %}
-                {% endif %}
-                <div class="row g-2">
-                    <div class="col-12">
-                        {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
-                            label: 'address.phoneNumberLabel'|trans|sw_sanitize,
-                            id: idPrefix ~ prefix ~ 'AddressPhoneNumber',
-                            name: prefix ~ '[phoneNumber]',
-                            value: data.get('phoneNumber'),
-                            placeholder: 'TopdataBetterCheckoutSW6.swissPost.phonePlaceholder'|trans,
-                            violationPath: violationPath,
-                            validationRules: 'required',
-                        } %}
-                        <p class="text-muted" style="font-size: 0.8rem; margin-top: -0.5rem;">{{ 'TopdataBetterCheckoutSW6.swissPost.phoneHint'|trans|sw_sanitize }}</p>
-                    </div>
+            {% if formViolations.getViolations('/phoneNumber') is not empty %}
+                {% set violationPath = '/phoneNumber' %}
+            {% elseif formViolations.getViolations("/#{prefix}/phoneNumber") is not empty %}
+                {% set violationPath = "/#{prefix}/phoneNumber" %}
+            {% endif %}
+            <div class="row g-2">
+                <div class="col-12">
+                    {% sw_include '@Storefront/storefront/component/form/form-input.html.twig' with {
+                        label: 'address.phoneNumberLabel'|trans|sw_sanitize,
+                        id: idPrefix ~ prefix ~ 'AddressPhoneNumber',
+                        name: prefix ~ '[phoneNumber]',
+                        value: data.get('phoneNumber'),
+                        placeholder: 'TopdataBetterCheckoutSW6.swissPost.phonePlaceholder'|trans,
+                        violationPath: violationPath,
+                        validationRules: 'required',
+                    } %}
+                    <p class="text-muted" style="font-size: 0.8rem; margin-top: -0.5rem;">{{ 'TopdataBetterCheckoutSW6.swissPost.phoneHint'|trans|sw_sanitize }}</p>
                 </div>
-            {% endblock %}
+            </div>
         {% else %}
             {{ parent() }}
-
-            {% if swissPostValidationEnabled %}
-                {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
-            {% endif %}
         {% endif %}
+    </div>
+{% endblock %}
+
+{% block component_address_form_phone_number %}
+    {% if swissPostValidationEnabled is defined and swissPostValidationEnabled %}
+        {% sw_include '@TopdataBetterCheckoutSW6/storefront/component/address/swiss-post-widget.html.twig' %}
+    {% endif %}
+    <div class="row g-2">
+        {% sw_include '@Storefront/storefront/component/address/field/address-phone-number-field.html.twig' %}
     </div>
 {% endblock %}
