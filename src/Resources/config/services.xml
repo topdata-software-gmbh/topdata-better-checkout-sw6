@@ -87,6 +87,13 @@
             <argument type="service" id="customer_address.repository"/>
         </service>
 
+        <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\SalesChannel\ChangeCustomerProfileRouteDecorator"
+                 decorates="Shopware\Core\Checkout\Customer\SalesChannel\ChangeCustomerProfileRoute"
+                 public="true">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="customer.repository"/>
+        </service>
+
         <!-- SUBSCRIBERS -->
         <service id="Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber\LogoutRedirectSubscriber">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
