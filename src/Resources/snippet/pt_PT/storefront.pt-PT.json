@@ -54,6 +54,7 @@
     "account": {
         "addressesTitleDefaultShippingAddress": "Padrão",
         "addressesTitleDefaultBillingAddress": "Endereço de faturação",
+        "overviewBillingHeader": "Endereço de faturação",
         "addressText": "Gerencie os seus endereços de entrega",
         "addressCreateBtn": "Adicionar novo endereço de entrega"
     },

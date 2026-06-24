@@ -54,6 +54,7 @@
     "account": {
         "addressesTitleDefaultShippingAddress": "Standard",
         "addressesTitleDefaultBillingAddress": "Rechnungsadresse",
+        "overviewBillingHeader": "Rechnungsadresse",
         "addressText": "Verwalten Sie Ihre Lieferadressen",
         "addressCreateBtn": "Neue Lieferadresse hinzufügen"
     },
