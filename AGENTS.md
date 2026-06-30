@@ -37,6 +37,8 @@ Full feature spec at `_ai/SPEC.md` — read first for architecture, feature list
 | `companyValidationShipping` | `optional` | `core` / `required` / `optional` |
 | `cloneBillingAsShipping` | `true` | `true` / `false` |
 | `logoutRedirectRoute` | `frontend.home.page` | route name, URL path, or multi-line locale map (see below) |
+| `companyNameChangeNotificationEnabled` | `true` | Enable/disable admin notification emails |
+| `companyNameChangeNotificationEmail` | `` (empty) | Custom admin email recipient (falls back to core.basicInformation.email) |
 
   > **Multi‑line locale map** – each line: `locale=target`. Lines starting with `#` are ignored.  
   > Fallback: exact `de-DE` → `de` (2‑letter) → `_default`.  

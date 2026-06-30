@@ -23,10 +23,18 @@ class CompanyNameChangeRequestEmailService
             return;
         }
 
-        $recipientEmail = $this->systemConfigService->getString('core.basicInformation.email');
+        $enabled = $this->systemConfigService->getBool('TopdataBetterCheckoutSW6.config.companyNameChangeNotificationEnabled');
+        if (!$enabled) {
+            return;
+        }
+
+        $recipientEmail = $this->systemConfigService->getString('TopdataBetterCheckoutSW6.config.companyNameChangeNotificationEmail');
 
         if ($recipientEmail === '') {
-            $recipientEmail = $this->systemConfigService->getString('core.mailerSettings.mailerSender');
+            $recipientEmail = $this->systemConfigService->getString('core.basicInformation.email');
+            if ($recipientEmail === '') {
+                $recipientEmail = $this->systemConfigService->getString('core.mailerSettings.mailerSender');
+            }
         }
 
         if ($recipientEmail === '') {

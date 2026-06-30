@@ -178,6 +178,29 @@
     </card>
 
     <card>
+        <title>Company Name Change Request</title>
+        <title lang="de-DE">Firmenname-Änderungsantrag</title>
+
+        <input-field type="bool">
+            <name>companyNameChangeNotificationEnabled</name>
+            <defaultValue>true</defaultValue>
+            <label>Enable admin notification emails</label>
+            <label lang="de-DE">Admin-Benachrichtigungs-E-Mails aktivieren</label>
+            <helpText>When enabled, an email is sent to the configured address when a customer submits a company name change request.</helpText>
+            <helpText lang="de-DE">Wenn aktiviert, wird beim Einreichen eines Firmenname-Änderungsantrags eine E-Mail an die konfigurierte Adresse gesendet.</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>companyNameChangeNotificationEmail</name>
+            <defaultValue></defaultValue>
+            <label>Admin notification email address</label>
+            <label lang="de-DE">Admin-Benachrichtigungs-E-Mail-Adresse</label>
+            <helpText>Custom email address for admin notifications. If left empty, the system falls back to core.basicInformation.email / core.mailerSettings.mailerSender.</helpText>
+            <helpText lang="de-DE">Benutzerdefinierte E-Mail-Adresse für Admin-Benachrichtigungen. Wenn leer, wird auf core.basicInformation.email / core.mailerSettings.mailerSender zurückgegriffen.</helpText>
+        </input-field>
+    </card>
+
+    <card>
         <title>Swiss Post Address Services</title>
         <title lang="de-DE">Swiss Post Adressdienste</title>
         <title lang="fr-FR">Services d'adresse Swiss Post</title>

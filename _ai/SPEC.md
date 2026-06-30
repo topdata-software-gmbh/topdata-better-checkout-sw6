@@ -1,6 +1,6 @@
 # Topdata Better Checkout SW6 — Specification
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Author:** TopData Software GmbH
 **Requires:** Shopware 6.7
 
@@ -77,7 +77,11 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 - Backend: `AddressValidationSubscriber` adds/removes `NotBlank` Symfony constraints on `company` for customer and address create/update events
 - Billing vs. shipping identification via `defaultBillingAddressId` comparison
 
-### 2.10 Multilingual Snippets
+### 2.10 Company Name Change Request Notifications
+- Admin notification emails for company name change requests can be enabled/disabled via `companyNameChangeNotificationEnabled`
+- The recipient can be customised via `companyNameChangeNotificationEmail` (falls back to `core.basicInformation.email` / `core.mailerSettings.mailerSender` when empty)
+
+### 2.11 Multilingual Snippets
 - **Languages:** de-DE, en-GB, fr-FR, fr-CH, pt-PT
 - Covers 3-box UI labels, email-already-registered error, confirm-page billing address edit link
 
@@ -124,11 +128,12 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 ## 4. Configuration Summary
 
 | Card | Fields |
-|---|---|
+|---|---|---|
 | Account Type Settings | `guestAccountType`, `registrationAccountType` |
 | Payment Restrictions (Guest) | `blockedPrivateGuestPayments`, `blockedBusinessGuestPayments` |
 | Address Cloning | `cloneBillingAsShipping` |
 | Company Name Validation | `companyValidationBilling`, `companyValidationShipping` |
+| Company Name Change Request | `companyNameChangeNotificationEnabled`, `companyNameChangeNotificationEmail` |
 
 ---
 
@@ -139,7 +144,7 @@ Template hides account-type dropdown when forced; backend (`RegisterRouteDecorat
 - **No third-party integrations** — only depends on `shopware/core: 6.7.*`
 - **No Storefront API or SPA support** beyond standard Storefront template overrides
 
-### 2.11 Asynchronous Swiss Post Address Validation
+### 2.12 Asynchronous Swiss Post Address Validation
 - **Registration/address save NEVER blocks** on Swiss Post API calls
 - `AddressCertificationSubscriber` dispatches `ValidateAddressMessage` via Symfony Messenger
 - `ValidateAddressHandler` processes the message asynchronously:
