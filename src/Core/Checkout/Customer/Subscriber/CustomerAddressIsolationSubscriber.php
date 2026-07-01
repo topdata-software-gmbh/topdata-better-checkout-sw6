@@ -68,6 +68,10 @@ class CustomerAddressIsolationSubscriber implements EventSubscriberInterface
             $newBillingIdBytes = $hasBillingChange ? $payload['default_billing_address_id'] : $currentData['default_billing_address_id'];
             $newShippingIdBytes = $hasShippingChange ? $payload['default_shipping_address_id'] : $currentData['default_shipping_address_id'];
 
+            if ($hasBillingChange && $payload['default_billing_address_id'] !== $currentData['default_billing_address_id']) {
+                throw new AccessDeniedHttpException('Changing the default billing address is not allowed. Please edit the existing billing address instead.');
+            }
+
             if ($newBillingIdBytes !== null && $newShippingIdBytes !== null && $newBillingIdBytes === $newShippingIdBytes) {
                 throw new AccessDeniedHttpException('Setting default billing address same as shipping address (or vice-versa) is strictly forbidden due to address isolation rules.');
             }
