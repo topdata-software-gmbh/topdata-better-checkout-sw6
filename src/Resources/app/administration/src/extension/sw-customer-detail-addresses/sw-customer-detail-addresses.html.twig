@@ -1,0 +1,40 @@
+{% block sw_customer_detail_addresses_grid_columns_default_shipping_address %}
+<template #column-defaultShippingAddress="{ item }">
+    <sw-radio-field
+        v-model:value="activeCustomer.defaultShippingAddressId"
+        :disabled="!customerEditMode || item.id === activeCustomer.defaultBillingAddressId"
+        name="defaultShippingAddress"
+        :options="[{ value: item.id }]"
+        @update:value="onChangeDefaultShippingAddress"
+    />
+</template>
+{% endblock %}
+
+{% block sw_customer_detail_addresses_grid_columns_default_billing_address %}
+<template #column-defaultBillingAddress="{ item }">
+    <sw-radio-field
+        v-model:value="activeCustomer.defaultBillingAddressId"
+        disabled
+        name="defaultBillingAddress"
+        :options="[{ value: item.id }]"
+    />
+</template>
+{% endblock %}
+
+{% block sw_customer_detail_addresses_grid_columns_actions_defaultShippingAddress %}
+<sw-context-menu-item
+    :disabled="!customerEditMode || item.id === activeCustomer.defaultBillingAddressId"
+    @click="onChangeDefaultShippingAddress(item.id)"
+>
+    {{ $t('sw-customer.detailAddresses.contextMenuDefaultShippingAddress') }}
+</sw-context-menu-item>
+{% endblock %}
+
+{% block sw_customer_detail_addresses_grid_columns_actions_defaultBillingAddress %}
+<sw-context-menu-item
+    disabled
+    @click="onChangeDefaultBillingAddress(item.id)"
+>
+    {{ $t('sw-customer.detailAddresses.contextMenuDefaultBillingAddress') }}
+</sw-context-menu-item>
+{% endblock %}

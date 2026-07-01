@@ -1,0 +1,13 @@
+{% block sw_customer_address_form_options_default_shipping_address %}
+<mt-checkbox
+    v-model:checked="isDefaultShippingAddressId"
+    name="sw-field--isDefaultShippingAddressId"
+    :label="$t('sw-customer.detailAddresses.contextMenuDefaultShippingAddress')"
+    :disabled="customer.defaultBillingAddressId === address.id"
+    @update:checked="onChangeDefaultShippingAddress"
+/>
+{% endblock %}
+
+{% block sw_customer_address_form_options_default_billing_address %}
+{# Billing address cannot be changed; the "set as default" option is intentionally removed #}
+{% endblock %}
