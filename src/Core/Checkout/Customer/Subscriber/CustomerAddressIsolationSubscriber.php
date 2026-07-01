@@ -3,6 +3,8 @@
 namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
+use Shopware\Core\Framework\DataAbstractionLayer\Write\Command\DeleteCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Command\UpdateCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Validation\PreWriteValidationEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -24,7 +26,17 @@ class CustomerAddressIsolationSubscriber implements EventSubscriberInterface
 
     public function onPreWriteValidate(PreWriteValidationEvent $event): void
     {
+        $deleteAddressIds = [];
+
         foreach ($event->getCommands() as $command) {
+            if ($command instanceof DeleteCommand && $command->getEntityName() === 'customer_address') {
+                $primaryKey = $command->getPrimaryKey();
+                if (isset($primaryKey['id'])) {
+                    $deleteAddressIds[] = $primaryKey['id'];
+                }
+                continue;
+            }
+
             if (!$command instanceof UpdateCommand || $command->getEntityName() !== 'customer') {
                 continue;
             }
@@ -59,6 +71,28 @@ class CustomerAddressIsolationSubscriber implements EventSubscriberInterface
             if ($newBillingIdBytes !== null && $newShippingIdBytes !== null && $newBillingIdBytes === $newShippingIdBytes) {
                 throw new AccessDeniedHttpException('Setting default billing address same as shipping address (or vice-versa) is strictly forbidden due to address isolation rules.');
             }
+        }
+
+        if ($deleteAddressIds !== []) {
+            $this->assertAddressesNotReferencedAsDefault($deleteAddressIds);
+        }
+    }
+
+    private function assertAddressesNotReferencedAsDefault(array $addressIdBytes): void
+    {
+        $placeholders = implode(', ', array_fill(0, count($addressIdBytes), '?'));
+
+        $count = (int) $this->connection->fetchOne(
+            "SELECT COUNT(*) FROM customer WHERE default_billing_address_id IN ({$placeholders}) OR default_shipping_address_id IN ({$placeholders})",
+            array_merge($addressIdBytes, $addressIdBytes),
+            array_merge(
+                array_fill(0, count($addressIdBytes), ParameterType::BINARY),
+                array_fill(0, count($addressIdBytes), ParameterType::BINARY),
+            )
+        );
+
+        if ($count > 0) {
+            throw new AccessDeniedHttpException('Cannot delete a customer address that is still set as a default billing or shipping address.');
         }
     }
 }
