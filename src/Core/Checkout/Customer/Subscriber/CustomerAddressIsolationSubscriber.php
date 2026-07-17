@@ -4,6 +4,7 @@ namespace Topdata\TopdataBetterCheckoutSW6\Core\Checkout\Customer\Subscriber;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
+use Shopware\Core\Framework\DataAbstractionLayer\Write\Command\CascadeDeleteCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Command\DeleteCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Command\UpdateCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\Validation\PreWriteValidationEvent;
@@ -29,7 +30,7 @@ class CustomerAddressIsolationSubscriber implements EventSubscriberInterface
         $deleteAddressIds = [];
 
         foreach ($event->getCommands() as $command) {
-            if ($command instanceof DeleteCommand && $command->getEntityName() === 'customer_address') {
+            if ($command instanceof DeleteCommand && !$command instanceof CascadeDeleteCommand && $command->getEntityName() === 'customer_address') {
                 $primaryKey = $command->getPrimaryKey();
                 if (isset($primaryKey['id'])) {
                     $deleteAddressIds[] = $primaryKey['id'];
