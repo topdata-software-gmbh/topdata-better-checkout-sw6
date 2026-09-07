@@ -1,0 +1,14 @@
+{% sw_extends '@Storefront/storefront/component/address/address-manager-modal-list.html.twig' %}
+
+{% block address_base_list_address_item %}
+    {% if type is same as('shipping') and address.id == context.customer.defaultBillingAddressId %}
+        {# Billing address is strictly separated from shipping choices. #}
+    {% elseif activeAddressId !== address.id %}
+        {% sw_include '@Storefront/storefront/component/address/address-manager-item.html.twig' with {
+            type,
+            activeAddressId,
+            defaultAddressId,
+            address
+        } %}
+    {% endif %}
+{% endblock %}
