@@ -1,5 +1,28 @@
 {% sw_extends '@Storefront/storefront/component/address/address-manager-modal.html.twig' %}
 
-{% block address_manager_modal_navigation_billing %}{% endblock %}
+{% block address_manager_modal_title %}
+    <h1>
+        {{ 'account.addressesTitleShippingAddress'|trans|sw_sanitize }}
+    </h1>
+{% endblock %}
 
-{% block address_manager_modal_billing %}{% endblock %}
+{% block address_manager_modal_tab_group %}
+    {# Only the shipping tab exists; hide the tab bar entirely but keep the
+       radios/panes in the DOM because the AddressManagerPlugin JS still
+       queries them (e.g. _renderModal sets #shipping-address-tab.checked). #}
+    <div class="d-none">
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block address_manager_modal_billing %}
+    {# Keep the pane node in the DOM (empty) so the JS's
+
+       #billing-address-tab-pane .classList calls never hit null. #}
+    <div
+        class="tab-pane fade"
+        id="billing-address-tab-pane"
+        role="tabpanel"
+        aria-labelledby="billing-address-tab"
+    ></div>
+{% endblock %}
