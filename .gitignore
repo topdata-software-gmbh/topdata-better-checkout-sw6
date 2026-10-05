@@ -6,6 +6,7 @@ vendor/
 node_modules/
 .idea/
 *.log
+.tmp
 
 
 # +----------------------------+
