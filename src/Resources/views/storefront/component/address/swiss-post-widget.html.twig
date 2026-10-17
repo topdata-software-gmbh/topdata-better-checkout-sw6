@@ -16,11 +16,11 @@
                     {{ "TopdataBetterCheckoutSW6.swissPost.usableText"|trans|sw_sanitize }}
                 </div>
                 <div class="status-msg status-not-certified text-warning d-none">
-                    {% sw_icon 'warning' style { size: 'xs', pack: 'solid' } %}
+                    {% sw_icon 'exclamationmark' style { size: 'xs', pack: 'solid' } %}
                     {{ "TopdataBetterCheckoutSW6.swissPost.notCertifiedText"|trans|sw_sanitize }}
                 </div>
                 <div class="status-msg status-error text-danger d-none">
-                    {% sw_icon 'blocked' style { size: 'xs', pack: 'solid' } %}
+                    {% sw_icon 'x-circle' style { size: 'xs', pack: 'solid' } %}
                     <span class="error-details"></span>
                 </div>
             </div>
