@@ -187,7 +187,14 @@ class SwissPostApiService
                 'address' => $address,
             ]);
 
-            return ['success' => false, 'error' => 'Could not authenticate with Swiss Post API'];
+            return [
+                'success' => false,
+                'quality' => null,
+                'originalResponse' => null,
+                'errorKey' => 'TopdataBetterCheckoutSW6.validation.authenticationFailed',
+                'details' => null,
+                'error' => 'Could not authenticate with Swiss Post API',
+            ];
         }
 
         try {
@@ -234,7 +241,14 @@ class SwissPostApiService
                         'address' => $address,
                     ]);
 
-                    return ['success' => false, 'error' => 'Could not re-authenticate with Swiss Post API'];
+                    return [
+                        'success' => false,
+                        'quality' => null,
+                        'originalResponse' => null,
+                        'errorKey' => 'TopdataBetterCheckoutSW6.validation.reauthenticationFailed',
+                        'details' => null,
+                        'error' => 'Could not re-authenticate with Swiss Post API',
+                    ];
                 }
             }
 

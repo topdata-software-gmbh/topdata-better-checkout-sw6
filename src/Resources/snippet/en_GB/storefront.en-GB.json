@@ -82,7 +82,9 @@
         },
         "validation": {
             "invalidLiechtensteinZip": "The postal code is not valid for Liechtenstein (expected 9480-9499).",
-            "swissZipForLiechtenstein": "This postal code belongs to Liechtenstein. Please select Liechtenstein as country."
+            "swissZipForLiechtenstein": "This postal code belongs to Liechtenstein. Please select Liechtenstein as country.",
+            "authenticationFailed": "Could not authenticate with Swiss Post API.",
+            "reauthenticationFailed": "Could not re-authenticate with Swiss Post API."
         },
         "address": {
             "phone": "Phone:"
